@@ -19,6 +19,8 @@ import codecs
 if sys.version_info < (2, 7):
     raise Exception('thorn requires Python 2.7 or higher.')
 
+PY3 = sys.version_info[0] >= 3
+
 NAME = 'thorn'
 entrypoints = {}
 extra = {}
@@ -93,6 +95,8 @@ def reqs(f):
         os.path.join(os.getcwd(), 'requirements', f)).readlines()])
 
 install_requires = reqs('default.txt')
+if not PY3:
+    install_requires.extend(reqs('py2.txt'))
 
 # -*- Tests Requires -*-
 

@@ -35,20 +35,38 @@ class Event(object):
         (disabled by default).
     :keyword retry_max: Max number of retries (3 by default).
     :keyword retry_delay: Delay between retries (60 seconds by default).
+    :keyword recipient_validators: List of functions validating the recipient
+        URL string.  Functions must return False if the URL is blocked.
+        Default is to only allow HTTP and HTTPS, with respective reserved
+        ports 80 and 443, and to block internal IP networks, and can
+        be changed using the :setting:`THORN_RECIPIENT_VALIDATORS` setting::
 
-    """
+            recipient_validators=[
+                thorn.validators.block_internal_ips(),
+                thorn.validators.ensure_protocol('http', 'https'),
+                thorn.validators.ensure_port(80, 443),
+            ]
+
+        WARNING: :func:`~thorn.validators.block_internal_ips` will only
+        test for reserved internal networks, and not private networks
+        with a public IP address.  You can block those using
+        :class:`~thorn.validators.block_cidr_network`.
+
+        """
     app = None
 
     def __init__(self, name,
                  timeout=None, dispatcher=None,
-                 retry=None, retry_max=None, retry_delay=None,
-                 app=None, **kwargs):
+                 retry=None, retry_max=None, retry_delay=None, app=None,
+                 recipient_validators=None,
+                 **kwargs):
         self.name = name
         self.timeout = timeout
         self._dispatcher = dispatcher
         self.retry = retry
         self.retry_max = retry_max
         self.retry_delay = retry_delay
+        self.recipient_validators = recipient_validators
         self.app = app_or_default(app or self.app)
 
     def send(self, data, sender=None,
@@ -89,6 +107,7 @@ class Event(object):
             on_success=on_success, on_error=on_error,
             timeout=timeout, on_timeout=on_timeout, retry=self.retry,
             retry_max=self.retry_max, retry_delay=self.retry_delay,
+            recipient_validators=self.recipient_validators,
         )
 
     def __repr__(self):

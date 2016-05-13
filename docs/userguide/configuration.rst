@@ -141,3 +141,43 @@ Maximum number of retries before giving up.  Default is 10.
 
 Note that subscriptions are currently not cancelled if exceeding the maximum
 retry amount.
+
+.. setting:: THORN_RECIPIENT_VALIDATORS
+
+``THORN_RECIPIENT_VALIDATORS``
+------------------------------
+
+List of default validator functions to validate recipient URLs.
+
+Individual events can override this using the ``recipient_validators``
+argument.
+
+The default set of validators will validate that:
+
+- That the IP address of the recipient is not on a local network.
+
+    .. warning::
+
+        This only applies to IP addresses reserved for internal
+        use, such as 127.0.0.1, and 192.168.0.0/16.
+
+        If you have private networks on a public IP address you can
+        block them by using the :func:`~thorn.validators.block_cidr_network`
+        validator.
+
+- The scheme of the recipient is either HTTP or HTTPS.
+
+- The port of the recipient is either 80, or 443.
+
+This is expressed in configuration as:
+
+.. code-block:: python
+
+    THORN_VALIDATORS = [
+        validators.block_internal_ips(),
+        validators.ensure_protocol('http', 'https'),
+        validators.ensure_port(80, 443),
+    ]
+
+More validators can be found in the API reference for the
+:mod:`thorn.validators` module.

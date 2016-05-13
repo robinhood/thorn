@@ -10,6 +10,7 @@ from __future__ import absolute_import, unicode_literals
 
 from celery.utils import cached_property
 
+from . import validators
 from ._state import app_or_default
 from .exceptions import ImproperlyConfigured
 from .utils import json
@@ -33,6 +34,11 @@ class Settings(object):
     default_retry = True
     default_retry_max = 10
     default_retry_delay = 60.0
+    default_recipient_validators = [
+        validators.block_internal_ips(),
+        validators.ensure_protocol('http', 'https'),
+        validators.ensure_port(80, 443),
+    ]
 
     def __init__(self, app=None):
         self.app = app_or_default(app or self.app)
@@ -104,6 +110,13 @@ class Settings(object):
         return (
             getattr(self.app.config, 'THORN_RETRY_DELAY', None) or
             self.default_retry_delay,
+        )
+
+    @cached_property
+    def THORN_RECIPIENT_VALIDATORS(self):
+        return getattr(
+            self.app.config, 'THORN_RECIPIENT_VALIDATORS',
+            self.default_recipient_validators,
         )
 settings = Settings()
 

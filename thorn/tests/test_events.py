@@ -41,6 +41,7 @@ class test_Event(EventCase):
             on_success=on_success, on_error=on_error,
             timeout=3.34, on_timeout=on_timeout,
             retry=None, retry_delay=None, retry_max=None,
+            recipient_validators=None,
         )
 
     def test_dispatcher(self):

@@ -16,6 +16,7 @@
     thorn.events
     thorn.reverse
     thorn.request
+    thorn.validators
     thorn.exceptions
     thorn.conf
     thorn.tasks

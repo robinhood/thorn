@@ -23,6 +23,12 @@ __all__ = [
     'EventCase', 'RealSignalCase', 'SignalCase',
 ]
 
+DEFAULT_RECIPIENT_VALIDATORS = [
+    ('block_internal_ips', ()),
+    ('ensure_protocol', ('http://', 'https://')),
+    ('ensure_port', (80, 443)),
+]
+
 
 def _reset_signal(sig, receivers):
     receivers, sig.receivers = sig.receivers, receivers

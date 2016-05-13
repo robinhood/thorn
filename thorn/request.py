@@ -21,6 +21,7 @@ from vine.abstract import Thenable, ThenableProxy
 from ._state import app_or_default
 from .utils.compat import restore_from_keys
 from .utils.log import get_logger
+from .validators import deserialize_validator, serialize_validator
 
 __all__ = ['Request']
 
@@ -47,7 +48,8 @@ class Request(ThenableProxy):
     :keyword on_error: Optional callback called if the HTTP request
         fails.  Must have signature: ``(request, exc)``.
     :keyword headers: Additional HTTP headers to send with the request.
-    :kewyord user_agent: Set custom HTTP user agent.
+    :keyword user_agent: Set custom HTTP user agent.
+    :keyword recipient_validators: List of serialized recipient validators.
 
     :keyword retry: Retry in the event of timeout/failure?
         Disabled by default.
@@ -78,7 +80,8 @@ class Request(ThenableProxy):
                  id=None, on_success=None, on_error=None,
                  timeout=None, on_timeout=None,
                  retry=None, retry_max=None, retry_delay=None,
-                 headers=None, user_agent=None, app=None):
+                 headers=None, user_agent=None, app=None,
+                 recipient_validators=None):
         self.app = app_or_default(app or self.app)
         self.id = id or uuid()
         self.event = event
@@ -96,6 +99,9 @@ class Request(ThenableProxy):
         self.retry_delay = (
             self.app.settings.THORN_RETRY_DELAY
             if retry_delay is None else retry_delay)
+        if recipient_validators is None:
+            recipient_validators = self.app.settings.THORN_RECIPIENT_VALIDATORS
+        self._recipient_validators = recipient_validators
         self.response = None
         self._headers = headers
         self._set_promise_target(promise(
@@ -104,9 +110,13 @@ class Request(ThenableProxy):
         if user_agent:
             self.user_agent = user_agent
 
+    def validate_recipient(self, url):
+        return [validate(url) for validate in self.recipient_validators]
+
     def dispatch(self, session=None, propagate=False):
         if self.cancelled:
             return
+        self.validate_recipient(self.subscriber.url)
         session = session if session is not None else self.Session()
         try:
             self.response = session.post(
@@ -148,7 +158,13 @@ class Request(ThenableProxy):
             'retry': self.retry,
             'retry_max': self.retry_max,
             'retry_delay': self.retry_delay,
+            'recipient_validators': self._serialize_validators(
+                self._recipient_validators,
+            ),
         }
+
+    def _serialize_validators(self, validators):
+        return [serialize_validator(v) for v in validators]
 
     def __reduce__(self):
         return restore_from_keys, (type(self), (), self.__reduce_keys__())
@@ -182,3 +198,9 @@ class Request(ThenableProxy):
     @property
     def value(self):
         return self.response  # here for Thenable-compatiblity.
+
+    @cached_property
+    def recipient_validators(self):
+        return [
+            deserialize_validator(v) for v in self._recipient_validators
+        ]

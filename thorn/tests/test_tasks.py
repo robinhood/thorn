@@ -8,7 +8,9 @@ from thorn.tasks import (
     send_event, dispatch_requests, dispatch_request, _worker_dispatcher,
 )
 
-from .case import Case, EventCase, Mock, call, patch
+from .case import (
+    DEFAULT_RECIPIENT_VALIDATORS, Case, EventCase, Mock, call, patch,
+)
 
 
 class test_send_event(EventCase):
@@ -79,6 +81,7 @@ class test_dispatch_request(EventCase):
             self.req.sender, current_app().Subscriber(),
             id=self.req.id, timeout=self.req.timeout, retry=self.req.retry,
             retry_max=self.req.retry_max, retry_delay=self.req.retry_delay,
+            recipient_validators=DEFAULT_RECIPIENT_VALIDATORS,
         )
         _Request().dispatch.assert_called_once_with(
             session=self.session, propagate=_Request().retry)
@@ -95,6 +98,7 @@ class test_dispatch_request(EventCase):
             self.req2.sender, current_app().Subscriber(),
             id=self.req2.id, timeout=self.req2.timeout, retry=self.req2.retry,
             retry_max=self.req2.retry_max, retry_delay=self.req2.retry_delay,
+            recipient_validators=DEFAULT_RECIPIENT_VALIDATORS,
         )
         _Request().dispatch.assert_called_once_with(
             session=self.session, propagate=_Request().retry)

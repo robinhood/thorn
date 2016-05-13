@@ -15,3 +15,7 @@ class ThornError(Exception):
 
 class ImproperlyConfigured(ThornError):
     pass
+
+
+class SecurityError(ThornError):
+    pass

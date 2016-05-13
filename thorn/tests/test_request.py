@@ -3,9 +3,10 @@ from __future__ import absolute_import, unicode_literals
 import pickle
 
 from thorn.conf import MIME_JSON
+from thorn.exceptions import SecurityError
 from thorn.request import Request
 
-from .case import EventCase, Mock, patch
+from .case import DEFAULT_RECIPIENT_VALIDATORS, EventCase, Mock, patch
 
 
 class test_Request(EventCase):
@@ -13,8 +14,10 @@ class test_Request(EventCase):
     def setUp(self):
         EventCase.setUp(self)
         self.req = self.mock_req(
-            self.event.name, 'http://example.com:1234/hook#id1?x=303',
+            self.event.name, 'http://example.com:80/hook#id1?x=303',
         )
+        self.gethostbyname = self.patch('socket.gethostbyname')
+        self.gethostbyname.return_value = '123.123.123.123'
 
     def mock_req(self, event, url, **kwargs):
         kwargs.setdefault('on_success', Mock(name='on_success'))
@@ -59,7 +62,7 @@ class test_Request(EventCase):
         session = Mock(name='session')
         exc = session.post.side_effect = ValueError('foo')
         req = self.mock_req(
-            self.event.name, 'http://e.com:1234/hook',
+            self.event.name, 'http://e.com:80/hook',
             on_error=None, on_timeout=None,
         )
         req.connection_errors = (type(exc),)
@@ -69,11 +72,20 @@ class test_Request(EventCase):
         req.dispatch(session=session, propagate=False)
         req.handle_connection_error.assert_called_with(exc, propagate=False)
 
+    def test_dispatch__illegal_port(self):
+        session = Mock(name='session')
+        req = self.mock_req(
+            self.event.name, 'http://e.com:1234/hook',
+        )
+        with self.assertRaises(SecurityError):
+            req.dispatch(session=session, propagate=True)
+        session.post.assert_not_called()
+
     def test_dispatch__timeout_error(self):
         session = Mock(name='session')
         exc = session.post.side_effect = ValueError('foo')
         req = self.mock_req(
-            self.event.name, 'http://e.com:1234/hook',
+            self.event.name, 'http://e.com:80/hook',
             on_error=None, on_timeout=None,
         )
         req.timeout_errors, req.connection_errors = (type(exc),), ()
@@ -121,6 +133,7 @@ class test_Request(EventCase):
             'retry': self.req.retry,
             'retry_delay': self.req.retry_delay,
             'retry_max': self.req.retry_max,
+            'recipient_validators': DEFAULT_RECIPIENT_VALIDATORS,
         })
 
     def test_urlident(self):
@@ -151,6 +164,5 @@ class test_Request(EventCase):
             def as_dict(self):
                 return {'value': 808}
         self.req.subscriber = Subscriber()
-        print(self.req.__reduce_keys__())
         r2 = pickle.loads(pickle.dumps(self.req))
         self.assertIs(r2.app, self.app)
