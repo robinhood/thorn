@@ -180,7 +180,7 @@ Installing the stable version
 You can install thorn either via the Python Package Index (PyPI)
 or from source.
 
-To install using `pip`,:
+To install using `pip`:
 ::
 
     $ pip install -U thorn
