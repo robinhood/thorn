@@ -34,13 +34,13 @@ def deserialize_validator(v):
     return v
 
 
-def _is_private_address(addr):
-    return (
-        addr.is_private or
-        addr.is_reserved or
-        addr.is_loopback or
-        addr.is_multicast
-    )
+def _is_internal_address(addr):
+    return any([
+        addr.is_private,
+        addr.is_reserved,
+        addr.is_loopback,
+        addr.is_multicast,
+    ])
 
 
 @validator
@@ -103,7 +103,7 @@ def block_internal_ips():
 
     def validate_not_internal_ip(recipient_url):
         addr = _url_ip_address(recipient_url)
-        if _is_private_address(addr):
+        if _is_internal_address(addr):
             raise SecurityError(
                 'IP address of recipient {0}={1} considered private!'.format(
                     recipient_url, addr))
