@@ -46,7 +46,7 @@ Be sure to also read the `Contributing to Thorn`_ section in the
 documentation.
 
 .. _`Contributing to Thorn`:
-    http://thorn.readthedocs.org/en/latest.html
+    http://thorn.readthedocs.io/en/latest.html
 
 .. _license:
 

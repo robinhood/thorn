@@ -10,7 +10,7 @@ globals().update(conf.build_config(
     project='Thorn',
     # version_dev='2.0',
     # version_stable='1.4',
-    canonical_url='http://thorn.readthedocs.org',
+    canonical_url='http://thorn.readthedocs.io',
     webdomain='robinhood.com',
     github_project='robinhood/thorn',
     copyright='2016',

@@ -1,5 +1,5 @@
 :Version: 1.0.0rc1
-:Web: http://thorn.readthedocs.org/
+:Web: http://thorn.readthedocs.io/
 :Download: http://pypi.python.org/pypi/thorn/
 :Source: http://github.com/robinhood/thorn/
 :Keywords: event driven, webhooks, callback, http, django

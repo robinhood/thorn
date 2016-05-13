@@ -3,7 +3,7 @@
 |build-status| |coverage|
 
 :Version: 1.0.0rc1
-:Web: http://thorn.readthedocs.org/
+:Web: http://thorn.readthedocs.io/
 :Download: http://pypi.python.org/pypi/thorn/
 :Source: http://github.com/robinhood/thorn/
 :Keywords: event driven, webhooks, callback, http, django
@@ -167,7 +167,7 @@ Thorn was inspired by multiple Python projects:
 .. _`django-rest-hooks`: https://github.com/zapier/django-rest-hooks
 .. _`durian`: https://github.com/ask/durian/
 
-.. _`Events Guide`: http://thorn.readthedocs.org/en/latest/userguide/events.html
+.. _`Events Guide`: http://thorn.readthedocs.io/en/latest/userguide/events.html
 
 .. _installation:
 
@@ -218,7 +218,7 @@ pip command:
 
     $ pip install https://github.com/robinhood/thorn/zipball/master#egg=thorn
 
-.. _`Events Guide`: http://thorn.readthedocs.org/en/latest/userguide/events.html
+.. _`Events Guide`: http://thorn.readthedocs.io/en/latest/userguide/events.html
 
 .. _getting-help:
 
@@ -268,7 +268,7 @@ Be sure to also read the `Contributing to Thorn`_ section in the
 documentation.
 
 .. _`Contributing to Thorn`:
-    http://thorn.readthedocs.org/en/latest.html
+    http://thorn.readthedocs.io/en/latest.html
 
 .. _license:
 
@@ -280,7 +280,7 @@ file in the top distribution directory for the full license text.
 
 .. # vim: syntax=rst expandtab tabstop=4 shiftwidth=4 shiftround
 
-.. _`Events Guide`: http://thorn.readthedocs.org/en/latest/userguide/events.html
+.. _`Events Guide`: http://thorn.readthedocs.io/en/latest/userguide/events.html
 
 .. |build-status| image:: https://secure.travis-ci.org/robinhood/thorn.png?branch=master
     :alt: Build status
@@ -289,5 +289,5 @@ file in the top distribution directory for the full license text.
 .. |coverage| image:: https://codecov.io/github/robinhood/thorn/coverage.svg?branch=master
     :target: https://codecov.io/github/robinhood/thorn?branch=master
 
-.. _`Events Guide`: http://thorn.readthedocs.org/en/latest/userguide/events.html
+.. _`Events Guide`: http://thorn.readthedocs.io/en/latest/userguide/events.html
 

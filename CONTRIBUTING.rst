@@ -828,7 +828,7 @@ Packages
 :CI: http://travis-ci.org/#!/robinhood/thorn
 :Windows-CI: https://ci.appveyor.com/project/robinhood/thorn
 :PyPI: http://pypi.python.org/pypi/thorn
-:docs: http://thorn.readthedocs.org
+:docs: http://thorn.readthedocs.io
 
 .. _release-procedure:
 
