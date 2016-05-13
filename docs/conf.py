@@ -23,6 +23,7 @@ globals().update(conf.build_config(
     extra_intersphinx_mapping={
         'requests': ('http://requests.readthedocs.org/en/latest/', None),
     },
+    html_prepend_sidebars=['sidebargithub.html'],
     django_settings='testproj.settings',
     path_additions=[os.path.join(os.pardir, 'testproj')],
     apicheck_package='thorn',
