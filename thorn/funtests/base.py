@@ -9,6 +9,7 @@
 """
 from __future__ import absolute_import, unicode_literals
 
+import hashlib
 import json
 import requests
 
@@ -20,6 +21,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 
 from cyanide.suite import Suite, testcase
+from itsdangerous import Signer
 
 from thorn.django.models import Subscriber
 
@@ -85,10 +87,18 @@ class WebhookSuite(Suite):
     def _event_url(self, event, ref=None, rest=None):
         return event_url(event, ref=ref or self.ref, rest=rest)
 
-    def assert_article_event_received(self, article, event,
+    def assert_article_event_received(self, article, event, sub=None,
                                       reverse=None, ref=None, n=1):
         logs = self.wait_for_webhook_received(ref or self.ref, maxlen=n)
         assert len(logs) == n
+        if sub is not None:
+            hmac_secret = sub['hmac_secret']
+            if hmac_secret:
+                log = SubscriberLog.objects.filter(ref=ref or self.ref)[0]
+                assert Signer(
+                    hmac_secret,
+                    digest_method=hashlib.sha256).get_signature(
+                        log.data) == log.hmac
         self.assert_log_matches(
             logs[0],
             event=event,

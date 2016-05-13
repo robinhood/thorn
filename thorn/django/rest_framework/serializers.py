@@ -28,5 +28,6 @@ class SubscriberSerializer(serializers.HyperlinkedModelSerializer):
         fields = (
             'event', 'url', 'content_type', 'user',
             'id', 'created_at', 'updated_at', 'subscription',
+            'hmac_secret', 'hmac_digest',
         )
         read_only_fields = ('id', 'created_at', 'updated_at', 'subscription')

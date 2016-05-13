@@ -51,3 +51,4 @@ class SubscriberLog(models.Model):
     ref = models.CharField(max_length=128)
     event = models.CharField(max_length=128)
     data = models.TextField()
+    hmac = models.TextField()

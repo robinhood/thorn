@@ -75,41 +75,43 @@ class Default(WebhookSuite):
 
     @testcase('all', iterations=1)
     def subscribe_to_article_created(self, event='article.created'):
-        self.subscribe('article.created')
+        sub = self.subscribe('article.created')
         article = self.create_article('The quick brown fox')
-        self.assert_article_event_received(article, event)
+        self.assert_article_event_received(article, event, sub)
 
     @testcase('all', iterations=1)
     def subscribe_to_article_changed(self, event='article.changed'):
         article = self.create_article('The quick brown fox')
-        self.subscribe(event)
+        sub = self.subscribe(event)
         article = Article.objects.filter(author=self.user)[0]
         article.title = 'The lazy dog'
         article.save()
-        self.assert_article_event_received(article, event)
+        self.assert_article_event_received(article, event, sub)
 
     @testcase('all', iterations=1)
     def subscribe_to_article_published(self, event='article.published'):
         article = self.create_article('The quick brown fox')
-        self.subscribe(event)
+        sub = self.subscribe(event)
         article.state = 'PUBLISHED'
         article.save()
-        self.assert_article_event_received(article, event)
+        self.assert_article_event_received(article, event, sub)
 
     @testcase('all', iterations=1)
     def subscribe_to_article_removed(self, event='article.removed'):
         article = self.create_article('The quick brown fox')
-        self.subscribe(event)
+        sub = self.subscribe(event)
         rev = self.reverse_article(article)
         article.delete()
-        self.assert_article_event_received(article, event, reverse=rev)
+        self.assert_article_event_received(article, event, sub, reverse=rev)
 
     @testcase('all', iterations=5)
     def hundred_subscribers(self, event='article.created'):
-        for i in range(100):
+        subs = [
             self.subscribe(event, rest='&n={0}'.format(str(i)))
+            for i in range(100)
+        ]
         article = self.create_article('The Boring Bear')
-        self.assert_article_event_received(article, event, n=100)
+        self.assert_article_event_received(article, event, subs[0], n=100)
 
     @testcase('all', iterations=1)
     def sender_mismatch_does_not_dispatch(self, event='article.changed'):
@@ -124,7 +126,7 @@ class Default(WebhookSuite):
     def unsubscribe_does_not_dispatch(self, event='article.created'):
         sub = self.subscribe(event)
         article = self.create_article('Angry Bots')
-        self.assert_article_event_received(article, event)
+        self.assert_article_event_received(article, event, sub)
         self.unsubscribe(sub['subscription'])
         self.create_article('Funky Bots')
         self.assert_webhook_not_received()

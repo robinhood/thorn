@@ -10,6 +10,8 @@ from __future__ import absolute_import, unicode_literals
 
 from uuid import uuid4
 
+from functools import partial
+
 from django.conf import settings as django_settings
 from django.db import models
 from django.utils import text
@@ -18,6 +20,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from thorn.conf import event_choices, MIME_JSON, MIME_URLFORM
 from thorn.models import SubscriberModelMixin
+from thorn.utils.compat import random_secret
 
 from .managers import SubscriberManager
 
@@ -58,6 +61,24 @@ class Subscriber(models.Model, SubscriberModelMixin):
         django_settings.AUTH_USER_MODEL,
         related_name='%(app_label)s_%(class)s',
         null=True,
+    )
+
+    hmac_secret = models.TextField(
+        _('HMAC Secret'),
+        default=partial(random_secret, 64),
+        help_text=_('Specify HMAC secret for endpoints to verify'),
+    )
+
+    hmac_digest = models.CharField(
+        _('HMAC Digest Type'),
+        max_length=64,
+        choices=[
+            ('SHA512', 'sha512'),
+            ('SHA256', 'sha256'),
+            ('SHA1', 'sha1'),
+        ],
+        default='sha256',
+        help_text=_('Specify HMAC digest type (use sha256 if uncertain)'),
     )
 
     url = models.URLField(

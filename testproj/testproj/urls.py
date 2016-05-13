@@ -19,7 +19,12 @@ def user_detail(request):
 
 def log_event(request, event):
     ref = request.GET.get('ref')
-    SubscriberLog.objects.create(event=event, ref=ref, data=request.body)
+    SubscriberLog.objects.create(
+        event=event,
+        ref=ref,
+        data=request.body,
+        hmac=request.META.get('HTTP_HOOK_HMAC'),
+    )
     return HttpResponse(json.dumps({'event': event, 'ref': ref}))
 
 

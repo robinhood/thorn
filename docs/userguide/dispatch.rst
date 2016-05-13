@@ -70,6 +70,8 @@ Thorn will provide the endpoints with standard HTTP header values
 +-------------------+--------------------------------------------------------+
 | ``Hook-Delivery`` | Unique id for this delivery.                           |
 +-------------------+--------------------------------------------------------+
+| ``Hook-HMAC``     | HMAC digest that can be used to verify the sender      |
++-------------------+--------------------------------------------------------+
 | ``User-Agent``    | User agent string, including Thorn and client version. |
 +-------------------+--------------------------------------------------------+
 | ``Content-Type``  | Delivery content type (e.g. application/json).         |

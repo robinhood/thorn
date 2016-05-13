@@ -113,6 +113,9 @@ class Request(ThenableProxy):
     def validate_recipient(self, url):
         return [validate(url) for validate in self.recipient_validators]
 
+    def sign_request(self, subscriber, data):
+        return subscriber.sign(data)
+
     def dispatch(self, session=None, propagate=False):
         if self.cancelled:
             return
@@ -122,8 +125,10 @@ class Request(ThenableProxy):
             self.response = session.post(
                 url=self.subscriber.url,
                 data=self.data,
-                headers=self.headers,
                 timeout=self.timeout,
+                headers=self.headers_with_hmac(
+                    self.sign_request(self.subscriber, self.data),
+                ),
             )
         except self.timeout_errors as exc:
             self.handle_timeout_error(exc, propagate=propagate)
@@ -175,6 +180,9 @@ class Request(ThenableProxy):
             headers=self._headers,
             user_agent=self.user_agent,
         )
+
+    def headers_with_hmac(self, hmac):
+        return dict(self.headers, **{'Hook-HMAC': hmac})
 
     @cached_property
     def headers(self):

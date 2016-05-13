@@ -8,7 +8,16 @@
 """
 from __future__ import absolute_import, unicode_literals
 
+import hashlib
+
 from six import string_types
+
+from itsdangerous import Signer
+
+
+def get_digest(d):
+    assert d in hashlib.algorithms_available
+    return getattr(hashlib, d)
 
 
 class SubscriberModelMixin(object):
@@ -22,8 +31,15 @@ class SubscriberModelMixin(object):
             'event': self.event,
             'user': self._user_ident(),
             'url': self.url,
+            'hmac_secret': self.hmac_secret,
+            'hmac_digest': self.hmac_digest,
             'content_type': self.content_type,
         }
+
+    def sign(self, text):
+        return Signer(
+            self.hmac_secret,
+            digest_method=get_digest(self.hmac_digest)).get_signature(text)
 
     @classmethod
     def from_dict(cls, *args, **kwargs):

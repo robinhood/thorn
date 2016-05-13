@@ -40,10 +40,14 @@ class test_Request(EventCase):
     def test_dispatch(self):
         session = Mock(name='session')
         self.req.dispatch(session=session)
+        expected_headers = dict(self.req.headers, **{
+            'Hook-HMAC': self.req.sign_request(
+                self.req.subscriber, self.req.data)
+        })
         session.post.assert_called_with(
             url=self.req.subscriber.url,
             data=self.req.data,
-            headers=self.req.headers,
+            headers=expected_headers,
             timeout=self.req.timeout,
         )
         self.req.on_success.assert_called_with(self.req)

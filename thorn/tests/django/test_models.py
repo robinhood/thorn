@@ -26,6 +26,8 @@ class test_Subscriber(Case):
             'user': self.subscriber.user.pk,
             'url': self.subscriber.url,
             'content_type': self.subscriber.content_type,
+            'hmac_secret': self.subscriber.hmac_secret,
+            'hmac_digest': self.subscriber.hmac_digest,
         })
 
     def test_from_dict__arg(self):
