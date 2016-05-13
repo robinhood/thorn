@@ -1,4 +1,4 @@
-.. image:: ../images/thorn_banner.png
+.. image:: http://thorn.readthedocs.io/en/latest/_images/thorn_banner.png
 
 |build-status| |coverage|
 
