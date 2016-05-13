@@ -1,0 +1,59 @@
+.. _getting-help:
+
+Getting Help
+============
+
+.. _mailing-list:
+
+Mailing list
+------------
+
+For discussions about the usage, development, and future of Thorn,
+please join the `thorn-users`_ mailing list.
+
+.. _`thorn-users`: https://groups.google.com/forum/#!forum/thorn-users
+
+.. _irc-channel:
+
+IRC
+---
+
+Come chat with us on IRC. The **#thorn** channel is located at the `Freenode`_
+network.
+
+.. _`Freenode`: http://freenode.net
+
+.. _bug-tracker:
+
+Bug tracker
+===========
+
+If you have any suggestions, bug reports or annoyances please report them
+to our issue tracker at https://github.com/robinhood/thorn/issues/
+
+.. _contributing-short:
+
+Contributing
+============
+
+Development of `Thorn` happens at GitHub: https://github.com/robinhood/thorn
+
+You are highly encouraged to participate in the development
+of `thorn`. If you don't like GitHub (for some reason) you're welcome
+to send regular patches.
+
+Be sure to also read the `Contributing to Thorn`_ section in the
+documentation.
+
+.. _`Contributing to Thorn`:
+    http://thorn.readthedocs.org/en/latest.html
+
+.. _license:
+
+License
+=======
+
+This software is licensed under the `New BSD License`. See the :file:`LICENSE`
+file in the top distribution directory for the full license text.
+
+.. # vim: syntax=rst expandtab tabstop=4 shiftwidth=4 shiftround

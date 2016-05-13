@@ -1,0 +1,4 @@
+celery
+six
+requests
+vine>=1.1.0

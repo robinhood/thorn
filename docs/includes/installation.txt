@@ -1,0 +1,51 @@
+.. _installation:
+
+Installation
+============
+
+Installing the stable version
+-----------------------------
+
+You can install thorn either via the Python Package Index (PyPI)
+or from source.
+
+To install using `pip`,:
+
+.. code-block:: console
+
+    $ pip install -U thorn
+
+.. _installing-from-source:
+
+Downloading and installing from source
+--------------------------------------
+
+Download the latest version of thorn from
+http://pypi.python.org/pypi/thorn/
+
+You can install it by doing the following,:
+
+.. code-block:: console
+
+    $ tar xvfz thorn-0.0.0.tar.gz
+    $ cd thorn-0.0.0
+    $ python setup.py build
+    # python setup.py install
+
+The last command must be executed as a privileged user if
+you are not currently using a virtualenv.
+
+.. _installing-from-git:
+
+Using the development version
+-----------------------------
+
+With pip
+~~~~~~~~
+
+You can install the latest snapshot of thorn using the following
+pip command:
+
+.. code-block:: console
+
+    $ pip install https://github.com/robinhood/thorn/zipball/master#egg=thorn

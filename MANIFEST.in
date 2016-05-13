@@ -1,0 +1,4 @@
+include README.rst Changelog LICENSE
+recursive-include docs *
+recursive-include extra README *.py
+recursive-include requirements *.txt

@@ -1,0 +1,7 @@
+case>=1.1.4
+django_nose
+coverage>=3.0
+mockredispy
+django
+djangorestframework
+pytz>dev

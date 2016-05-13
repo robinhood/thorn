@@ -1,0 +1,166 @@
+:Version: 1.0.0rc1
+:Web: http://thorn.readthedocs.org/
+:Download: http://pypi.python.org/pypi/thorn/
+:Source: http://github.com/robinhood/thorn/
+:Keywords: event driven, webhooks, callback, http, django
+
+.. contents:: Table of Contents:
+    :local:
+
+
+About
+=====
+
+Thorn is a webhook framework for Python, focusing on flexibility and
+ease of use, both when getting started and when maintaining a production
+system.
+
+The goal is for webhooks to thrive on the web, by providing Python projects
+with an easy solution to implement them and keeping a repository of patterns
+evolved by the Python community.
+
+- **Simple**
+
+    Add webhook capabilities to your database models using a single
+    decorator, including filtering for specific changes to the model.
+
+- **Flexible**
+
+    All Thorn components are pluggable, reusable and extendable.
+
+- **Scalable**
+
+    Thorn can perform millions of HTTP requests every second by taking
+    advantage of `Celery`_ for asynchronous processing.
+
+.. _`Celery`: http://celeryproject.org/
+
+What are webhooks?
+==================
+
+A webhook is a fancy name for an HTTP callback.
+
+Users and other services can subscribe to events happening in your system
+by registering a URL to be called whenever the event occurs.
+
+The canonical example would be GitHub where you can register URLs to be
+called whenever a new change is committed to your repository, a new
+bugtracker issue is created, someone publishes a comment, and so on.
+
+Another example is communication between internal systems, traditionally
+dominated by complicated message consumer daemons, using webhooks
+is an elegant and REST friendly way to implement event driven systems,
+requiring only a web-server (and optimally a separate service to dispatch
+the HTTP callback requests).
+
+Webhooks are also composable, so you can combine multiple HTTP callbacks
+to form complicated workflows, executed as events happen across multiple
+systems
+
+In use
+------
+
+Notable examples of webhooks in use are:
+
++------------+---------------------------------------------------------------+
+| **Site**   | **Documentation**                                             |
++------------+---------------------------------------------------------------+
+|   Github   | https://developer.github.com/webhooks/                        |
++------------+---------------------------------------------------------------+
+|   Stripe   | https://stripe.com/docs/webhooks                              |
++------------+---------------------------------------------------------------+
+|   PayPal   | http://bit.ly/1TbDtvj                                         |
++------------+---------------------------------------------------------------+
+
+Example
+-------
+
+This example adds four webhook events to the Article model of
+an imaginary blog engine:
+
+.. code-block:: python
+
+    from thorn import ModelEvent, model_reverser, webhook_model
+
+    @webhook_model(
+        on_create=ModelEvent('article.created')
+        on_change=ModelEvent('article.changed'),
+        on_delete=ModelEvent('article.removed'),
+        on_publish=ModelEvent(
+            'article.published',
+            state__eq='PUBLISHED').dispatches_on_change(),
+        reverse=model_reverser('article:detail', uuid='uuid'),
+    )
+    class Article(models.Model):
+        pass  # ...
+
+Users can now subscribe to the four events individually, or all of them
+by subscribing to ``article.*``, and will be notified every time
+an article is created, changed, removed or published:
+
+.. code-block:: console
+
+    $ curl -X POST                                                      \
+    > -H "Authorization: Bearer <secret login token>"                   \
+    > -H "Content-Type: application/json"                               \
+    > -d '{"event": "article.*", "url": "https://e.com/h/article?u=1"}' \
+    > http://example.com/hooks/
+
+The API is expressive, so may require you to learn more about the arguments
+to understand it fully.  Luckily it's all described in the
+:ref:`Events Guide <events-guide>` for you to consult after reading
+the quick start tutorial.
+
+What do I need?
+===============
+
+.. sidebar:: Version Requirements
+    :subtitle: Thorn version 1.0 runs on
+
+    - Python (2.7, 3.4, 3.5)
+    - PyPy (5.1.1)
+    - Jython (2.7).
+
+Thorn currently only supports `Django`_, and an API for subscribing to events
+is only provided for `Django REST Framework`_.
+
+Extending Thorn is simple so you can also contribute support
+for your favorite frameworks.
+
+For dispatching web requests we recommend using `Celery`_, but you
+can get started immediately by dispatching requests locally.
+
+Using `Celery`_ for dispatching requests will require a message transport
+like `RabbitMQ`_ or `Redis`_.
+
+You can also write custom dispatchers if you have an idea for efficient
+payload delivery, or just want to reuse a technology you already deploy in
+production.
+
+.. _`Celery`: http://celeryproject.org/
+.. _`Django`: http://djangoproject.com/
+.. _`Django REST Framework`: http://www.django-rest-framework.org
+.. _`RabbitMQ`: http://rabbitmq.com
+.. _`Redis`: http://redis.io
+
+Quick Start
+===========
+
+Go immediately to the :ref:`django-guide` guide to get started using
+Thorn in your Django projects.
+
+If you are using a different web framework, please consider contributing
+to the project by implementing a new environment type.
+
+Alternatives
+============
+
+Thorn was inspired by multiple Python projects:
+
+- `dj-webhooks`_
+- `django-rest-hooks`_
+- `durian`_
+
+.. _`dj-webhooks`: https://github.com/pydanny/dj-webhooks
+.. _`django-rest-hooks`: https://github.com/zapier/django-rest-hooks
+.. _`durian`: https://github.com/ask/durian/
