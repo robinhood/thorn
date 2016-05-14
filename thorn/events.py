@@ -231,7 +231,7 @@ class ModelEvent(Event):
         return {
             'event': self.name,
             'ref': ref,
-            'sender': sender.username if sender else sender,
+            'sender': sender.get_username() if sender else sender,
             'data': data or {},
         }
 
