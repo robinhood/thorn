@@ -81,7 +81,8 @@ Example
 
 This example adds four webhook events to the Article model of
 an imaginary blog engine:
-::
+
+.. code-block:: python
 
     from thorn import ModelEvent, model_reverser, webhook_model
 
@@ -100,7 +101,8 @@ an imaginary blog engine:
 Users can now subscribe to the four events individually, or all of them
 by subscribing to ``article.*``, and will be notified every time
 an article is created, changed, removed or published:
-::
+
+.. code-block:: sh
 
     $ curl -X POST                                                      \
     > -H "Authorization: Bearer <secret login token>"                   \
@@ -194,7 +196,8 @@ Download the latest version of thorn from
 http://pypi.python.org/pypi/thorn/
 
 You can install it by doing the following,:
-::
+
+.. code-block:: sh
 
     $ tar xvfz thorn-0.0.0.tar.gz
     $ cd thorn-0.0.0
