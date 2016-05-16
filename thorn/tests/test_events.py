@@ -70,7 +70,7 @@ class test_ModelEvent(EventCase):
         self.event._send.assert_called_with(
             {
                 'event': self.event.name,
-                'sender': sender.username,
+                'sender': sender.get_username(),
                 'ref': self.event.app.reverse.return_value,
                 'data': {'foo': 'bar'},
             },
