@@ -81,6 +81,7 @@ class SignalCase(ThornCase):
         self.Model = Mock(name='Model')
         self.post_save = self.patch('django.db.models.signals.post_save')
         self.post_delete = self.patch('django.db.models.signals.post_delete')
+        self.m2m_changed = self.patch('django.db.models.signals.m2m_changed')
         super(SignalCase, self).setUp()
 
 

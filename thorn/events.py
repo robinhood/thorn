@@ -276,13 +276,31 @@ class ModelEvent(Event):
         return self._set_default_signal_dispatcher(
             self.app.signals.dispatch_on_delete)
 
-    def _set_default_signal_dispatcher(self, signal_dispatcher):
-        if self.signal_dispatcher is None:
-            self.signal_dispatcher = signal_dispatcher
+    def dispatches_on_m2m_add(self, related_field):
+        return self._set_default_signal_dispatcher(
+            self.app.signals.dispatch_on_m2m_add, related_field)
+
+    def dispatches_on_m2m_remove(self, related_field):
+        return self._set_default_signal_dispatcher(
+            self.app.signals.dispatch_on_m2m_remove, related_field)
+
+    def dispatches_on_m2m_clear(self, related_field):
+        return self._set_default_signal_dispatcher(
+            self.app.signals.dispatch_on_m2m_clear, related_field)
+
+    def _set_default_signal_dispatcher(self, signal_dispatcher, *args):
+        if self._signal_dispatcher is None:
+            self._signal_dispatcher = self._prepare_signal_dispatcher(
+                signal_dispatcher, *args)
         return self
 
     def __reduce_keys__(self):
         return dict(self._kwargs, name=self.name, _filterargs=self._filterargs)
+
+    def _prepare_signal_dispatcher(self, signal_dispatcher, *args):
+        d = signal_dispatcher(self.on_signal, *args)
+        d.use_transitions = self.use_transitions
+        return d
 
     @property
     def signal_dispatcher(self):
@@ -290,8 +308,7 @@ class ModelEvent(Event):
 
     @signal_dispatcher.setter
     def signal_dispatcher(self, signal_dispatcher):
-        if signal_dispatcher is not None:
-            self._signal_dispatcher = signal_dispatcher(self.on_signal)
-            self._signal_dispatcher.use_transitions = self.use_transitions
-        else:
-            self._signal_dispatcher = None
+        self._signal_dispatcher = (
+            self._prepare_signal_dispatcher(signal_dispatcher)
+            if signal_dispatcher is not None else None
+        )

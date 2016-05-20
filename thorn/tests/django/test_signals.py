@@ -14,10 +14,11 @@ class test_signal_dispatcher(SignalCase):
 
 class SignalDispatcherCase(SignalCase):
     dispatcher = None
+    dispatcher_args = ()
 
     def setup(self):
         self.fun = Mock(name='fun')
-        self.dispatch = self.dispatcher(self.fun)
+        self.dispatch = self.dispatcher(self.fun, *self.dispatcher_args)
         self.instance = Mock(name='instance')
 
 
@@ -107,3 +108,47 @@ class test_dispatch_on_delete(SignalDispatcherCase):
         self.post_delete.connect.assert_called_with(
             self.dispatch, sender=self.Model, weak=False,
         )
+
+
+class test_dispatch_on_m2m_change(SignalDispatcherCase):
+    dispatcher = signals.dispatch_on_m2m_change
+    dispatcher_args = ('tags.sgat',)
+
+    def test_dispatch(self):
+        self.dispatch(self.instance, arg=1)
+        self.fun.assert_called_with(self.instance, arg=1)
+
+    def test_connect(self):
+        self.dispatch.connect(sender=self.Model)
+        self.m2m_changed.connect.assert_called_with(
+            self.dispatch.on_m2m_change,
+            sender=self.Model.tags.sgat.through, weak=False,
+        )
+
+    def test_on_m2m_change__post_add(self):
+        handler = self.dispatch.actions['post_add'] = Mock(name='post_add')
+        self.dispatch.on_m2m_change(
+            sender=self.Model, action='post_add', instance=self.instance,
+            model=self.Model, foo=1,
+        )
+        handler.assert_called_with(
+            self.instance, sender=self.Model, model=self.Model, foo=1,
+        )
+
+    def test_on_m2m_change__no_handler(self):
+        self.dispatch.on_m2m_change(
+            sender=self.Model, action='foo',
+            instance=self.instance, model=self.Model,
+        )
+
+
+class test_dispatch_on_m2m_add(test_dispatch_on_m2m_change):
+    dispatcher = signals.dispatch_on_m2m_add
+
+
+class test_dispatch_on_m2m_remove(test_dispatch_on_m2m_change):
+    dispatcher = signals.dispatch_on_m2m_remove
+
+
+class test_dispatch_on_m2m_clear(test_dispatch_on_m2m_change):
+    dispatcher = signals.dispatch_on_m2m_clear

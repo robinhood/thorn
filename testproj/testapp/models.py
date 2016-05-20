@@ -19,10 +19,19 @@ class Bar(models.Model):
     foo = models.ForeignKey(Foo, related_name='bars')
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=128, unique=True)
+
+
 @webhook_model(
     on_create=ModelEvent('article.created'),
     on_change=ModelEvent('article.changed'),
     on_delete=ModelEvent('article.removed'),
+    on_tag=ModelEvent('article.tag_added').dispatches_on_m2m_add('tags'),
+    on_tag_remove=ModelEvent(
+        'article.tag_removed').dispatches_on_m2m_remove('tags'),
+    on_tag_clear=ModelEvent(
+        'article.tag_all_cleared').dispatches_on_m2m_clear('tags'),
     on_published=ModelEvent(
         'article.published', state__eq='PUBLISHED').dispatches_on_change(),
     sender_field='author',
@@ -35,6 +44,7 @@ class Article(models.Model):
         settings.AUTH_USER_MODEL,
         related_name='%(app_label)s_%(class)s',
     )
+    tags = models.ManyToManyField(Tag)
 
     def webhook_payload(self):
         return {

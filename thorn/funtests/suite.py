@@ -38,7 +38,7 @@ from __future__ import absolute_import, unicode_literals
 
 from celery.utils.imports import qualname
 
-from testapp.models import Article
+from testapp.models import Article, Tag
 
 from .base import WebhookSuite, event_url, testcase
 
@@ -103,6 +103,34 @@ class Default(WebhookSuite):
         rev = self.reverse_article(article)
         article.delete()
         self.assert_article_event_received(article, event, sub, reverse=rev)
+
+    @testcase('all', iterations=1)
+    def subscribe_to_tag_added(self, event='article.tag_added'):
+        article = self.create_article('The quick brown fox')
+        tag, _ = Tag.objects.get_or_create(name='kids')
+        sub = self.subscribe(event)
+        article.tags.add(tag)
+        self.assert_article_event_received(article, event, sub)
+
+    @testcase('all', iterations=1)
+    def subscribe_to_tag_removed(self, event='article.tag_removed'):
+        article = self.create_article('The quick brown fox')
+        tag, _ = Tag.objects.get_or_create(name='kids')
+        article.tags.add(tag)
+        sub = self.subscribe(event)
+        article.tags.remove(tag)
+        self.assert_article_event_received(article, event, sub)
+
+    @testcase('all', iterations=1)
+    def subscribe_to_tag_all_cleared(self, event='article.tag_all_cleared'):
+        article = self.create_article('The quick brown fox')
+        tag1, _ = Tag.objects.get_or_create(name='kids')
+        tag2, _ = Tag.objects.get_or_create(name='fun')
+        article.tags.add(tag1)
+        article.tags.add(tag2)
+        sub = self.subscribe(event)
+        article.tags.clear()
+        self.assert_article_event_received(article, event, sub)
 
     @testcase('all', iterations=5)
     def hundred_subscribers(self, event='article.created'):

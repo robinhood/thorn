@@ -380,6 +380,39 @@ There are three built-in signal dispatch handlers:
 
         >>> ModelEvent('...').dispatches_on_delete()
 
+#. Send when a many-to-many relation is added
+
+    .. code-block:: pycon
+
+        >>> ModelEvent('...').dispatches_on_m2m_add('tags')
+
+    Argument is the related field name, and in this example
+    tags is defined on the model as ``tags = ManyToManyField(Tag)``.
+    The event will dispatch whenever ``Model.tags.add(related_object)``
+    happens.
+
+#. Send when a many-to-many relation is removed
+
+    .. code-block:: pycon
+
+        >>> ModelEvent('...').dispatches_on_m2m_remove('tags')
+
+    Argument is the related field name, and in this example
+    tags is defined on the model as ``tags = ManyToManyField(Tag)``.
+    The event will dispatch whenever ``Model.tags.remove(related_object)``
+    happens.
+
+#. Send when a many-to-many field is cleared
+
+    .. code-block:: pycon
+
+        >>> ModelEvent('...').dispatches_on_m2m_clear('tags')
+
+    Argument is the related field name, and in this example
+    tags is defined on the model as ``tags = ManyToManyField(Tag)``.
+    The event will dispatch whenever ``Model.tags.clear()``
+    happens.
+
 All of these will only be sent when the transaction is committed, or by other
 means the changes are final in the database.
 

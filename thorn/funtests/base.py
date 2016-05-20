@@ -25,7 +25,7 @@ from itsdangerous import Signer
 
 from thorn.django.models import Subscriber
 
-from testapp.models import Article, SubscriberLog
+from testapp.models import Article, SubscriberLog, Tag
 
 BASE_URL = 'http://localhost:8000'
 
@@ -51,6 +51,7 @@ class WebhookSuite(Suite):
 
     def setup(self):
         Article.objects.all().delete()
+        Tag.objects.all().delete()
         SubscriberLog.objects.all().delete()
         Subscriber.objects.all().delete()
 
