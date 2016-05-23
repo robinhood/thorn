@@ -10,8 +10,6 @@ from __future__ import absolute_import, unicode_literals
 
 from uuid import uuid4
 
-from functools import partial
-
 from django.conf import settings as django_settings
 from django.db import models
 from django.utils import text
@@ -35,6 +33,11 @@ CONTENT_TYPES = {
     MIME_JSON,
     MIME_URLFORM,
 }
+
+
+# Django migrations cannot handle partial objects, ugh...
+def random_secret64():
+    return random_secret(64)
 
 
 @python_2_unicode_compatible
@@ -65,7 +68,7 @@ class Subscriber(models.Model, SubscriberModelMixin):
 
     hmac_secret = models.TextField(
         _('HMAC Secret'),
-        default=partial(random_secret, 64),
+        default=random_secret64,
         help_text=_('Specify HMAC secret for endpoints to verify'),
     )
 
