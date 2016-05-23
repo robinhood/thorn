@@ -39,6 +39,7 @@ globals().update(conf.build_config(
         'thorn.funtests',
         'thorn.funtests.celery',
         'thorn._state',
+        'thorn.generic',
     ],
 ))
 

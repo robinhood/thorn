@@ -32,7 +32,8 @@
     thorn.dispatch.base
     thorn.dispatch.disabled
     thorn.dispatch.celery
-    thorn.models
+    thorn.generic.models
+    thorn.generic.signals
     thorn.utils.compat
     thorn.utils.functional
     thorn.utils.json

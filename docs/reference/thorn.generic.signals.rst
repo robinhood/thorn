@@ -1,11 +1,11 @@
 =====================================================
- thorn.models
+ thorn.generic.signals
 =====================================================
 
 .. contents::
     :local:
-.. currentmodule:: thorn.models
+.. currentmodule:: thorn.generic.signals
 
-.. automodule:: thorn.models
+.. automodule:: thorn.generic.signals
     :members:
     :undoc-members:
