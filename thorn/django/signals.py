@@ -3,59 +3,23 @@
     thorn.django.signals
     ====================
 
-    Django model signal utilities.
+    Django signal dispatchers.
 
 """
 from __future__ import absolute_import, unicode_literals
 
 from operator import attrgetter
-from six import iteritems as items
 
-from celery.utils.imports import symbol_by_name
+from thorn.generic.signals import signal_dispatcher
 
 __all__ = [
-    'signal_dispatcher',
-    'dispatch_on_create', 'dispatch_on_change', 'dispatch_on_delete',
+    'dispatch_on_create',
+    'dispatch_on_change',
+    'dispatch_on_delete',
+    'dispatch_on_m2m_add',
+    'dispatch_on_m2m_remove',
+    'dispatch_on_m2m_clear',
 ]
-
-
-class signal_dispatcher(object):
-    signals = None
-    use_transitions = False
-
-    def __init__(self, fun, **kwargs):
-        self.fun = fun
-        self.signals = self.load_signals(self.setup_signals())
-
-    def setup_signals(self):
-        return {}
-
-    def load_signals(self, signals):
-        return {
-            symbol_by_name(sig): handler
-            for sig, handler in items(signals)
-        }
-
-    def should_dispatch(self, instance, **kwargs):
-        return True
-
-    def __call__(self, instance, **kwargs):
-        if self.should_dispatch(instance, **kwargs):
-            return self.fun(instance, **kwargs)
-
-    def connect(self, sender=None, weak=False, **kwargs):
-        [self._connect_signal(signal, handler, sender, weak, **kwargs)
-         for signal, handler in items(self.signals)]
-
-    def _connect_signal(self, signal, handler, sender, weak, **kwargs):
-        signal.connect(
-            handler,
-            sender=self.prepare_sender(sender),
-            weak=weak,
-            **kwargs)
-
-    def prepare_sender(self, sender):
-        return sender
 
 
 class dispatch_on_create(signal_dispatcher):

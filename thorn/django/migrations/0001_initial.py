@@ -5,7 +5,7 @@ from __future__ import absolute_import, unicode_literals
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import thorn.models
+import thorn.generic.models
 import uuid
 
 
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'subscriber',
                 'verbose_name_plural': 'subscriber',
             },
-            bases=(models.Model, thorn.models.SubscriberModelMixin),
+            bases=(models.Model, thorn.generic.models.SubscriberModelMixin),
         ),
         migrations.AlterUniqueTogether(
             name='subscriber',

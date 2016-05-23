@@ -1,14 +1,14 @@
 from __future__ import absolute_import, unicode_literals
 
-from thorn.models import SubscriberModelMixin, get_digest
+from thorn.generic.models import SubscriberModelMixin, get_digest
 
-from .case import Case, Mock, patch
+from thorn.tests.case import Case, Mock, patch
 
 
 class DigestCase(Case):
 
     def setup(self):
-        self.hashlib = self.patch('thorn.models.hashlib')
+        self.hashlib = self.patch('thorn.generic.models.hashlib')
         self.hashlib.algorithms_available = ['sha1']
 
 
@@ -24,7 +24,7 @@ class test_get_digest(DigestCase):
 
 class test_SubscriberModelMixin(DigestCase):
 
-    @patch('thorn.models.Signer')
+    @patch('thorn.generic.models.Signer')
     def test_sign(self, Signer):
         x = SubscriberModelMixin()
         x.hmac_secret = Mock(name='hmac_secret')
