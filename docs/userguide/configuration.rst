@@ -173,7 +173,7 @@ This is expressed in configuration as:
 
 .. code-block:: python
 
-    THORN_VALIDATORS = [
+    THORN_RECIPIENT_VALIDATORS = [
         validators.block_internal_ips(),
         validators.ensure_protocol('http', 'https'),
         validators.ensure_port(80, 443),

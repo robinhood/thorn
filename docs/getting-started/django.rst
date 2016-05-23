@@ -187,8 +187,10 @@ from a subscription by unique identifier:
     > -H "Content-Type: application/json"               \
     > http://example.com/hooks/c91fe938-55fb-4190-a5ed-bd92f5ea8339
 
-Example endpoint
-================
+.. _django-example-consumer:
+
+Example consumer endpoint
+=========================
 
 This is an example Django webhook receiver view, using the json content type:
 

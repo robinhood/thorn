@@ -2,6 +2,131 @@
  Changelog
 ===========
 
+.. _version-1.1.0:
+
+1.1.0
+=====
+:release-date: 2016-05-23 12:00 P.M PDT
+:release-by: Ask Solem
+
+- Fixed installation on Python 3
+
+    Fix contributed by Josh Drake.
+
+- Now depends on
+
+    - :pypi:`itsdangerous`
+
+    - :pypi:`ipaddress` (Python 2.7)
+
+- Security: Now provides HMAC signing by default.
+
+    The Subscriber model has a new ``hmac_secret`` field
+    which subscribers can provide to set the secret key for
+    communication.  A default secret will be created if none is provided,
+    and can be found in the response of the subscribe endpoint.
+
+    The signed HMAC message found in the ``Hook-HMAC`` HTTP header
+    can then be used to verify the sender of the webhook.
+
+    An example Django webhook consumer verifying the signature
+    can be found in the :ref:`Django guide <django-example-consumer>`.
+
+    Thanks to Timothy Fitz for suggestions.
+
+- Security: No longer dispatches webhooks to internal networks.
+
+    This means Thorn will refuse to deliver webhooks to
+    networks considered internal, like ``fd00::/8``, ``10.0.0.0/8``,
+    ``172.16.0.0/12``, ``192.168.0.0/16`` and ``127.0.0.1``
+
+    This behavior can be changed globally using the
+    :setting:`THORN_RECIPIENT_VALIDATORS` setting, or on an per-event basis
+    using the ``recipient_validators`` argument to :class:`~Thorn.event`.
+
+- Security: Now only dispatches to HTTP and HTTPS URLs by default.
+
+    This behavior can be changed globally using the
+    :setting:`THORN_RECIPIENT_VALIDATORS` setting, or on an per-event basis
+    using the ``recipient_validators`` argument to :class:`~Thorn.event`.
+
+- Security: Now only dispatches to ports 80 and 443 by default.
+
+    This behavior can be changed globally using the
+    :setting:`THORN_RECIPIENT_VALIDATORS` setting, or on an per-event basis
+    using the ``recipient_validators`` argument to :class:`~Thorn.event`.
+
+- Security: Adds recipient validators
+
+    You can now validate the recipient URL by providing a list
+    of validators in the ``recipient_validators`` argument to
+    :class:`~thorn.Event`.
+
+    The default list of validators is provided by the
+    new :setting:`THORN_RECIPIENT_VALIDATORS` setting.
+
+    Thanks to Edmond Wong for reviewing, and Timothy Fitz for suggestions.
+
+- Django: Now properly supports custom user models by using
+  ``UserModel.get_username()``.
+
+    Fix contributed by Josh Drake.
+
+- ModelEvent: Adds new many-to-many signal dispatcher types
+
+    - ``dispatches_on_m2m_add(related_field)``
+
+        Sent when a new object is added to a many-to-many relation.
+
+    - ``dispatches_on_m2m_remove(related_field)``
+
+        Sent when an object is removed from a many-to-many relation.
+
+    - ``dispatches_on_m2m_clear(related_field)``
+
+        Sent when a many-to-many relation is cleared.
+
+    **Example**
+
+    In this blog article model, events are sent whenever a new
+    tag is added or removed:
+
+    .. code-block:: python
+
+        @webhook_model(
+            on_add_tag=ModelEvent(
+                'article.tagged').dispatches_on_m2m_add('tags'),
+            on_remove_tag=ModelEvent(
+                'article.untagged').dispatches_on_m2m_remove('tags'),
+            on_clear_tags=ModelEvent(
+                'article.tags_cleared').dispatches_on_m2m_clear('tags'),
+        )
+        class Article(models.Model):
+            title = models.CharField(max_length=128)
+            tags = models.ManyToManyField(Tag)
+
+
+        class Tag(models.Model):
+            name = models.CharField(max_length=64, unique=True)
+
+    The ``article.tagged`` webhook is sent when::
+
+        >>> python_tag, _ = Tag.objects.get_or_create(name='python')
+        >>> article.tags.add(python_tag)  # <-- dispatches with this line
+
+    and the ``article.untagged`` webhook is sent when::
+
+        >>> article.tags.remove(python_tag)
+
+    finally, the ``article.tags_cleared`` event is sent when::
+
+        >>> article.tags.clear()
+
+- Documentation fixes contributed by:
+
+    - Matthew Brener
+
+
 .. _version-1.0.0:
 
 1.0.0
