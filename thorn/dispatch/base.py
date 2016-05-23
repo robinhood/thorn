@@ -8,10 +8,10 @@
 """
 from __future__ import absolute_import, unicode_literals
 
-from collections import Callable
+from collections import Callable, deque
 from itertools import chain
 
-from celery.utils.functional import maybe_list
+from celery.utils.functional import is_list, maybe_list
 from vine import barrier
 
 from thorn._state import app_or_default
@@ -94,13 +94,17 @@ class Dispatcher(object):
         ]
 
     def _configured_for_event(self, name, sender=None):
-        for sub in maybe_list(
-                self.app.settings.THORN_SUBSCRIBERS.get(name) or []):
-            if isinstance(sub, Callable):
-                for subsub in sub(name, sender=sender):
-                    yield subsub
-            else:
-                yield sub
+        stream = deque(
+            maybe_list(self.app.settings.THORN_SUBSCRIBERS.get(name)) or []
+        )
+        while stream:
+            for node in maybe_list(stream.popleft()):
+                if isinstance(node, Callable):
+                    node = node(name, sender=sender)
+                if is_list(node):
+                    stream.append(node)
+                else:
+                    yield node
 
     def _stored_subscribers(self, name, sender=None):
         return self.app.Subscribers.matching(event=name, user=sender)
