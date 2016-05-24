@@ -1,8 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
-from thorn.utils.functional import Q, groupbymax
+from thorn.utils.functional import Q, groupbymax, traverse_subscribers
 
-from thorn.tests.case import Case, Mock
+from thorn.tests.case import Case, Mock, patch
 
 
 class test_groupbymax(Case):
@@ -347,3 +347,15 @@ class test_Q(Case):
         self.assertFalse(
             Q(foo__baz__now_not_in={'PENDING', 'X', 'Y', 'Z'})(x1),
         )
+
+
+class test_traverse_subscribers(Case):
+
+    @patch('thorn.utils.functional.symbol_by_name')
+    def test_symbol_string(self, symbol_by_name):
+        symbol_by_name.return_value = 'http://e.com'
+        x = [1, 2, ['!some.where.symbol', 3, 4], 5, 6]
+        self.assertListEqual(list(traverse_subscribers(x)), [
+            1, 2, 5, 6, symbol_by_name.return_value, 3, 4
+        ])
+        symbol_by_name.assert_called_once_with('some.where.symbol')

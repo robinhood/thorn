@@ -31,6 +31,7 @@ class test_functional_webhook_model(RealSignalCase):
             instance=self.obj,
             data=self.obj.webhook_payload(),
             sender=self.obj.username,
+            context={'instance': self.obj.pk},
         )
 
     def test_on_create(self):
@@ -44,6 +45,7 @@ class test_functional_webhook_model(RealSignalCase):
             instance=obj,
             data=obj.webhook_payload(),
             sender=None,
+            context={'instance': obj.pk},
         )
 
     def test_on_delete(self):
@@ -51,11 +53,13 @@ class test_functional_webhook_model(RealSignalCase):
         Model = webhook_model(on_delete=on_delete)(self.Model)
         self.assertIs(Model.webhook_events.events['on_delete'], on_delete)
         on_delete.send = Mock(name='event.send')
+        obj_pk = self.obj.pk
         self.obj.delete()
         on_delete.send.assert_called_with(
             instance=self.obj,
             data=self.obj.webhook_payload(),
             sender=None,
+            context={'instance': obj_pk},
         )
 
     def test_on_custom_with_filter_dispatching_on_delete(self):
@@ -71,12 +75,14 @@ class test_functional_webhook_model(RealSignalCase):
         self.obj.delete()
         on_jerry_delete.send.assert_not_called()
 
+        jerry_pk = jerry.pk
         jerry.delete()
 
         on_jerry_delete.send.assert_called_with(
             instance=jerry,
             data=jerry.webhook_payload(),
             sender=None,
+            context={'instance': jerry_pk},
         )
 
     def test_on_change__does_not_dispatch_on_create(self):
@@ -94,6 +100,7 @@ class test_functional_webhook_model(RealSignalCase):
             instance=obj2,
             data=obj2.webhook_payload(),
             sender=None,
+            context={'instance': obj2.pk},
         )
         on_change.send.assert_not_called()
 

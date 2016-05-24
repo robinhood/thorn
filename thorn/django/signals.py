@@ -12,6 +12,8 @@ from operator import attrgetter
 
 from thorn.generic.signals import signal_dispatcher
 
+from .utils import serialize_model
+
 __all__ = [
     'dispatch_on_create',
     'dispatch_on_change',
@@ -68,6 +70,13 @@ class dispatch_on_m2m_change(signal_dispatcher):
 
     def prepare_sender(self, sender):
         return attrgetter(self.related_field)(sender).through
+
+    def context(self, instance, model, pk_set, **kwargs):
+        return {
+            'instance': instance.pk,
+            'model': serialize_model(model),
+            'pk_set': list(sorted(pk_set)),
+        }
 
     def on_m2m_change(self, sender, action, instance, model, **kwargs):
         try:

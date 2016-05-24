@@ -28,6 +28,7 @@
     thorn.django.rest_framework.urls
     thorn.django.rest_framework.views
     thorn.django.rest_framework.serializers
+    thorn.django.utils
     thorn.dispatch
     thorn.dispatch.base
     thorn.dispatch.disabled

@@ -37,7 +37,8 @@ class signal_dispatcher(object):
 
     def __call__(self, instance, **kwargs):
         if self.should_dispatch(instance, **kwargs):
-            return self.fun(instance, **kwargs)
+            return self.fun(
+                instance, context=self.context(instance, **kwargs))
 
     def connect(self, sender=None, weak=False, **kwargs):
         [self._connect_signal(signal, handler, sender, weak, **kwargs)
@@ -49,6 +50,9 @@ class signal_dispatcher(object):
             sender=self.prepare_sender(sender),
             weak=weak,
             **kwargs)
+
+    def context(self, instance, **kwargs):
+        return {'instance': instance.pk}
 
     def prepare_sender(self, sender):
         return sender

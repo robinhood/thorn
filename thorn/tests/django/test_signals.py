@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from thorn.django import signals
+from thorn.django.utils import serialize_model
 
 from thorn.tests.case import Mock, SignalCase
 
@@ -20,6 +21,9 @@ class SignalDispatcherCase(SignalCase):
         self.fun = Mock(name='fun')
         self.dispatch = self.dispatcher(self.fun, *self.dispatcher_args)
         self.instance = Mock(name='instance')
+        self.related_model = Mock(name='related_model')
+        self.related_model._meta.app_label = 'app_label'
+        self.related_model._meta.model_name = 'model_name'
 
 
 class test_dispatch_on_create(SignalDispatcherCase):
@@ -27,7 +31,10 @@ class test_dispatch_on_create(SignalDispatcherCase):
 
     def test_dispatch__when_created(self):
         self.dispatch(self.instance, raw=False, created=True)
-        self.fun.assert_called_with(self.instance, raw=False, created=True)
+        self.fun.assert_called_with(
+            self.instance,
+            context={'instance': self.instance.pk},
+        )
 
     def test_dispatch__when_not_created(self):
         self.dispatch(self.instance, raw=False, created=False)
@@ -53,7 +60,10 @@ class test_dispatch_on_change(SignalDispatcherCase):
 
     def test_dispatch__when_not_created(self):
         self.dispatch(self.instance, raw=False, created=False)
-        self.fun.assert_called_with(self.instance, raw=False, created=False)
+        self.fun.assert_called_with(
+            self.instance,
+            context={'instance': self.instance.pk},
+        )
 
     def test_dispatch__when_raw(self):
         self.dispatch(self.instance, raw=True, created=True)
@@ -100,8 +110,9 @@ class test_dispatch_on_delete(SignalDispatcherCase):
     dispatcher = signals.dispatch_on_delete
 
     def test_dispatch(self):
-        self.dispatch(self.instance, arg=1)
-        self.fun.assert_called_with(self.instance, arg=1)
+        self.dispatch(self.instance)
+        self.fun.assert_called_with(
+            self.instance, context={'instance': self.instance.pk})
 
     def test_connect(self):
         self.dispatch.connect(sender=self.Model)
@@ -115,8 +126,14 @@ class test_dispatch_on_m2m_change(SignalDispatcherCase):
     dispatcher_args = ('tags.sgat',)
 
     def test_dispatch(self):
-        self.dispatch(self.instance, arg=1)
-        self.fun.assert_called_with(self.instance, arg=1)
+        self.dispatch(
+            self.instance, pk_set={31, 123}, model=self.related_model,
+        )
+        self.fun.assert_called_with(self.instance, context={
+            'instance': self.instance.pk,
+            'model': serialize_model(self.related_model),
+            'pk_set': [31, 123],
+        })
 
     def test_connect(self):
         self.dispatch.connect(sender=self.Model)

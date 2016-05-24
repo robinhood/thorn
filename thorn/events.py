@@ -51,6 +51,8 @@ class Event(object):
         test for reserved internal networks, and not private networks
         with a public IP address.  You can block those using
         :class:`~thorn.validators.block_cidr_network`.
+    :keyword subscribers: Additional subscribers, as a list of URLs,
+        subscriber model objects, or callback functions returning these
 
         """
     app = None
@@ -58,7 +60,7 @@ class Event(object):
     def __init__(self, name,
                  timeout=None, dispatcher=None,
                  retry=None, retry_max=None, retry_delay=None, app=None,
-                 recipient_validators=None,
+                 recipient_validators=None, subscribers=None,
                  **kwargs):
         self.name = name
         self.timeout = timeout
@@ -67,6 +69,7 @@ class Event(object):
         self.retry_max = retry_max
         self.retry_delay = retry_delay
         self.recipient_validators = recipient_validators
+        self._subscribers = subscribers
         self.app = app_or_default(app or self.app)
 
     def send(self, data, sender=None,
@@ -91,6 +94,7 @@ class Event(object):
             if the request fails.  Takes two arguments:
             a :class:`~thorn.request.Request` argument, and
             the error exception instance.
+        :keyword context: Extra context to pass to subscriber callbacks
 
         """
         return self._send(
@@ -100,14 +104,17 @@ class Event(object):
         )
 
     def _send(self, data, sender=None,
-              on_success=None, on_error=None, timeout=None, on_timeout=None):
+              on_success=None, on_error=None,
+              timeout=None, on_timeout=None, context=None):
         timeout = timeout if timeout is not None else self.timeout
         return self.dispatcher.send(
             self.name, data, sender,
+            context=context,
             on_success=on_success, on_error=on_error,
             timeout=timeout, on_timeout=on_timeout, retry=self.retry,
             retry_max=self.retry_max, retry_delay=self.retry_delay,
             recipient_validators=self.recipient_validators,
+            extra_subscribers=self._subscribers,
         )
 
     def __repr__(self):
@@ -125,11 +132,18 @@ class Event(object):
             'retry': self.retry,
             'retry_max': self.retry_max,
             'retry_delay': self.retry_delay,
+            'subscribers': self._subscribers,
         }
 
     @property
     def subscribers(self):
-        return self.dispatcher.subscribers_for_event(self.name)
+        return self.dispatcher.subscribers_for_event(
+            self.name, extra_subscribers=self._subscribers,
+        )
+
+    @subscribers.setter
+    def subscribers(self, subscribers):
+        self._subscribers = subscribers
 
     @property
     def dispatcher(self):
@@ -220,11 +234,12 @@ class ModelEvent(Event):
             ref=self.reverse(instance, app=self.app) if self.reverse else None,
         ), sender=sender, **kwargs)
 
-    def send_from_instance(self, instance):
+    def send_from_instance(self, instance, context={}, **kwargs):
         return self.send(
             instance=instance,
             data=self.instance_data(instance),
             sender=self.instance_sender(instance),
+            context=context,
         )
 
     def to_message(self, data, sender=None, ref=None):
@@ -262,7 +277,7 @@ class ModelEvent(Event):
 
     def on_signal(self, instance, **kwargs):
         if self.should_dispatch(instance, **kwargs):
-            return self.send_from_instance(instance)
+            return self.send_from_instance(instance, **kwargs)
 
     def dispatches_on_create(self):
         return self._set_default_signal_dispatcher(

@@ -10,9 +10,13 @@ from __future__ import absolute_import, unicode_literals
 
 import operator
 
+from collections import Callable, deque
 from functools import partial
+from six import string_types
 
 from celery.utils import cached_property
+from celery.utils.functional import is_list, maybe_list
+from celery.utils.imports import symbol_by_name
 
 try:
     from django.db.models.query import Q as _Q_
@@ -63,6 +67,20 @@ def reverse_arguments(N):
             return fun(*reverse_n(N, args), **kwargs)
         return reversed
     return _inner
+
+
+def traverse_subscribers(it, *args, **kwargs):
+    stream = deque([it])
+    while stream:
+        for node in maybe_list(stream.popleft()):
+            if isinstance(node, string_types) and node.startswith('!'):
+                node = symbol_by_name(node[1:])
+            if isinstance(node, Callable):
+                node = node(*args, **kwargs)
+            if is_list(node):
+                stream.append(node)
+            else:
+                yield node
 
 
 def wrap_transition(op, did_change):

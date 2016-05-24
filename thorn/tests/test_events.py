@@ -20,9 +20,14 @@ class test_Event(EventCase):
     def test_subscribers(self):
         subscribers = self.event.subscribers
         self.dispatcher.subscribers_for_event.assert_called_with(
-            self.event.name,
+            self.event.name, extra_subscribers=None,
         )
         self.assertIs(subscribers, self.dispatcher.subscribers_for_event())
+
+    def test_subscribers__setter(self):
+        subs = [1, 2, 3]
+        self.event.subscribers = subs
+        self.assertIs(self.event._subscribers, subs)
 
     def test_repr(self):
         self.assertTrue(repr(self.event))
@@ -42,6 +47,7 @@ class test_Event(EventCase):
             timeout=3.34, on_timeout=on_timeout,
             retry=None, retry_delay=None, retry_max=None,
             recipient_validators=None,
+            context=None, extra_subscribers=None,
         )
 
     def test_dispatcher(self):
@@ -186,6 +192,7 @@ class test_ModelEvent(EventCase):
             instance=instance,
             data=instance.webhook_payload.return_value,
             sender=instance.x.y.z.account,
+            context={},
         )
 
     def test_on_signal__no_sender_field(self):
@@ -198,12 +205,12 @@ class test_ModelEvent(EventCase):
             instance=instance,
             data=instance.webhook_payload.return_value,
             sender=None,
+            context={},
         )
 
     def test_reduce(self):
         self.event._kwargs['dispatcher'] = None
         self.event.reverse._reverse = None
-        print(self.event.__reduce__())
         e2 = pickle.loads(pickle.dumps(self.event))
         self.assertEqual(e2.name, self.event.name)
         self.assertIs(e2.app, self.app)
