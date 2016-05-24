@@ -39,6 +39,7 @@ install:
   - "%PYTHON%/Scripts/pip.exe install -U setuptools"
   - "%PYTHON%/Scripts/pip.exe install -r requirements/test.txt"
   - "%PYTHON%/Scripts/pip.exe install -r requirements/default.txt"
+  - "%PYTHON%/Scripts/pip.exe install -r requirements/py2.txt"
 
 build: off
 
