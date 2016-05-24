@@ -6,7 +6,7 @@ from thorn.conf import MIME_JSON
 from thorn.exceptions import SecurityError
 from thorn.request import Request
 
-from .case import DEFAULT_RECIPIENT_VALIDATORS, EventCase, Mock, patch
+from .case import DEFAULT_RECIPIENT_VALIDATORS, EventCase, Mock, patch, skip
 
 
 class test_Request(EventCase):
@@ -173,4 +173,7 @@ class test_Request(EventCase):
 
     def test_repr(self):
         self.assertTrue(repr(self.req))
+
+    @skip.if_python3()
+    def test_repr__bytes_on_py2(self):
         self.assertIsInstance(repr(self.req), bytes)
