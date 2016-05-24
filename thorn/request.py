@@ -19,7 +19,7 @@ from vine import maybe_promise, promise
 from vine.abstract import Thenable, ThenableProxy
 
 from ._state import app_or_default
-from .utils.compat import restore_from_keys
+from .utils.compat import bytes_if_py2, restore_from_keys
 from .utils.log import get_logger
 from .validators import deserialize_validator, serialize_validator
 
@@ -28,6 +28,10 @@ __all__ = ['Request']
 DEFAULT_USER_AGENT = 'Mozilla/5.0 (compatible; thorn/{0}; {1})'.format(
     thorn.__version__, requests.utils.default_user_agent(),
 )
+
+REQUEST_REPR = """\
+<{0}: {1.event} -> {1.subscriber.url} sender={1.sender!r}>\
+"""
 
 logger = get_logger(__name__)
 
@@ -168,8 +172,14 @@ class Request(ThenableProxy):
             ),
         }
 
+    def headers_with_hmac(self, hmac):
+        return dict(self.headers, **{'Hook-HMAC': hmac})
+
     def _serialize_validators(self, validators):
         return [serialize_validator(v) for v in validators]
+
+    def __repr__(self):
+        return bytes_if_py2(REQUEST_REPR.format(type(self).__name__, self))
 
     def __reduce__(self):
         return restore_from_keys, (type(self), (), self.__reduce_keys__())
@@ -180,9 +190,6 @@ class Request(ThenableProxy):
             headers=self._headers,
             user_agent=self.user_agent,
         )
-
-    def headers_with_hmac(self, hmac):
-        return dict(self.headers, **{'Hook-HMAC': hmac})
 
     @cached_property
     def headers(self):

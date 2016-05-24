@@ -170,3 +170,7 @@ class test_Request(EventCase):
         self.req.subscriber = Subscriber()
         r2 = pickle.loads(pickle.dumps(self.req))
         self.assertIs(r2.app, self.app)
+
+    def test_repr(self):
+        self.assertTrue(repr(self.req))
+        self.assertIsInstance(repr(self.req), bytes)
