@@ -79,7 +79,7 @@ def traverse_subscribers(it, *args, **kwargs):
                 node = node(*args, **kwargs)
             if is_list(node):
                 stream.append(node)
-            else:
+            elif node:
                 yield node
 
 

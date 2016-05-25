@@ -359,3 +359,9 @@ class test_traverse_subscribers(Case):
             1, 2, 5, 6, symbol_by_name.return_value, 3, 4
         ])
         symbol_by_name.assert_called_once_with('some.where.symbol')
+
+    def test_none_items(self):
+        self.assertListEqual(
+            list(traverse_subscribers([None, [None], None])),
+            [],
+        )
