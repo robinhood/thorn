@@ -10,6 +10,8 @@ from __future__ import absolute_import, unicode_literals
 
 from operator import attrgetter
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from thorn.generic.signals import signal_dispatcher
 
 from .utils import serialize_model
@@ -43,7 +45,10 @@ class dispatch_on_change(signal_dispatcher):
 
     def on_pre_save(self, instance, sender, raw=False, **kwargs):
         if self.use_transitions and not raw and instance.pk:
-            instance._previous_version = sender.objects.get(pk=instance.pk)
+            try:
+                instance._previous_version = sender.objects.get(pk=instance.pk)
+            except ObjectDoesNotExist:
+                pass
 
     def should_dispatch(self, instance, created=False, raw=False, **kwargs):
         return not raw and not created

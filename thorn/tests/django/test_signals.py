@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from thorn.django import signals
 from thorn.django.utils import serialize_model
 
@@ -76,6 +78,16 @@ class test_dispatch_on_change(SignalDispatcherCase):
         self.dispatch.on_pre_save(instance, sender, raw=False)
         sender.objects.get.assert_called_once_with(pk=instance.pk)
         self.assertIs(instance._previous_version, sender.objects.get())
+
+    def test_on_pre_save__ObjectDoesNotExist(self):
+        self.dispatch.use_transitions = True
+        instance = Mock(Name='instance')
+        instance._previous_version = None
+        sender = Mock(name='sender')
+        sender.objects.get.side_effect = ObjectDoesNotExist()
+        self.dispatch.on_pre_save(instance, sender, raw=False)
+        sender.objects.get.assert_called_once_with(pk=instance.pk)
+        self.assertIsNone(instance._previous_version)
 
     def test_on_pre_save__disabled(self):
         self.dispatch.use_transitions = False
