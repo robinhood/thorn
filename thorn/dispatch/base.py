@@ -41,11 +41,13 @@ class Dispatcher(object):
         return {'timeout': self.timeout}
 
     def send(self, event, payload, sender,
-             context={}, extra_subscribers=[], **kwargs):
+             context=None, extra_subscribers=None, **kwargs):
         return barrier([
             self.dispatch_request(req) for req in self.prepare_requests(
                 event, payload, sender,
-                context=context, extra_subscribers=extra_subscribers, **kwargs
+                context=context or {},
+                extra_subscribers=extra_subscribers,
+                **kwargs
             )
         ])
 
@@ -53,7 +55,7 @@ class Dispatcher(object):
         return request.dispatch()
 
     def prepare_requests(self, event, payload, sender,
-                         timeout=None, context={}, extra_subscribers=[],
+                         timeout=None, context=None, extra_subscribers=None,
                          **kwargs):
         # holds a cache of the payload serialized by content-type,
         # built incrementally depending on what content-types are
@@ -85,7 +87,7 @@ class Dispatcher(object):
             return encode(data)
 
     def subscribers_for_event(self, name,
-                              sender=None, context={}, extra_subscribers=[]):
+                              sender=None, context={}, extra_subscribers=None):
         """Return a list of :class:`~thorn.django.models.Subscriber`
         subscribing to an event by name (optionally filtered by sender)."""
         return chain(*[
@@ -93,7 +95,8 @@ class Dispatcher(object):
             for source in chain(
                 self.subscriber_sources,
                 self._traverse_subscribers(
-                    extra_subscribers, name, sender=sender, **context))
+                    extra_subscribers or [], name,
+                    sender=sender, **context))
         ])
 
     def _traverse_subscribers(self, it, name, **context):
