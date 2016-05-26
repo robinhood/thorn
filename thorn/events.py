@@ -12,6 +12,8 @@ from operator import attrgetter
 from six import iteritems as items, iterkeys as keys
 from weakref import WeakSet
 
+from celery.utils import cached_property
+
 from ._state import app_or_default
 from .utils.compat import bytes_if_py2, restore_from_keys
 from .utils.functional import Q
@@ -56,6 +58,7 @@ class Event(object):
 
         """
     app = None
+    recipient_validators = None
 
     def __init__(self, name,
                  timeout=None, dispatcher=None,
@@ -68,7 +71,8 @@ class Event(object):
         self.retry = retry
         self.retry_max = retry_max
         self.retry_delay = retry_delay
-        self.recipient_validators = recipient_validators
+        if recipient_validators is not None:
+            self.recipient_validators = recipient_validators
         self._subscribers = subscribers
         self.app = app_or_default(app or self.app)
 
@@ -113,9 +117,12 @@ class Event(object):
             on_success=on_success, on_error=on_error,
             timeout=timeout, on_timeout=on_timeout, retry=self.retry,
             retry_max=self.retry_max, retry_delay=self.retry_delay,
-            recipient_validators=self.recipient_validators,
+            recipient_validators=self.prepared_recipient_validators,
             extra_subscribers=self._subscribers,
         )
+
+    def prepare_recipient_validators(self, validators):
+        return validators
 
     def __repr__(self):
         return bytes_if_py2("<{0}: {1} ({2:#x})>".format(
@@ -134,6 +141,10 @@ class Event(object):
             'retry_delay': self.retry_delay,
             'subscribers': self._subscribers,
         }
+
+    @cached_property
+    def prepared_recipient_validators(self):
+        return self.prepare_recipient_validators(self.recipient_validators)
 
     @property
     def subscribers(self):

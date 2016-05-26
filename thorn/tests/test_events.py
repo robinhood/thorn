@@ -24,6 +24,10 @@ class test_Event(EventCase):
         )
         self.assertIs(subscribers, self.dispatcher.subscribers_for_event())
 
+    def test_init__recipient_validators(self):
+        x = Event('x.y', recipient_validators=[1])
+        self.assertListEqual(x.recipient_validators, [1])
+
     def test_subscribers__setter(self):
         subs = [1, 2, 3]
         self.event.subscribers = subs
