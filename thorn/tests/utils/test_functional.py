@@ -209,6 +209,12 @@ class test_Q(Case):
         self.assertTrue(q3(x))
         self.assertFalse(q4(x))
 
+    def test_now_eq__no_previous_version(self):
+        class X(object):
+            foo = 1
+        q = Q(foo__now_eq=1)
+        self.assertTrue(q(X()))
+
     def test_now_eq(self):
         x1 = Mock(foo=Mock(bar=1, baz=2))
         x1._previous_version = Mock(foo=Mock(bar=0, baz=2))

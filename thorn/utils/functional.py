@@ -308,8 +308,16 @@ class Q(_Q_):
         # transition op  (e.g. now_eq) only matches if the
         # value differs from the previous version.
         return self.apply_op(
-            getter, op, rhs, obj, getter(obj._previous_version),
+            getter, op, rhs, obj, self._get_from_prev_version(getter, obj),
         )
+
+    def _get_from_prev_version(self, getter, obj):
+        try:
+            prev = obj._previous_version
+        except AttributeError:
+            pass
+        else:
+            return getter(prev)
 
     @property
     def gate(self):
