@@ -37,13 +37,15 @@ class test_Request(EventCase):
         self.assertEqual(x.user_agent, 'MyAgent')
         self.assertEqual(x.headers['User-Agent'], 'MyAgent')
 
+    def expected_headers(self, req):
+        return dict(req.headers, **{
+            'Hook-HMAC': req.sign_request(req.subscriber, req.data),
+        })
+
     def test_dispatch(self):
         session = Mock(name='session')
+        expected_headers = self.expected_headers(self.req)
         self.req.dispatch(session=session)
-        expected_headers = dict(self.req.headers, **{
-            'Hook-HMAC': self.req.sign_request(
-                self.req.subscriber, self.req.data)
-        })
         session.post.assert_called_with(
             url=self.req.subscriber.url,
             data=self.req.data,
@@ -55,12 +57,29 @@ class test_Request(EventCase):
         self.req.dispatch(session=session)
         self.assertIs(self.req.response, session.post())
         self.assertIs(self.req.value, session.post())
+        session.close.assert_not_called()
 
     def test_dispatch__cancelled(self):
         session = Mock(name='session')
         self.req.cancel()
         self.req.dispatch(session=session)
         session.post.assert_not_called()
+
+    def test_dispatch__keepalive_disabled(self):
+        self.req.allow_keepalive = False
+        session = Mock(name='session')
+        self.req.Session = Mock(name='req.Session')
+        expected_headers = self.expected_headers(self.req)
+        self.req.dispatch(session=session)
+        session.post.assert_not_called()
+        self.req.Session.assert_called_once_with()
+        self.req.Session().post.assert_called_with(
+            url=self.req.subscriber.url,
+            data=self.req.data,
+            headers=expected_headers,
+            timeout=self.req.timeout,
+        )
+        self.req.Session().close.assert_called_once_with()
 
     def test_dispatch__connection_error(self):
         session = Mock(name='session')
@@ -138,6 +157,7 @@ class test_Request(EventCase):
             'retry_delay': self.req.retry_delay,
             'retry_max': self.req.retry_max,
             'recipient_validators': DEFAULT_RECIPIENT_VALIDATORS,
+            'allow_keepalive': self.req.allow_keepalive,
         })
 
     def test_urlident(self):

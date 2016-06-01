@@ -43,12 +43,14 @@ class Dispatcher(object):
         return {'timeout': self.timeout}
 
     def send(self, event, payload, sender,
-             context=None, extra_subscribers=None, **kwargs):
+             context=None, extra_subscribers=None,
+             allow_keepalive=True, **kwargs):
         return barrier([
             self.dispatch_request(req) for req in self.prepare_requests(
                 event, payload, sender,
                 context=context or {},
                 extra_subscribers=extra_subscribers,
+                allow_keepalive=allow_keepalive,
                 **kwargs
             )
         ])
@@ -57,8 +59,8 @@ class Dispatcher(object):
         return request.dispatch()
 
     def prepare_requests(self, event, payload, sender,
-                         timeout=None, context=None, extra_subscribers=None,
-                         **kwargs):
+                         timeout=None, context=None,
+                         extra_subscribers=None, **kwargs):
         # holds a cache of the payload serialized by content-type,
         # built incrementally depending on what content-types are
         # required by the subscribers.
@@ -68,7 +70,8 @@ class Dispatcher(object):
             self.app.Request(
                 event,
                 self.encode_cached(payload, cache, subscriber.content_type),
-                sender, subscriber, timeout=timeout, **kwargs)
+                sender, subscriber,
+                timeout=timeout, **kwargs)
             for subscriber in self.subscribers_for_event(
                 event, sender, context, extra_subscribers)
         )

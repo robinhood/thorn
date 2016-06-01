@@ -57,16 +57,19 @@ class Event(object):
         subscriber model objects, or callback functions returning these
     :keyword request_data: Optional mapping of extra data to inject into
         event payloads,
+    :keyword allow_keepalive: Flag to disable HTTP connection keepalive
+        for this event only.  Keepalive is enabled by default.
 
     """
     app = None
+    allow_keepalive = True
     recipient_validators = None
 
     def __init__(self, name,
                  timeout=None, dispatcher=None,
                  retry=None, retry_max=None, retry_delay=None, app=None,
                  recipient_validators=None, subscribers=None,
-                 request_data=None,
+                 request_data=None, allow_keepalive=None,
                  **kwargs):
         self.name = name
         self.timeout = timeout
@@ -75,6 +78,8 @@ class Event(object):
         self.retry_max = retry_max
         self.retry_delay = retry_delay
         self.request_data = request_data
+        if allow_keepalive is not None:
+            self.allow_keepalive = allow_keepalive
         if recipient_validators is not None:
             self.recipient_validators = recipient_validators
         self._subscribers = subscribers
@@ -126,6 +131,7 @@ class Event(object):
             retry_max=self.retry_max, retry_delay=self.retry_delay,
             recipient_validators=self.prepared_recipient_validators,
             extra_subscribers=self._subscribers,
+            allow_keepalive=self.allow_keepalive,
         )
 
     def prepare_recipient_validators(self, validators):
@@ -147,6 +153,8 @@ class Event(object):
             'retry_max': self.retry_max,
             'retry_delay': self.retry_delay,
             'subscribers': self._subscribers,
+            'request_data': self.request_data,
+            'allow_keepalive': self.allow_keepalive,
         }
 
     @cached_property

@@ -54,6 +54,8 @@ class Request(ThenableProxy):
     :keyword headers: Additional HTTP headers to send with the request.
     :keyword user_agent: Set custom HTTP user agent.
     :keyword recipient_validators: List of serialized recipient validators.
+    :keyword allow_keepalive: Allow reusing session for this HTTP request.
+        Enabled by default.
 
     :keyword retry: Retry in the event of timeout/failure?
         Disabled by default.
@@ -85,7 +87,8 @@ class Request(ThenableProxy):
                  timeout=None, on_timeout=None,
                  retry=None, retry_max=None, retry_delay=None,
                  headers=None, user_agent=None, app=None,
-                 recipient_validators=None):
+                 recipient_validators=None,
+                 allow_keepalive=True):
         self.app = app_or_default(app or self.app)
         self.id = id or uuid()
         self.event = event
@@ -105,6 +108,7 @@ class Request(ThenableProxy):
             if retry_delay is None else retry_delay)
         if recipient_validators is None:
             recipient_validators = self.app.settings.THORN_RECIPIENT_VALIDATORS
+        self.allow_keepalive = allow_keepalive
         self._recipient_validators = recipient_validators
         self.response = None
         self._headers = headers
@@ -120,11 +124,12 @@ class Request(ThenableProxy):
     def sign_request(self, subscriber, data):
         return subscriber.sign(data)
 
-    def dispatch(self, session=None, propagate=False):
+    def dispatch(self, session=None, propagate=False, close_session=False):
         if self.cancelled:
             return
         self.validate_recipient(self.subscriber.url)
-        session = session if session is not None else self.Session()
+        if session is None or not self.allow_keepalive:
+            session, close_session = self.Session(), True
         try:
             self.response = session.post(
                 url=self.subscriber.url,
@@ -140,6 +145,9 @@ class Request(ThenableProxy):
             self.handle_connection_error(exc, propagate=propagate)
         else:
             self._p()
+        finally:
+            if close_session and session is not None:
+                session.close()
         return self
 
     def handle_timeout_error(self, exc, propagate=False):
@@ -170,6 +178,7 @@ class Request(ThenableProxy):
             'recipient_validators': self._serialize_validators(
                 self._recipient_validators,
             ),
+            'allow_keepalive': self.allow_keepalive,
         }
 
     def headers_with_hmac(self, hmac):

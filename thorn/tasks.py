@@ -8,12 +8,10 @@
 """
 from __future__ import absolute_import, unicode_literals
 
-import requests
-
 from celery import shared_task
 from celery.utils.functional import memoize
 
-from ._state import current_app
+from ._state import app_or_default
 
 __all__ = ['send_event', 'dispatch_requests', 'dispatch_request']
 
@@ -36,17 +34,18 @@ def send_event(event, payload, sender, timeout):
 
 
 @shared_task(ignore_result=True)
-def dispatch_requests(reqs):
+def dispatch_requests(reqs, app=None):
     """Process a batch of HTTP requests."""
-    session = requests.Session()
-    [dispatch_request(session=session, **req) for req in reqs]
+    app = app_or_default(app)
+    session = app.Request.Session()
+    [dispatch_request(session=session, app=app, **req) for req in reqs]
 
 
 @shared_task(bind=True, ignore_result=True)
 def dispatch_request(self, event, data, sender, subscriber,
-                     session=None, **kwargs):
+                     session=None, app=None, **kwargs):
     """Process a single HTTP request."""
-    app = current_app()
+    app = app_or_default(app)
     # the user is serialized as the pk, so we cannot pass it
     # directly to Subscriber, but we also don't need it at this point.
     subscriber.pop('user', None)

@@ -51,7 +51,7 @@ class test_Event(EventCase):
             timeout=3.34, on_timeout=on_timeout,
             retry=None, retry_delay=None, retry_max=None,
             recipient_validators=None,
-            context=None, extra_subscribers=None,
+            context=None, extra_subscribers=None, allow_keepalive=True,
         )
 
     def test_send__with_request_data(self):
@@ -63,7 +63,19 @@ class test_Event(EventCase):
             timeout=None, on_timeout=None,
             retry=None, retry_delay=None, retry_max=None,
             recipient_validators=None,
-            context=None, extra_subscribers=None,
+            context=None, extra_subscribers=None, allow_keepalive=True,
+        )
+
+    def test_send__with_disable_keepalive(self):
+        event = self.mock_event('x.y', allow_keepalive=False)
+        event.send({'foo': 'bar'})
+        self.dispatcher.send.assert_called_with(
+            event.name, {'foo': 'bar'}, None,
+            on_success=None, on_error=None,
+            timeout=None, on_timeout=None,
+            retry=None, retry_delay=None, retry_max=None,
+            recipient_validators=None,
+            context=None, extra_subscribers=None, allow_keepalive=False,
         )
 
     def test_dispatcher(self):
@@ -120,7 +132,7 @@ class test_ModelEvent(EventCase):
             timeout=None, on_timeout=None,
             retry=None, retry_delay=None, retry_max=None,
             recipient_validators=None,
-            context=None, extra_subscribers=None,
+            context=None, extra_subscribers=None, allow_keepalive=True,
         )
 
     def test_dispatches_on_create(self):
