@@ -35,6 +35,8 @@ classes = """
     Programming Language :: Python :: 3
     Programming Language :: Python :: 3.4
     Programming Language :: Python :: 3.5
+    Framework :: Django :: 1.8
+    Framework :: Django :: 1.9
     License :: OSI Approved :: BSD License
     Intended Audience :: Developers
     Operating System :: OS Independent
@@ -100,7 +102,7 @@ if not PY3:
 
 # -*- Tests Requires -*-
 
-tests_require = reqs('test.txt')
+tests_require = reqs('test.txt') + reqs('test_django.txt')
 
 # -*- Long Description -*-
 
