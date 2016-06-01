@@ -96,11 +96,12 @@ class EventCase(SignalCase):
         self.event = self.mock_event('george.costanza')
         super(EventCase, self).setUp()
 
-    def mock_event(self, name, dispatcher=None):
+    def mock_event(self, name, dispatcher=None, app=None, **kwargs):
         return self.Event(
             name,
             dispatcher=dispatcher or self.dispatcher,
-            app=self.app,
+            app=app or self.app,
+            **kwargs
         )
 
     def tearDown(self):

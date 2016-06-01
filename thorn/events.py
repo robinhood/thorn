@@ -55,8 +55,10 @@ class Event(object):
         :class:`~thorn.validators.block_cidr_network`.
     :keyword subscribers: Additional subscribers, as a list of URLs,
         subscriber model objects, or callback functions returning these
+    :keyword request_data: Optional mapping of extra data to inject into
+        event payloads,
 
-        """
+    """
     app = None
     recipient_validators = None
 
@@ -64,6 +66,7 @@ class Event(object):
                  timeout=None, dispatcher=None,
                  retry=None, retry_max=None, retry_delay=None, app=None,
                  recipient_validators=None, subscribers=None,
+                 request_data=None,
                  **kwargs):
         self.name = name
         self.timeout = timeout
@@ -71,6 +74,7 @@ class Event(object):
         self.retry = retry
         self.retry_max = retry_max
         self.retry_delay = retry_delay
+        self.request_data = request_data
         if recipient_validators is not None:
             self.recipient_validators = recipient_validators
         self._subscribers = subscribers
@@ -107,12 +111,15 @@ class Event(object):
             timeout=timeout, on_timeout=on_timeout,
         )
 
+    def prepare_payload(self, data):
+        return dict(self.request_data, **data) if self.request_data else data
+
     def _send(self, data, sender=None,
               on_success=None, on_error=None,
               timeout=None, on_timeout=None, context=None):
         timeout = timeout if timeout is not None else self.timeout
         return self.dispatcher.send(
-            self.name, data, sender,
+            self.name, self.prepare_payload(data), sender,
             context=context,
             on_success=on_success, on_error=on_error,
             timeout=timeout, on_timeout=on_timeout, retry=self.retry,

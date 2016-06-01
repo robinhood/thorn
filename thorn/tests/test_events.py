@@ -54,6 +54,18 @@ class test_Event(EventCase):
             context=None, extra_subscribers=None,
         )
 
+    def test_send__with_request_data(self):
+        event = self.mock_event('x.y', request_data={'agent': 'AGENT'})
+        event.send({'foo': 'bar'})
+        self.dispatcher.send.assert_called_with(
+            event.name, {'foo': 'bar', 'agent': 'AGENT'}, None,
+            on_success=None, on_error=None,
+            timeout=None, on_timeout=None,
+            retry=None, retry_delay=None, retry_max=None,
+            recipient_validators=None,
+            context=None, extra_subscribers=None,
+        )
+
     def test_dispatcher(self):
         event = Event('george.costanza', app=Mock(name='app'))
         self.assertIs(event.dispatcher, event.app.dispatcher)
@@ -85,6 +97,30 @@ class test_ModelEvent(EventCase):
                 'data': {'foo': 'bar'},
             },
             sender=sender,
+        )
+
+    def test_send__with_request_data(self):
+        event = self.mock_event('x.y', request_data={'agent': 'AGENT'})
+        event.reverse = None
+        instance = Mock(name='instance')
+        event.send(instance, {'foo': 'bar'}, sender=None)
+        self.dispatcher.send.assert_called_with(
+            event.name,
+            {
+                'ref': None,
+                'data': {
+                    'foo': 'bar',
+                },
+                'agent': 'AGENT',
+                'event': 'x.y',
+                'sender': None,
+            },
+            None,
+            on_success=None, on_error=None,
+            timeout=None, on_timeout=None,
+            retry=None, retry_delay=None, retry_max=None,
+            recipient_validators=None,
+            context=None, extra_subscribers=None,
         )
 
     def test_dispatches_on_create(self):
