@@ -118,7 +118,7 @@ class test_Dispatcher(ThornCase):
         self._app.Subscriber.from_dict = subscriber_from_dict
         self.assertListEqual(
             [dict(event='foo.bar', url='http://www.example.com/e/')],
-            self.dispatcher._configured_subscribers('foo.bar'),
+            list(self.dispatcher._configured_subscribers('foo.bar')),
         )
 
     def test_configured_subscribers__callback(self):
@@ -135,7 +135,7 @@ class test_Dispatcher(ThornCase):
              dict(event='foo.bar', url='http://a.com/2'),
              dict(event='foo.bar', url='http://b.com/1'),
              dict(event='foo.bar', url='http://b.com/2')],
-            self.dispatcher._configured_subscribers('foo.bar')
+            list(self.dispatcher._configured_subscribers('foo.bar')),
         )
 
     def test_configured_subscribers__string_list(self):
@@ -149,7 +149,7 @@ class test_Dispatcher(ThornCase):
         self.assertListEqual(
             [dict(event='foo.bar', url='http://www.example.com/e/a/'),
              dict(event='foo.bar', url='http://www.example.com/e/b/')],
-            self.dispatcher._configured_subscribers('foo.bar'),
+            list(self.dispatcher._configured_subscribers('foo.bar')),
         )
 
     def test_configured_subscribers__dict_scalar(self):
@@ -164,7 +164,7 @@ class test_Dispatcher(ThornCase):
             [dict(event='foo.bar',
                   url='http://www.example.com/e/',
                   content_type='application/x-www-form-urlencoded')],
-            self.dispatcher._configured_subscribers('foo.bar'),
+            list(self.dispatcher._configured_subscribers('foo.bar')),
         )
 
     def test_configured_subscribers__dict_list(self):
@@ -184,7 +184,7 @@ class test_Dispatcher(ThornCase):
              dict(event='foo.bar',
                   url='http://www.example.com/e/b/',
                   content_type='application/json')],
-            self.dispatcher._configured_subscribers('foo.bar'),
+            list(self.dispatcher._configured_subscribers('foo.bar')),
         )
 
     def test_reduce(self):

@@ -8,12 +8,14 @@
 """
 from __future__ import absolute_import, unicode_literals
 
+from functools import partial
 from itertools import chain
 
 from celery.utils.functional import maybe_list
 from vine import barrier
 
 from thorn._state import app_or_default
+from thorn.generic.models import AbstractSubscriber
 from thorn.utils.compat import restore_from_keys
 from thorn.utils.functional import traverse_subscribers
 
@@ -94,19 +96,20 @@ class Dispatcher(object):
             source(name, sender=sender, **context)
             for source in chain(
                 self.subscriber_sources,
-                self._traverse_subscribers(
-                    extra_subscribers or [], name,
-                    sender=sender, **context))
+                [partial(self._traverse_subscribers, extra_subscribers or [])],
+            )
         ])
 
+    def _maybe_subscriber(self, d, **kwargs):
+        return (self.app.Subscriber.from_dict(d, **kwargs)
+                if not isinstance(d, AbstractSubscriber) else d)
+
     def _traverse_subscribers(self, it, name, **context):
-        return traverse_subscribers(it, name, **context)
+        return (self._maybe_subscriber(d, event=name)
+                for d in traverse_subscribers(it, name, **context))
 
     def _configured_subscribers(self, name, **context):
-        return [
-            self.app.Subscriber.from_dict(d, event=name)
-            for d in self._configured_for_event(name,  **context)
-        ]
+        return self._configured_for_event(name, **context)
 
     def _configured_for_event(self, name, **context):
         return self._traverse_subscribers(
