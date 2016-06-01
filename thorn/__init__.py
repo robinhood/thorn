@@ -8,7 +8,7 @@ from .reverse import model_reverser
 from .utils.functional import Q
 
 
-VERSION = (1, 1, 0)
+VERSION = (1, 2, 0)
 __version__ = '.'.join(map(str, VERSION[0:3])) + ''.join(VERSION[3:])
 __author__ = 'Robinhood Markets'
 __contact__ = 'thorn@robinhood.com'

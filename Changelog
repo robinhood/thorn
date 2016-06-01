@@ -2,6 +2,51 @@
  Changelog
 ===========
 
+.. _version-1.2.0:
+
+1.2.0
+=====
+:release-date: 2016-06-01 03:11 P.M PDT
+:release-by: Ask Solem
+
+- Event: Adds ``request_data`` option.
+
+    This enables you to inject additional data into the webhook payload,
+    used for integration with quirky HTTP endpoints.
+
+- Event: Adds ``allow_keepalive`` option.
+
+    HTTP connections will not be reused for an event if this flag is set to
+    False.  Keepalive is enabled by default.
+
+- Event: Adds ``subscribers`` argument that can be used to add
+  default subscribers for the event.
+
+    This argument can hold the same values as the :setting:`THORN_SUBSCRIBERS`
+    setting.
+
+- Decorator: ``model.webhook_events`` is now a UserDict proxy
+    to ``model.webhook_events.events``.
+
+- Subscriber: :class:`thorn.generic.models.AbstractSubscribers` is a
+  new abstract interface for subscriber models.
+
+    This should be used if you want to check if an object is a subscriber
+    in :keyword:`isinstance` checks.
+
+- Q: ``now__*`` operators now properly handles the case when there's
+     no previous version of the object.
+
+- Django: :data:`django.db.models.signals.pre_save` signal handler
+  now ignores :exc:`~Adjango.core.exceptions.ObjectDoesNotExist` errors.
+
+- Events: Adds new ``prepare_recipient_validators`` method, enabling
+  subclasses to e.g. set default validators.
+
+- Windows: Unit test suite now passing on win32/win64.
+
+- Module ``thorn.models`` renamed to :mod:`thorn.generic.models`.
+
 .. _version-1.1.0:
 
 1.1.0

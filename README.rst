@@ -2,7 +2,7 @@
 
 |build-status| |coverage|
 
-:Version: 1.0.0
+:Version: 1.2.0
 :Web: http://thorn.readthedocs.io/
 :Download: http://pypi.python.org/pypi/thorn/
 :Source: http://github.com/robinhood/thorn/
@@ -180,7 +180,7 @@ Installing the stable version
 You can install thorn either via the Python Package Index (PyPI)
 or from source.
 
-To install using `pip`:
+To install using `pip`,:
 ::
 
     $ pip install -U thorn
