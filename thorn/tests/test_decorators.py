@@ -17,6 +17,13 @@ class test_functional_webhook_model(RealSignalCase):
     def teardown(self):
         self.Model.objects.all().delete()
 
+    def test_is_dict(self):
+        Model = webhook_model(on_change=ModelEvent('x.y'))(self.Model)
+        self.assertIs(
+            Model.webhook_events['on_change'],
+            Model.webhook_events.events['on_change'],
+        )
+
     def test_on_change(self):
         on_change = ModelEvent('x.change')
         Model = webhook_model(
