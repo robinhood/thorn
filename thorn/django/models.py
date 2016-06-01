@@ -17,7 +17,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from thorn.conf import event_choices, MIME_JSON, MIME_URLFORM
-from thorn.generic.models import SubscriberModelMixin
+from thorn.generic.models import AbstractSubscriber, SubscriberModelMixin
 from thorn.utils.compat import random_secret
 
 from .managers import SubscriberManager
@@ -40,10 +40,9 @@ def random_secret64():
     return random_secret(64)
 
 
+@AbstractSubscriber.register
 @python_2_unicode_compatible
 class Subscriber(models.Model, SubscriberModelMixin):
-    user_id_field = 'pk'
-
     objects = SubscriberManager()
 
     uuid = models.UUIDField(
@@ -58,6 +57,13 @@ class Subscriber(models.Model, SubscriberModelMixin):
         choices=event_choices(),
         db_index=True,
         help_text=_('Name of event to connect with'),
+    )
+
+    url = models.URLField(
+        _('URL'),
+        max_length=CHAR_MAX_LENGTH,
+        db_index=True,
+        help_text=_('Callback URL'),
     )
 
     user = models.ForeignKey(
@@ -84,13 +90,6 @@ class Subscriber(models.Model, SubscriberModelMixin):
         help_text=_('Specify HMAC digest type (use sha256 if uncertain)'),
     )
 
-    url = models.URLField(
-        _('URL'),
-        max_length=CHAR_MAX_LENGTH,
-        db_index=True,
-        help_text=_('Callback URL'),
-    )
-
     content_type = models.CharField(
         _('content type'),
         max_length=CHAR_MAX_LENGTH,
@@ -113,6 +112,9 @@ class Subscriber(models.Model, SubscriberModelMixin):
         ordering = ['url', '-created_at']
         get_latest_by = 'updated_at'
         unique_together = ('url', 'event')
+
+    def user_ident(self):
+        return self.user and self.user.pk
 
     def __str__(self):
         return '{0} -> {1}'.format(
