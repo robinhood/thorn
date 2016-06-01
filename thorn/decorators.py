@@ -11,9 +11,10 @@ from __future__ import absolute_import, unicode_literals
 from itertools import chain
 
 from six import iteritems as items, itervalues as values
+from six.moves import UserDict
 
 
-class webhook_model(object):
+class webhook_model(UserDict):
     """Decorates models to send webhooks based changes to that model.
 
     :keyword on_create: Event to dispatch whenever an instance of
@@ -118,3 +119,8 @@ class webhook_model(object):
         [event.connect_model(model) for event in values(self.events) if event]
         model.webhook_events = self
         return model
+
+    @property
+    def data(self):
+        # for UserDict
+        return self.events
