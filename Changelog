@@ -6,7 +6,7 @@
 
 1.2.0
 =====
-:release-date: 2016-06-01 03:11 P.M PDT
+:release-date: 2016-06-02 01:00 P.M PDT
 :release-by: Ask Solem
 
 - Event: Adds ``request_data`` option.
