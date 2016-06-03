@@ -185,7 +185,7 @@ from a subscription by unique identifier:
 
     $ curl -X DELETE                                    \
     > -H "Content-Type: application/json"               \
-    > http://example.com/hooks/c91fe938-55fb-4190-a5ed-bd92f5ea8339
+    > http://example.com/hooks/c91fe938-55fb-4190-a5ed-bd92f5ea8339/
 
 .. _django-example-consumer:
 
