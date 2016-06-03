@@ -161,8 +161,7 @@ Returns the response:
 
 .. code-block:: json
 
-    {"previous": null,
-     "results": [
+    [
         {"id": "c91fe938-55fb-4190-a5ed-bd92f5ea8339",
          "url": "http:\/\/e.com\/h/article?u=1",
          "created_at": "2016-01-15T23:12:52.205785Z",
@@ -170,8 +169,7 @@ Returns the response:
          "user": 1,
          "content_type": "application\/json",
          "event": "article.*"}
-     ],
-     "next": null}
+    ]
 
 .. _django-rest-framework-unsubscribe:
 
