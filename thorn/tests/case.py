@@ -7,7 +7,7 @@ from celery import Celery, current_app
 from django.db.models import signals
 
 from thorn import Thorn
-from thorn.events import Event
+from thorn.events import Event, ModelEvent
 from thorn import _state
 
 from nose import SkipTest
@@ -88,6 +88,7 @@ class SignalCase(ThornCase):
 class EventCase(SignalCase):
     Dispatcher = Mock
     Event = Event
+    ModelEvent = ModelEvent
 
     def setUp(self):
         self._prev_app = current_app._get_current_object()
@@ -98,6 +99,14 @@ class EventCase(SignalCase):
 
     def mock_event(self, name, dispatcher=None, app=None, **kwargs):
         return self.Event(
+            name,
+            dispatcher=dispatcher or self.dispatcher,
+            app=app or self.app,
+            **kwargs
+        )
+
+    def mock_modelevent(self, name, dispatcher=None, app=None, **kwargs):
+        return self.ModelEvent(
             name,
             dispatcher=dispatcher or self.dispatcher,
             app=app or self.app,

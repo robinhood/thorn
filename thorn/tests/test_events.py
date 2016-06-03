@@ -102,6 +102,7 @@ class test_ModelEvent(EventCase):
             args=[], kwargs={'uuid': instance.uuid},
         )
         self.event._send.assert_called_with(
+            self.event.name,
             {
                 'event': self.event.name,
                 'sender': sender.get_username(),
@@ -125,6 +126,29 @@ class test_ModelEvent(EventCase):
                 },
                 'agent': 'AGENT',
                 'event': 'x.y',
+                'sender': None,
+            },
+            None,
+            on_success=None, on_error=None,
+            timeout=None, on_timeout=None,
+            retry=None, retry_delay=None, retry_max=None,
+            recipient_validators=None,
+            context=None, extra_subscribers=None, allow_keepalive=True,
+        )
+
+    def test_send__with_format_name(self):
+        event = self.mock_modelevent('created.{.occasion}')
+        event.reverse = None
+        instance = Mock(occasion='festivus')
+        event.send(instance, {'foo': 'bar'}, sender=None)
+        self.dispatcher.send.assert_called_with(
+            'created.festivus',
+            {
+                'ref': None,
+                'data': {
+                    'foo': 'bar',
+                },
+                'event': 'created.festivus',
                 'sender': None,
             },
             None,

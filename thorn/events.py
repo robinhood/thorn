@@ -111,7 +111,7 @@ class Event(object):
 
         """
         return self._send(
-            data,
+            self.name, data,
             sender=sender, on_success=on_success, on_error=on_error,
             timeout=timeout, on_timeout=on_timeout,
         )
@@ -119,12 +119,12 @@ class Event(object):
     def prepare_payload(self, data):
         return dict(self.request_data, **data) if self.request_data else data
 
-    def _send(self, data, sender=None,
+    def _send(self, name, data, sender=None,
               on_success=None, on_error=None,
               timeout=None, on_timeout=None, context=None):
         timeout = timeout if timeout is not None else self.timeout
         return self.dispatcher.send(
-            self.name, self.prepare_payload(data), sender,
+            name, self.prepare_payload(data), sender,
             context=context,
             on_success=on_success, on_error=on_error,
             timeout=timeout, on_timeout=on_timeout, retry=self.retry,
@@ -246,6 +246,12 @@ class ModelEvent(Event):
         self.sender_field = sender_field
         self.signal_dispatcher = signal_dispatcher
 
+    def _get_name(self, instance):
+        """
+        Interpolates the event name with attributes from the instance.
+        """
+        return self.name.format(instance)
+
     def send(self, instance, data=None, sender=None, **kwargs):
         """Send event for model ``instance``.
 
@@ -254,8 +260,10 @@ class ModelEvent(Event):
         See :meth:`Event.send` for more arguments supported.
 
         """
-        return self._send(self.to_message(
+        name = self._get_name(instance)
+        return self._send(name, self.to_message(
             data,
+            instance=instance,
             sender=sender,
             ref=self.reverse(instance, app=self.app) if self.reverse else None,
         ), sender=sender, **kwargs)
@@ -268,9 +276,10 @@ class ModelEvent(Event):
             context=context,
         )
 
-    def to_message(self, data, sender=None, ref=None):
+    def to_message(self, data, instance=None, sender=None, ref=None):
+        name = self._get_name(instance)
         return {
-            'event': self.name,
+            'event': name,
             'ref': ref,
             'sender': sender.get_username() if sender else sender,
             'data': data or {},
