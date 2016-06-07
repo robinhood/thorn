@@ -2,7 +2,7 @@
 
 |build-status| |coverage|
 
-:Version: 1.2.0
+:Version: 1.2.1
 :Web: http://thorn.readthedocs.io/
 :Download: http://pypi.python.org/pypi/thorn/
 :Source: http://github.com/robinhood/thorn/
