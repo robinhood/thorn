@@ -23,14 +23,15 @@ def _worker_dispatcher():
 
 
 @shared_task(ignore_result=True)
-def send_event(event, payload, sender, timeout):
+def send_event(event, payload, sender, timeout, context={}):
     """Task called by process dispatching the event.
 
     This will use the WorkerDispatcher to dispatch the individual
     HTTP requests in batches (``dispatch_requests -> dispatch_request``).
 
     """
-    _worker_dispatcher().send(event, payload, sender, timeout=timeout)
+    _worker_dispatcher().send(
+        event, payload, sender, timeout=timeout, context=context)
 
 
 @shared_task(ignore_result=True)

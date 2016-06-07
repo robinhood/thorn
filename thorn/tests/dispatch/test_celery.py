@@ -12,9 +12,11 @@ class test_Dispatcher(Case):
         event = Mock(name='event')
         payload = Mock(name='payload')
         user = Mock(name='user')
-        res = Dispatcher().send(event, payload, user, timeout=3.03, kw=9)
+        context = {'instance': 9}
+        res = Dispatcher().send(
+            event, payload, user, timeout=3.03, kw=9, context=context)
         send_event.s.assert_called_once_with(
-            event, payload, user.pk, 3.03,
+            event, payload, user.pk, 3.03, context,
         )
         send_event.s().apply_async.assert_called_once_with()
         self.assertIs(res, send_event.s().apply_async())

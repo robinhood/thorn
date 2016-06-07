@@ -66,6 +66,7 @@ class Dispatcher(object):
         # required by the subscribers.
         cache = {}
         timeout = timeout if timeout is not None else self.timeout
+        context = context or {}
         return (
             self.app.Request(
                 event,

@@ -18,9 +18,10 @@ class test_send_event(EventCase):
     @patch('thorn.tasks._worker_dispatcher')
     def test_sends_event(self, _worker_dispatcher):
         _worker_dispatcher.return_value = self.dispatcher
-        send_event(self.event.name, 'foobar', 501, 3.03)
+        send_event(self.event.name, 'foobar', 501, 3.03, {'instance': 9})
         self.dispatcher.send.assert_called_with(
-            self.event.name, 'foobar', 501, timeout=3.03,
+            self.event.name, 'foobar', 501,
+            timeout=3.03, context={'instance': 9},
         )
 
 

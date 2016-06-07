@@ -27,17 +27,19 @@ class Dispatcher(base.Dispatcher):
 
     """
 
-    def send(self, event, payload, sender, timeout=None, **kwargs):
+    def send(self, event, payload, sender,
+             timeout=None, context=None, **kwargs):
         return send_event.s(
             event, payload,
-            sender.pk if sender else sender, timeout,
+            sender.pk if sender else sender, timeout, context,
         ).apply_async()
 
 
 class WorkerDispatcher(base.Dispatcher):
     """Dispatcher used by the :func:`thorn.tasks.send_event` task."""
 
-    def send(self, event, payload, sender, timeout=None, **kwargs):
+    def send(self, event, payload, sender,
+             timeout=None, context=None, **kwargs):
         # the requests are sorted by url, so we group them into chunks
         # each containing a list of requests for that host/port/scheme pair,
         # with up to :setting:`THORN_CHUNKSIZE` requests each.
@@ -47,7 +49,8 @@ class WorkerDispatcher(base.Dispatcher):
         return group(
             dispatch_requests.s([req.as_dict() for req in chunk])
             for chunk in self.group_requests(
-                self.prepare_requests(event, payload, sender, timeout))
+                self.prepare_requests(
+                    event, payload, sender, timeout, context))
         ).delay()
 
     def group_requests(self, requests):
