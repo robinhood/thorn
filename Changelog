@@ -2,6 +2,15 @@
  Changelog
 ===========
 
+.. _version-1.2.1:
+
+1.2.1
+=====
+:release-date: 2016-06-06 06:30 P.M PDT
+:release-by: Ask Solem
+
+- Celery: Forward event signal context to the tasks.
+
 .. _version-1.2.0:
 
 1.2.0
