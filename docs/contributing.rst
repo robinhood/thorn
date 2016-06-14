@@ -199,7 +199,7 @@ spelling or other errors on the website/docs/code.
 
     A) If the error is from a Python traceback, include it in the bug report.
 
-    B) We also need to know what platform you're running (Windows, OS X, Linux,
+    B) We also need to know what platform you're running (Windows, macOS, Linux,
        etc.), the version of your Python interpreter, and the version of Thorn,
        and related packages that you were running when the bug occurred.
 
