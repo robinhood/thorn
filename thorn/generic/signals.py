@@ -17,10 +17,10 @@ __all__ = ['signal_dispatcher']
 
 class signal_dispatcher(object):
     signals = None
-    use_transitions = False
 
-    def __init__(self, fun, **kwargs):
+    def __init__(self, fun, use_transitions=False, **kwargs):
         self.fun = fun
+        self.use_transitions = use_transitions
         self.signals = self.load_signals(self.setup_signals())
 
     def setup_signals(self):
