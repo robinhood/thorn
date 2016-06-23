@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from thorn.utils import hmac
+from thorn.utils.compat import bytes_if_py3
 
 from thorn.tests.case import Case, DigestCase, patch
 
@@ -23,7 +24,9 @@ class test_sign(DigestCase):
                   digest="sha1", key="KEY", msg="MSG"):
         ret = hmac.sign(digest, key, msg)
         hmac_new.assert_called_with(
-            key, msg, digestmod=hmac.get_digest(digest))
+            bytes_if_py3(key), bytes_if_py3(msg),
+            digestmod=hmac.get_digest(digest),
+        )
         hmac_new().digest.assert_called_with()
         b64encode.assert_called_with(hmac_new().digest())
         self.assertIs(ret, b64encode())
