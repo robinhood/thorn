@@ -8,9 +8,9 @@ from json import loads
 from six import text_type
 from uuid import uuid4
 
-from thorn.utils.json import JsonEncoder, dumps, get_best_json
+from thorn.utils.json import dumps, get_best_json
 
-from thorn.tests.case import Case, Mock, patch
+from thorn.tests.case import Case, Mock, mock, patch
 
 
 class test_JsonEncoder(Case):
@@ -51,20 +51,34 @@ class test_JsonEncoder(Case):
 
 class test_dumps(Case):
 
-    def test_dumps(self):
-        obj = Mock(name='obj')
-        encode = Mock(name='encode')
-        self.assertIs(dumps(obj, encode=encode), encode.return_value)
-        encode.assert_called_with(obj, cls=JsonEncoder)
+    @mock.mask_modules('simplejson')
+    def test_A_simplejson(self):
+        with mock.reset_modules('thorn.utils.json'):
+            from thorn.utils import json
+            obj = Mock(name='obj')
+            encode = Mock(name='encode')
+            self.assertIs(json.dumps(obj, encode=encode), encode.return_value)
+            encode.assert_called_with(obj, cls=json.JsonEncoder)
+
+    @mock.module('simplejson')
+    def test_B_simplejson(self, _simplejson):
+        with mock.reset_modules('thorn.utils.json'):
+            from thorn.utils import json
+            obj = Mock(name='obj')
+            encode = Mock(name='encode')
+            self.assertIs(json.dumps(obj, encode=encode), encode.return_value)
+            encode.assert_called_with(
+                obj, cls=json.JsonEncoder, use_decimal=False)
 
 
 class test_get_best_json(Case):
 
     @patch('thorn.utils.json.symbol_by_name')
     def test_no_alternatives(self, symbol_by_name):
+        from thorn.utils import json
         symbol_by_name.side_effect = ImportError()
         with self.assertRaises(ImportError):
-            get_best_json()
+            json.get_best_json()
 
     def test_no_choices(self):
         get_best_json(choices=[])

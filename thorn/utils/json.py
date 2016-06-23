@@ -24,21 +24,24 @@ except ImportError:  # pragma: no cover
 
 __all__ = ['JsonEncoder', 'dumps']
 
+_JSON_EXTRA_ARGS = {
+    'simplejson': {'use_decimal': False},
+}
+
 
 def get_best_json(attr=None,
-                  choices=['kombu.utils.json', 'simplejson', 'json']):
+                  choices=['simplejson', 'json']):
     for i, module in enumerate(choices):
         try:
-            return symbol_by_name(
-                ':'.join([module, attr]) if attr else module
-            )
+            sym = ':'.join([module, attr]) if attr else module
+            return symbol_by_name(sym), _JSON_EXTRA_ARGS.get(module, {})
         except (AttributeError, ImportError):
             if i + 1 >= len(choices):
                 raise
-json = get_best_json()
+json, _json_args = get_best_json()
 
 
-class JsonEncoder(get_best_json('JSONEncoder')):
+class JsonEncoder(get_best_json('JSONEncoder')[0]):
     # like django.core.serializers.json.JSONEncoder but preserves
     # datetime microsecond information.
 
@@ -65,4 +68,4 @@ class JsonEncoder(get_best_json('JSONEncoder')):
 
 
 def dumps(obj, encode=json.dumps, cls=JsonEncoder):
-    return encode(obj, cls=cls)
+    return encode(obj, cls=cls, **_json_args)
