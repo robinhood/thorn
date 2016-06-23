@@ -37,6 +37,7 @@
     thorn.generic.signals
     thorn.utils.compat
     thorn.utils.functional
+    thorn.utils.hmac
     thorn.utils.json
     thorn.utils.log
     thorn.funtests.base
