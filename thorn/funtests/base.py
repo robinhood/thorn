@@ -9,7 +9,6 @@
 """
 from __future__ import absolute_import, unicode_literals
 
-import hashlib
 import json
 import requests
 
@@ -21,9 +20,9 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 
 from cyanide.suite import Suite, testcase
-from itsdangerous import Signer
 
 from thorn.django.models import Subscriber
+from thorn.utils import hmac
 
 from testapp.models import Article, SubscriberLog, Tag
 
@@ -96,10 +95,7 @@ class WebhookSuite(Suite):
             hmac_secret = sub['hmac_secret']
             if hmac_secret:
                 log = SubscriberLog.objects.filter(ref=ref or self.ref)[0]
-                assert Signer(
-                    hmac_secret,
-                    digest_method=hashlib.sha256).get_signature(
-                        log.data) == log.hmac
+                assert hmac.verify(log.hmac, 'sha256', hmac_secret, log.data)
         self.assert_log_matches(
             logs[0],
             event=event,

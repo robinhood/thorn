@@ -18,7 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from thorn.conf import event_choices, MIME_JSON, MIME_URLFORM
 from thorn.generic.models import AbstractSubscriber, SubscriberModelMixin
-from thorn.utils.compat import random_secret
+from thorn.utils.hmac import random_secret
 
 from .managers import SubscriberManager
 

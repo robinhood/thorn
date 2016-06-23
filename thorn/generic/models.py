@@ -8,20 +8,14 @@
 """
 from __future__ import absolute_import, unicode_literals
 
-import hashlib
-
 from abc import ABCMeta, abstractmethod, abstractproperty
 from six import string_types
 
 from celery.five import with_metaclass
-from itsdangerous import Signer
 
-__all__ = ['AbstractSubscriber', 'SubscriberModelMixin', 'get_digest']
+from thorn.utils import hmac
 
-
-def get_digest(d):
-    assert d in hashlib.algorithms_available
-    return getattr(hashlib, d)
+__all__ = ['AbstractSubscriber', 'SubscriberModelMixin']
 
 
 @with_metaclass(ABCMeta)
@@ -103,6 +97,4 @@ class SubscriberModelMixin(object):
         }
 
     def sign(self, message):
-        return Signer(
-            self.hmac_secret,
-            digest_method=get_digest(self.hmac_digest)).get_signature(message)
+        return hmac.sign(self.hmac_digest, message, self.hmac_secret)

@@ -116,3 +116,10 @@ class EventCase(SignalCase):
     def tearDown(self):
         self._prev_app.set_current()
         super(EventCase, self).tearDown()
+
+
+class DigestCase(Case):
+
+    def setup(self):
+        self.hashlib = self.patch('thorn.utils.hmac.hashlib')
+        self.hashlib.algorithms_available = ['sha1']

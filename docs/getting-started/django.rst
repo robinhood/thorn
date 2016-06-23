@@ -196,7 +196,10 @@ This is an example Django webhook receiver view, using the json content type:
 
     from __future__ import absolute_import, unicode_literals
 
+    import hmac
+    import base64
     import json
+    import hashlib
 
     from itsdangerous import URLSafeSerializer
 
@@ -205,15 +208,86 @@ This is an example Django webhook receiver view, using the json content type:
     from django.views.decorators.csrf import csrf_exempt
 
     ARTICLE_SECRET = 'C=JTX)v3~dQCl];[_h[{q{CScm]oglLoe&>ga:>R~jR$.x?t|kW!FH:s@|4bu:11'
+    ARTICLE_DIGEST_TYPE = 'sha256'
+
+    def verify_webhook(secret, hmac_header, digest_method, message):
+        digestmod = getattr(hashlib, digest_method)
+        signed = base64.b64encode(
+            hmac.new(secret, message, digestmod).digest(),
+        ).strip()
+        return hmac.compare_digest(signed, hmac_header)
 
     @require_POST()
     @csrf_exempt()
     def handle_article_changed(request):
-        payload = URLSafeSerializer(ARTICLE_SECRET).loads(request.body)
-        print('Article changed: {0[ref]}'.format(payload)
-        return HttpResponse(status=200)
-
+        digest = request.META.get('HTTP_HOOK_HMAC')
+        digest_type = request.META.get('')
+        body = request.body
+        if verify_webhook(ARTICLE_SECRET, digest, ARTICLE_DIGEST_TYPE, body):
+            payload = json.loads(body)
+            print('Article changed: {0[ref]}'.format(payload)
+            return HttpResponse(status=200)
 
 Using the :func:`~django.views.decorators.csrf.csrf_exempt` is important here,
 as by default Django will refuse POST requests that do not specify the CSRF
 protection token.
+
+
+Verify HMAC Ruby
+================
+
+This example is derived from Shopify's great examples found here:
+https://help.shopify.com/api/tutorials/webhooks#verify-webhook
+
+.. code-block:: ruby
+
+    require 'rubygems'
+    require 'base64'
+    require 'openssl'
+    require 'sinatra'
+
+    ARTICLE_SECRET = 'C=JTX)v3~dQCl];[_h[{q{CScm]oglLoe&>ga:>R~jR$.x?t|kW!FH:s@|4bu:11'
+
+    helpers do
+
+        def verify_webhook(secret, data, hmac_header):
+            digest = OpenSSL::Digest::Digest.new('sha256')
+            calculated_hmac = Base64.encode64(OpenSSL:HMAC.digest(
+                digest, secret, data)).strip
+            return calculated_hmac == hmac_header
+        end
+    end
+
+    post '/' do
+        request.body.rewind
+        data = request.body.read
+        if verify_webhook(ARTICLE_SECRET, env["HTTP_HOOK_HMAC"])
+            # deserialize data' using json and process webhook
+        end
+    end
+
+Verify HMAC PHP
+===============
+
+This example is derived from Shopify's great examples found here:
+https://help.shopify.com/api/tutorials/webhooks#verify-webhook
+
+.. code-block:: php
+
+    <?php
+
+    define('ARTICLE_SECRET', 'C=JTX)v3~dQCl];[_h[{q{CScm]oglLoe&>ga:>R~jR$.x?t|kW!FH:s@|4bu:11')
+
+    function verify_webhook($data, $hmac_header)
+    {
+        $calculated_hmac = base64_encode(hash_hmac('sha256', $data,
+            ARTICLE_SECRET, true));
+        return ($hmac_header == $calculated_hmac);
+    }
+
+    $hmac_header = $_SERVER['HTTP_HOOK_HMAC'];
+    $data = file_get_contents('php://input');
+    $verified = verify_webhook($data, $hmac_header);
+
+    ?>
+

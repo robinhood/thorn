@@ -1,37 +1,17 @@
 from __future__ import absolute_import, unicode_literals
 
-from thorn.generic.models import SubscriberModelMixin, get_digest
+from thorn.generic.models import SubscriberModelMixin
 
-from thorn.tests.case import Case, Mock, patch
-
-
-class DigestCase(Case):
-
-    def setup(self):
-        self.hashlib = self.patch('thorn.generic.models.hashlib')
-        self.hashlib.algorithms_available = ['sha1']
-
-
-class test_get_digest(DigestCase):
-
-    def test_get_digest(self):
-        self.assertIs(get_digest('sha1'), self.hashlib.sha1)
-
-    def test_get_digest__algorithm_unavailable(self):
-        with self.assertRaises(AssertionError):
-            get_digest('sha256')
+from thorn.tests.case import DigestCase, Mock, patch
 
 
 class test_SubscriberModelMixin(DigestCase):
 
-    @patch('thorn.generic.models.Signer')
-    def test_sign(self, Signer):
+    @patch('thorn.utils.hmac.sign')
+    def test_sign(self, sign, message='thequickbrownfox'):
         x = SubscriberModelMixin()
         x.hmac_secret = Mock(name='hmac_secret')
         x.hmac_digest = 'sha1'
-        res = x.sign('thequickbrownfox')
-        Signer.assert_called_with(
-            x.hmac_secret, digest_method=self.hashlib.sha1,
-        )
-        Signer().get_signature.assert_called_with('thequickbrownfox')
-        self.assertIs(res, Signer().get_signature())
+        res = x.sign(message)
+        sign.assert_called_with(x.hmac_digest, message, x.hmac_secret)
+        self.assertIs(res, sign())
