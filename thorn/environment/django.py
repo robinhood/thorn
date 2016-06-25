@@ -33,7 +33,8 @@ class DjangoEnv(object):
 
     @cached_property
     def Subscriber(self):
-        return symbol_by_name(self.subscriber_cls)
+        return symbol_by_name(
+            self.config.THORN_SUBSCRIBER_MODEL or self.subscriber_cls)
 
     @cached_property
     def Subscribers(self):

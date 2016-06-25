@@ -27,15 +27,17 @@ class test_DjangoEnv(Case):
         self.symbol_by_name.assert_called_once_with(self.env.settings_cls)
 
     def test_Subscriber(self):
+        self.env.config.THORN_SUBSCRIBER_MODEL = None
         self.assertIs(self.env.Subscriber, self.symbol_by_name.return_value)
-        self.symbol_by_name.assert_called_once_with(self.env.subscriber_cls)
+        self.symbol_by_name.assert_called_with(self.env.subscriber_cls)
 
     def test_Subscribers(self):
+        self.env.config.THORN_SUBSCRIBER_MODEL = None
         self.assertIs(
             self.env.Subscribers,
             self.symbol_by_name.return_value.objects,
         )
-        self.symbol_by_name.assert_called_once_with(self.env.subscriber_cls)
+        self.symbol_by_name.assert_called_with(self.env.subscriber_cls)
 
     @patch('importlib.import_module')
     def test_signals(self, import_module):

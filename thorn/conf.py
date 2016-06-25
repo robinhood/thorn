@@ -59,9 +59,11 @@ class Settings(object):
 
     @cached_property
     def THORN_SUBSCRIBERS(self):
-        return (
-            getattr(self.app.config, 'THORN_SUBSCRIBERS', None) or {}
-        )
+        return getattr(self.app.config, 'THORN_SUBSCRIBERS', None) or {}
+
+    @cached_property
+    def THORN_SUBSCRIBER_MODEL(self):
+        return getattr(self.app.config, 'THORN_SUBCRIBER_MODEL', None)
 
     @cached_property
     def THORN_DISPATCHER(self):
