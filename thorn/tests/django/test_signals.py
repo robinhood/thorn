@@ -8,6 +8,29 @@ from thorn.django.utils import serialize_model
 from thorn.tests.case import Mock, SignalCase
 
 
+class test_signal_handler(SignalCase):
+
+    def setup(self):
+        self.dispatcher = Mock(name='dispatcher')
+        self.sender = Mock(name='sender')
+        self.handler = signals.signal_handler(
+            self.dispatcher, 1, 2, 3, sender=self.sender, foo=4,
+        )
+
+    def test_init(self):
+        self.assertIs(self.handler.dispatcher, self.dispatcher)
+        self.assertIs(self.handler.sender, self.sender)
+        self.assertTupleEqual(self.handler.args, (1, 2, 3))
+        self.assertDictEqual(self.handler.kwargs, {'foo': 4})
+
+    def test_call(self):
+        fun = Mock(name='fun')
+        ret = self.handler(fun)
+        self.dispatcher.assert_called_with(fun, 1, 2, 3, foo=4)
+        self.dispatcher().connect.assert_called_with(sender=self.sender)
+        self.assertIs(ret, fun)
+
+
 class test_signal_dispatcher(SignalCase):
 
     def test_setup_signals(self):
