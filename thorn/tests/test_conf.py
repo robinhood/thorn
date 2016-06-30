@@ -37,6 +37,10 @@ class test_Settings(Case):
         self.app.config.THORN_SUBSCRIBERS = 'just'
         self.assertEqual(Settings(app=self.app).THORN_SUBSCRIBERS, 'just')
 
+    def test_THORN_SUBSCRIBER_MODEL(self):
+        self.app.config.THORN_SUBSCRIBER_MODEL = None
+        self.assertIsNone(Settings(app=self.app).THORN_SUBSCRIBER_MODEL)
+
 
 class test_event_choices(Case):
 
