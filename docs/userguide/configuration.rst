@@ -181,3 +181,12 @@ This is expressed in configuration as:
 
 More validators can be found in the API reference for the
 :mod:`thorn.validators` module.
+
+.. setting:: THORN_SUBSCRIBER_MODEL
+
+``THORN_SUBSCRIBER_MODEL``
+--------------------------
+
+Specify a custom subscriber model as a fully qualified path.
+E.g. for Django the default is ``"thorn.django.models:Subscriber"``.
+
