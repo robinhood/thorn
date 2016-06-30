@@ -247,9 +247,8 @@ class ModelEvent(Event):
         self.signal_dispatcher = signal_dispatcher
 
     def _get_name(self, instance):
-        """
-        Interpolates the event name with attributes from the instance.
-        """
+        """Interpolates the event name with attributes from the
+        instance."""
         return self.name.format(instance)
 
     def send(self, instance, data=None, sender=None, **kwargs):
