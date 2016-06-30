@@ -99,6 +99,27 @@ Default is `"default"`.
 Optional configuration option to restrict the event destination
 choices for the Subscriber model.
 
+.. setting:: THORN_HMAC_SIGNER
+
+``THORN_HMAC_SIGNER``
+---------------------
+
+Specify the path to a custom HMAC signing function, taking
+the arguments ``(digest_method, secret, message)``.
+
+The recommended value for this setting is::
+
+    "thorn.utils.hmac:sign"
+
+but for compatibility reasons the default is an HMAC signer
+using the :pypi:`itsdangerous` library::
+
+    "thorn.utils.hmac:compat_sign"
+
+The compat version generates a signature that is difficult
+for users of non-Python languages to verify, so you're highly
+discouraged form using the default signer.
+
 .. setting:: THORN_DRF_PERMISSION_CLASSES
 
 ``THORN_DRF_PERMISSION_CLASSES``

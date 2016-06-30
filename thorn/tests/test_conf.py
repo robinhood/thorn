@@ -15,6 +15,7 @@ class test_Settings(Case):
         ('THORN_DRF_PERMISSION_CLASSES', 'default_drf_permission_classes'),
         ('THORN_EVENT_CHOICES', 'default_event_choices'),
         ('THORN_EVENT_TIMEOUT', 'default_timeout'),
+        ('THORN_HMAC_SIGNER', 'default_hmac_signer'),
     ]
 
     def setup(self):

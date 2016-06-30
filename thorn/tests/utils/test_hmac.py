@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from thorn.utils import hmac
 from thorn.utils.compat import bytes_if_py3
 
-from thorn.tests.case import Case, DigestCase, patch
+from thorn.tests.case import Case, DigestCase, Mock, patch
 
 
 class test_get_digest(DigestCase):
@@ -56,3 +56,18 @@ class test_verify(Case):
         self.assertFalse(hmac.verify(
             hmac.sign("sha512", key, msg), "sha256", "NKEY", msg,
         ))
+
+
+class test_compat_sign(Case):
+
+    @patch('itsdangerous.Signer')
+    @patch('thorn.utils.hmac.get_digest')
+    def test(self, get_digest, Signer):
+        digest = Mock(name='digest')
+        key = Mock(name='key')
+        message = Mock(name='message')
+        ret = hmac.compat_sign(digest, key, message)
+        get_digest.assert_called_with(digest)
+        Signer.assert_called_with(key, digest_method=get_digest())
+        Signer().get_signature.assert_called_with(message)
+        self.assertIs(ret, Signer().get_signature())

@@ -45,6 +45,12 @@ To use Thorn with your Django project you must
     Only :ref:`Django REST Framework <django-rest-framework>` is supported
     yet, please help us by contributing more view types.
 
+#. Specify the recommended HMAC signing method in your ``settings.py``:
+
+    .. code-block:: python
+
+        THORN_HMAC_SIGNER = 'thorn.utils.hmac:sign'
+
 .. _django-rest-framework:
 
 Django Rest Framework Views

@@ -2,3 +2,5 @@ celery
 six
 requests
 vine>=1.1.0
+
+itsdangerous # XXX remove for Thorn2

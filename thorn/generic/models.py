@@ -13,7 +13,7 @@ from six import string_types
 
 from celery.five import with_metaclass
 
-from thorn.utils import hmac
+from thorn._state import current_app
 
 __all__ = ['AbstractSubscriber', 'SubscriberModelMixin']
 
@@ -97,4 +97,6 @@ class SubscriberModelMixin(object):
         }
 
     def sign(self, message):
-        return hmac.sign(self.hmac_digest, message, self.hmac_secret)
+        return current_app().hmac_sign(
+            self.hmac_digest, message, self.hmac_secret,
+        )

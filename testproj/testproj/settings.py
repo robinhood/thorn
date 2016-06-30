@@ -40,6 +40,8 @@ THORN_EVENTS = [
     'article.published',
 ]
 
+THORN_HMAC_SIGNER = 'thorn.utils.hmac:sign'
+
 
 # Application definition
 

@@ -39,6 +39,7 @@ class Settings(object):
         validators.ensure_protocol('http', 'https'),
         validators.ensure_port(80, 443),
     ]
+    default_hmac_signer = 'thorn.utils.hmac:compat_sign'
 
     def __init__(self, app=None):
         self.app = app_or_default(app or self.app)
@@ -64,6 +65,13 @@ class Settings(object):
     @cached_property
     def THORN_SUBSCRIBER_MODEL(self):
         return getattr(self.app.config, 'THORN_SUBSCRIBER_MODEL', None)
+
+    @cached_property
+    def THORN_HMAC_SIGNER(self):
+        return (
+            getattr(self.app.config, 'THORN_HMAC_SIGNER', None) or
+            self.default_hmac_signer
+        )
 
     @cached_property
     def THORN_DISPATCHER(self):

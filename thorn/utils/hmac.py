@@ -16,6 +16,11 @@ import string
 
 from .compat import bytes_if_py3, to_bytes
 
+try:
+    import itsdangerous
+except ImportError:  # pragma: no cover
+    itsdangerous = None  # noqa
+
 punctuation = string.punctuation.replace('"', '').replace("'", '')
 
 
@@ -38,3 +43,9 @@ def verify(digest, digest_method, key, message):
 def random_secret(
         length, chars=string.ascii_letters + string.digits + punctuation):
     return ''.join(random.choice(chars) for _ in range(length))
+
+
+def compat_sign(digest_method, key, message):
+    return itsdangerous.Signer(
+        key, digest_method=get_digest(digest_method),
+    ).get_signature(message)

@@ -9,7 +9,63 @@
 :release-date: 2016-06-30 04:05 P.M PDT
 :release-by: Ask Solem
 
+- New and improved method for HMAC signing.
+
+    The new method must be enabled manually by setting:
+
+    .. code-block:: python
+
+        THORN_HMAC_SIGNER = 'thorn.utils.hmac:sign'
+
+    It turns out itsdangerous did not do what we expected it to,
+    instead it does this:
+
+    - The secret key is transformed into:
+
+        .. code-block:: python
+
+            key = hashlib.sha256(salt + ‘signer’ + HMAC_SECRET)
+           # strip = from beginning and end of the base64 string
+           key = key.strip(‘=‘)
+
+    - If you don’t specify a salt, which we don’t, there is a
+      default salt(!) which is::
+
+        “itsdangerous.Signer”
+
+    - The extra "signer" in the key transformation is there as the default
+      key_derivation method is called “django-concat”.
+
+    - The final signature is encoded using “urlsafe_b64encode"
+
+        So in Python to recreate the signature using the built-in hmac
+        library you would have to do:
+
+        .. code-block:: python
+
+            import hashlib
+            import hmac
+            from base64 import urlsafe_b64encode
+
+            # everything hardcoded to SHA256 here
+
+            def create_signature(secret_key, message):
+                key = hashlib.sha256(
+                    ‘itsdangerous.Signer’ + ‘signer’ + secret_key).digest()
+                digest = hmac.new(key, message, digestmod=hashlib.sha256).digest()
+                return urlsafe_b64encode(digest).replace(‘=‘)
+
+        which is much more complicated than what we can expect of users.
+
+    You're highly encouraged to enable the new HMAC method, but sadly
+    it's not backwards compatible.
+
+    We have also included new examples for verifying HMAC signatures
+    in Django, Ruby, and PHP in the documentation.
+
 - New :setting:`THORN_SUBSCRIBER_MODEL` setting.
+
+- New :setting:`THORN_HMAC_SIGNER` setting.
 
 - Requirements: Tests now depends on :pypi:`case` 1.2.2
 

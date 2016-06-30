@@ -56,6 +56,10 @@ class Thorn(object):
     def Dispatcher(self):
         return self.subclass_with_self(self._get_dispatcher(self._dispatcher))
 
+    @cached_property
+    def hmac_sign(self):
+        return symbol_by_name(self.settings.THORN_HMAC_SIGNER)
+
     @property
     def config(self):
         return self.env.config
