@@ -44,8 +44,6 @@ class test_verify(Case):
         self.assertIs(ret, compare_digest())
 
     def test_functional(self, key="KEY", msg="MSG"):
-        import hashlib
-        print('HASHLIB IS: %r' % (hashlib,))
         self.assertTrue(hmac.verify(
             hmac.sign("sha512", key, msg), "sha512", key, msg,
         ))

@@ -21,11 +21,16 @@ try:
 except ImportError:  # pragma: no cover
     itsdangerous = None  # noqa
 
+# Some version of PyPy does not have hashlib.algorithms_available
+allowed_algorithms = {
+    'sha1', 'sha224', 'sha256', 'sha384', 'sha512',
+}
+
 punctuation = string.punctuation.replace('"', '').replace("'", '')
 
 
 def get_digest(d):
-    assert d.lower() in hashlib.algorithms_available
+    assert d.lower() in allowed_algorithms
     return getattr(hashlib, d.lower())
 
 
