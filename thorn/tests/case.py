@@ -122,4 +122,3 @@ class DigestCase(Case):
 
     def setup(self):
         self.hashlib = self.patch('thorn.utils.hmac.hashlib')
-        self.hashlib.algorithms_available = ['sha1']

@@ -11,10 +11,6 @@ class test_get_digest(DigestCase):
     def test_get_digest(self):
         self.assertIs(hmac.get_digest('sha1'), self.hashlib.sha1)
 
-    def test_get_digest__algorithm_unavailable(self):
-        with self.assertRaises(AssertionError):
-            hmac.get_digest('sha256')
-
 
 class test_sign(DigestCase):
 
