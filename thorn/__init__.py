@@ -12,7 +12,7 @@ from .reverse import model_reverser
 from .utils.functional import Q
 
 
-__version__ = '1.2.1'
+__version__ = '1.3.0'
 __author__ = 'Robinhood Markets'
 __contact__ = 'thorn@robinhood.com'
 __homepage__ = 'http://github.com/robinhood/thorn'
