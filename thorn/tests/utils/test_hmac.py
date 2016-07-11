@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from thorn.utils import hmac
-from thorn.utils.compat import bytes_if_py3
+from thorn.utils.compat import bytes_if_py3, to_bytes
 
 from thorn.tests.case import Case, DigestCase, Mock, patch
 
@@ -36,7 +36,7 @@ class test_verify(Case):
                   digest_method="sha256", key="KEY", msg="MSG"):
         ret = hmac.verify("verify", digest_method, key, msg)
         sign.assert_called_with(digest_method, key, msg)
-        compare_digest.assert_called_with(sign(), "verify")
+        compare_digest.assert_called_with(sign(), to_bytes("verify"))
         self.assertIs(ret, compare_digest())
 
     def test_functional(self, key="KEY", msg="MSG"):
