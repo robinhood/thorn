@@ -135,9 +135,10 @@ class Request(ThenableProxy):
                 url=self.subscriber.url,
                 data=self.data,
                 timeout=self.timeout,
-                headers=self.headers_with_hmac(
-                    self.sign_request(self.subscriber, self.data),
-                ),
+                headers=self.annotate_headers({
+                    'Hook-HMAC': self.sign_request(self.subscriber, self.data),
+                    'Hook-Subscription': str(self.subscriber.uuid),
+                }),
             )
         except self.timeout_errors as exc:
             self.handle_timeout_error(exc, propagate=propagate)
@@ -181,8 +182,8 @@ class Request(ThenableProxy):
             'allow_keepalive': self.allow_keepalive,
         }
 
-    def headers_with_hmac(self, hmac):
-        return dict(self.headers, **{'Hook-HMAC': hmac})
+    def annotate_headers(self, extra_headers):
+        return dict(self.headers, **extra_headers)
 
     def _serialize_validators(self, validators):
         return [serialize_validator(v) for v in validators]

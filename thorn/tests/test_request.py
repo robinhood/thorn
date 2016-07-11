@@ -38,8 +38,9 @@ class test_Request(EventCase):
         self.assertEqual(x.headers['User-Agent'], 'MyAgent')
 
     def expected_headers(self, req):
-        return dict(req.headers, **{
+        return req.annotate_headers({
             'Hook-HMAC': req.sign_request(req.subscriber, req.data),
+            'Hook-Subscription': str(req.subscriber.uuid),
         })
 
     def test_dispatch(self):

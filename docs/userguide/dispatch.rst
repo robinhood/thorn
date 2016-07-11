@@ -63,19 +63,21 @@ HTTP Headers
 
 Thorn will provide the endpoints with standard HTTP header values
 
-+-------------------+--------------------------------------------------------+
-| **Header**        | **Description**                                        |
-+-------------------+--------------------------------------------------------+
-| ``Hook-Event``    | Name of the event that triggered this delivery.        |
-+-------------------+--------------------------------------------------------+
-| ``Hook-Delivery`` | Unique id for this delivery.                           |
-+-------------------+--------------------------------------------------------+
-| ``Hook-HMAC``     | HMAC digest that can be used to verify the sender      |
-+-------------------+--------------------------------------------------------+
-| ``User-Agent``    | User agent string, including Thorn and client version. |
-+-------------------+--------------------------------------------------------+
-| ``Content-Type``  | Delivery content type (e.g. application/json).         |
-+-------------------+--------------------------------------------------------+
++-----------------------+--------------------------------------------------------+
+| **Header**            | **Description**                                        |
++-----------------------+--------------------------------------------------------+
+| ``Hook-Event``        | Name of the event that triggered this delivery.        |
++-----------------------+--------------------------------------------------------+
+| ``Hook-Delivery``     | Unique id for this delivery.                           |
++-----------------------+--------------------------------------------------------+
+| ``Hook-HMAC``         | HMAC digest that can be used to verify the sender      |
++-----------------------+--------------------------------------------------------+
+| ``Hook-Subscription`` | Subscription UUID (can be used to cancel/modify)       |
++-----------------------+--------------------------------------------------------+
+| ``User-Agent``        | User agent string, including Thorn and client version. |
++-----------------------+--------------------------------------------------------+
+| ``Content-Type``      | Delivery content type (e.g. application/json).         |
++-----------------------+--------------------------------------------------------+
 
 HTTPS/SSL Requests
 ==================
