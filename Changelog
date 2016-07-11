@@ -24,12 +24,14 @@
 
         .. code-block:: python
 
-            key = hashlib.sha256(salt + ‘signer’ + HMAC_SECRET)
+            key = hashlib.sha256(salt + 'signer' + HMAC_SECRET)
            # strip = from beginning and end of the base64 string
-           key = key.strip(‘=‘)
+           key = key.strip('=')
 
     - If you don’t specify a salt, which we don’t, there is a
-      default salt(!) which is::
+      default salt(!) which is:
+
+      .. code-block:: text
 
         “itsdangerous.Signer”
 
@@ -51,9 +53,9 @@
 
             def create_signature(secret_key, message):
                 key = hashlib.sha256(
-                    ‘itsdangerous.Signer’ + ‘signer’ + secret_key).digest()
+                    'itsdangerous.Signer' + 'signer' + secret_key).digest()
                 digest = hmac.new(key, message, digestmod=hashlib.sha256).digest()
-                return urlsafe_b64encode(digest).replace(‘=‘)
+                return urlsafe_b64encode(digest).replace('=')
 
         which is much more complicated than what we can expect of users.
 
@@ -126,7 +128,7 @@
   new abstract interface for subscriber models.
 
     This should be used if you want to check if an object is a subscriber
-    in :keyword:`isinstance` checks.
+    in :func:`isinstance` checks.
 
 - Q: ``now__*`` operators now properly handles the case when there's
      no previous version of the object.
