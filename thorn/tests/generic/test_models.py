@@ -13,5 +13,5 @@ class test_SubscriberModelMixin(DigestCase):
         x.hmac_secret = Mock(name='hmac_secret')
         x.hmac_digest = 'sha1'
         res = x.sign(message)
-        sign.assert_called_with(x.hmac_digest, message, x.hmac_secret)
+        sign.assert_called_with(x.hmac_digest, x.hmac_secret, message)
         self.assertIs(res, sign())
