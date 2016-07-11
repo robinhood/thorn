@@ -11,10 +11,11 @@
 
 - New HTTP header now sent with events: ``Hook-Subscription``
 
-    This contains the UUID of the subscription, which means you
-    the webhooks may react by cancelling or modifying the subscription.
+    This contains the UUID of the subscription, which means
+    a webhook consumer may now react by cancelling or modifying the subscription.
 
-- Fixed missing default value for :setting:`THORN_SUBSCRIBER_MODEL`.
+- Fixed missing default value for the :setting:`THORN_SUBSCRIBER_MODEL`
+  setting.
 
 - Fixed HMAC signing wrong message value.
 
