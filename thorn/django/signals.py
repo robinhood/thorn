@@ -95,7 +95,7 @@ class dispatch_on_m2m_change(signal_dispatcher):
         return {
             'instance': instance.pk,
             'model': serialize_model(model),
-            'pk_set': list(sorted(pk_set)),
+            'pk_set': list(sorted(pk_set or [])),
         }
 
     def on_m2m_change(self, sender, action, instance, model, **kwargs):

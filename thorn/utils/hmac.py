@@ -30,7 +30,7 @@ punctuation = string.punctuation.replace('"', '').replace("'", '')
 
 
 def get_digest(d):
-    assert d.lower() in allowed_algorithms
+    assert d.lower() in allowed_algorithms, d.lower()
     return getattr(hashlib, d.lower())
 
 
@@ -42,7 +42,9 @@ def sign(digest_method, key, message):
 
 
 def verify(digest, digest_method, key, message):
-    return hmac.compare_digest(sign(digest_method, key, message), digest)
+    return hmac.compare_digest(
+        to_bytes(sign(digest_method, key, message)),
+        to_bytes(digest))
 
 
 def random_secret(

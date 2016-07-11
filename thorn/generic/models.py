@@ -98,5 +98,5 @@ class SubscriberModelMixin(object):
 
     def sign(self, message):
         return current_app().hmac_sign(
-            self.hmac_digest, message, self.hmac_secret,
+            self.hmac_digest, self.hmac_secret, message,
         )
