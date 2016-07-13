@@ -11,6 +11,8 @@ from __future__ import absolute_import, unicode_literals
 import thorn
 import requests
 
+from contextlib import contextmanager
+
 from celery import uuid
 from celery.utils import cached_property
 from requests.exceptions import ConnectionError, Timeout
@@ -124,14 +126,37 @@ class Request(ThenableProxy):
     def sign_request(self, subscriber, data):
         return subscriber.sign(data)
 
-    def dispatch(self, session=None, propagate=False, close_session=False):
-        if self.cancelled:
-            return
-        self.validate_recipient(self.subscriber.url)
+    def dispatch(self, session=None, propagate=False):
+        if not self.cancelled:
+            self.validate_recipient(self.subscriber.url)
+            with self._finalize_unless_request_error(propagate):
+                self.response = self.post(session=session)
+                return self
+
+    @contextmanager
+    def _finalize_unless_request_error(self, propagate=False):
+        try:
+            yield
+        except self.timeout_errors as exc:
+            self.handle_timeout_error(exc, propagate=propagate)
+        except self.connection_errors as exc:
+            self.handle_connection_error(exc, propagate=propagate)
+        else:
+            self._p()
+
+    @contextmanager
+    def session_or_acquire(self, session=None, close_session=False):
         if session is None or not self.allow_keepalive:
             session, close_session = self.Session(), True
         try:
-            self.response = session.post(
+            yield session
+        finally:
+            if close_session and session is not None:
+                session.close()
+
+    def post(self, session=None):
+        with self.session_or_acquire(session) as session:
+            return session.post(
                 url=self.subscriber.url,
                 data=self.data,
                 timeout=self.timeout,
@@ -140,16 +165,6 @@ class Request(ThenableProxy):
                     'Hook-Subscription': str(self.subscriber.uuid),
                 }),
             )
-        except self.timeout_errors as exc:
-            self.handle_timeout_error(exc, propagate=propagate)
-        except self.connection_errors as exc:
-            self.handle_connection_error(exc, propagate=propagate)
-        else:
-            self._p()
-        finally:
-            if close_session and session is not None:
-                session.close()
-        return self
 
     def handle_timeout_error(self, exc, propagate=False):
         logger.info('Timed out while dispatching webhook request: %r',
