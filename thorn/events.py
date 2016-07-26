@@ -23,8 +23,9 @@ class Event(object):
 
     Arguments:
         name (str): Name of this event.
-            Namespaces can be dot-separated, and if so subscribers can glob-match
-            based on the parts in the name (e.g. ``"order.created"``).
+            Namespaces can be dot-separated, and if so subscribers can
+            glob-match based on the parts in the name, e.g.
+            ``"order.created"``.
 
     Keyword Arguments:
         timeout (float): Default request timeout for this event.
