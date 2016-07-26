@@ -1,11 +1,4 @@
-"""
-
-    thorn.dispatch.disabled
-    =======================
-
-    Dispatcher doing nothing.
-
-"""
+"""Dispatcher doing nothing."""
 from __future__ import absolute_import, unicode_literals
 
 from . import base

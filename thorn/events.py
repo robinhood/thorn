@@ -1,11 +1,4 @@
-"""
-
-    thorn.webhook.events
-    ====================
-
-    User-defined webhook events.
-
-"""
+"""User-defined webhook events."""
 from __future__ import absolute_import, unicode_literals
 
 from operator import attrgetter
@@ -28,38 +21,41 @@ def _true(*args, **kwargs):
 class Event(object):
     """Webhook Event.
 
-    :param name: Name of this event.
-        Namespaces can be dot-separated, and if so subscribers can glob-match
-        based on the parts in the name (e.g. ``"order.created"``).
+    Arguments:
+        name (str): Name of this event.
+            Namespaces can be dot-separated, and if so subscribers can glob-match
+            based on the parts in the name (e.g. ``"order.created"``).
 
-    :keyword timeout: Default request timeout for this event.
-    :keyword retry: Enable/disable retries when dispatching this event fails
-        (disabled by default).
-    :keyword retry_max: Max number of retries (3 by default).
-    :keyword retry_delay: Delay between retries (60 seconds by default).
-    :keyword recipient_validators: List of functions validating the recipient
-        URL string.  Functions must return False if the URL is blocked.
-        Default is to only allow HTTP and HTTPS, with respective reserved
-        ports 80 and 443, and to block internal IP networks, and can
-        be changed using the :setting:`THORN_RECIPIENT_VALIDATORS` setting::
+    Keyword Arguments:
+        timeout (float): Default request timeout for this event.
+        retry (bool): Enable/disable retries when dispatching this event fails
+            Disabled by default.
+        retry_max (int): Max number of retries (3 by default).
+        retry_delay (float): Delay between retries (60 seconds by default).
+        recipient_validators (Sequence): List of functions validating the
+            recipient URL string.  Functions must return False if the URL is
+            blocked.  Default is to only allow HTTP and HTTPS, with respective
+            reserved ports 80 and 443, and to block internal IP networks, and
+            can be changed using the :setting:`THORN_RECIPIENT_VALIDATORS`
+            setting::
 
-            recipient_validators=[
-                thorn.validators.block_internal_ips(),
-                thorn.validators.ensure_protocol('http', 'https'),
-                thorn.validators.ensure_port(80, 443),
-            ]
+                recipient_validators=[
+                    thorn.validators.block_internal_ips(),
+                    thorn.validators.ensure_protocol('http', 'https'),
+                    thorn.validators.ensure_port(80, 443),
+                ]
+        subscribers: Additional subscribers, as a list of URLs,
+            subscriber model objects, or callback functions returning these
+        request_data: Optional mapping of extra data to inject into
+            event payloads,
+        allow_keepalive: Flag to disable HTTP connection keepalive
+            for this event only.  Keepalive is enabled by default.
 
-        WARNING: :func:`~thorn.validators.block_internal_ips` will only
+    Warning:
+        :func:`~thorn.validators.block_internal_ips` will only
         test for reserved internal networks, and not private networks
         with a public IP address.  You can block those using
         :class:`~thorn.validators.block_cidr_network`.
-    :keyword subscribers: Additional subscribers, as a list of URLs,
-        subscriber model objects, or callback functions returning these
-    :keyword request_data: Optional mapping of extra data to inject into
-        event payloads,
-    :keyword allow_keepalive: Flag to disable HTTP connection keepalive
-        for this event only.  Keepalive is enabled by default.
-
     """
     app = None
     allow_keepalive = True
@@ -89,26 +85,27 @@ class Event(object):
              on_success=None, on_error=None, timeout=None, on_timeout=None):
         """Send event to all subscribers.
 
-        :param data: Event payload (must be json serializable).
+        Arguments:
+            data (Any): Event payload (must be json serializable).
 
-        :keyword sender: Optional event sender, as a
-            :class:`~django.contrib.auth.models.User` instance.
-        :keyword timeout: Specify custom HTTP request timeout
-            overriding the :setting:`THORN_EVENT_TIMEOUT` setting.
+        Keyword Arguments:
+            sender (Any): Optional event sender, as a
+                :class:`~django.contrib.auth.models.User` instance.
+            context (Dict): Extra context to pass to subscriber callbacks.
+            timeout (float): Specify custom HTTP request timeout
+                overriding the :setting:`THORN_EVENT_TIMEOUT` setting.
 
-        :keyword on_success: Callback called for each HTTP request
-            if the request succeeds.  Must take single
-            :class:`~thorn.request.Request` argument.
-        :keyword on_timeout: Callback called for each HTTP request
-            if the request times out.  Takes two arguments:
-            a :class:`~thorn.request.Request`, and the time out
-            exception instance.
-        :keyword on_error: Callback called for each HTTP request
-            if the request fails.  Takes two arguments:
-            a :class:`~thorn.request.Request` argument, and
-            the error exception instance.
-        :keyword context: Extra context to pass to subscriber callbacks
-
+            on_success (Callable): Callback called for each HTTP request
+                if the request succeeds.  Must take single
+                :class:`~thorn.request.Request` argument.
+            on_timeout (Callable): Callback called for each HTTP request
+                if the request times out.  Takes two arguments:
+                a :class:`~thorn.request.Request`, and the time out
+                exception instance.
+            on_error (Callable): Callback called for each HTTP request
+                if the request fails.  Takes two arguments:
+                a :class:`~thorn.request.Request` argument, and
+                the error exception instance.
         """
         return self._send(
             self.name, data,
@@ -189,29 +186,29 @@ class ModelEvent(Event):
          "sender": "(User pk)optional_sender",
          "data": {"event specific data": "value"}}
 
-    :param name: Name of event.
-    :param reverse: A function that takes a model instance and returns
-        the canonical URL for that resource.
-    :keyword sender_field:
-        Field used as a sender for events, e.g. ``"account.user"``,
-        will use ``instance.account.user``.
-    :keyword $field__$op: Optional filter arguments to filter the model
-        instances to dispatch for.  These keyword arguments
-        can be defined just like the arguments to a Django query set,
-        the only difference being that you have to specify an operator
-        for every field: this means ``last_name="jerry"`` does not work,
-        and you have to use ``last_name__eq="jerry"`` instead.
+    Arguments:
+        name (str): Name of event.
 
-        See :class:`~thorn.utils.functional.Q` for more information.
+    Keyword Arguments:
+        reverse (Callable): A function that takes a model instance and returns
+            the canonical URL for that resource.
+        sender_field (str):
+            Field used as a sender for events, e.g. ``"account.user"``,
+            will use ``instance.account.user``.
+        $field__$op (Any): Optional filter arguments to filter the model
+            instances to dispatch for.  These keyword arguments
+            can be defined just like the arguments to a Django query set,
+            the only difference being that you have to specify an operator
+            for every field: this means ``last_name="jerry"`` does not work,
+            and you have to use ``last_name__eq="jerry"`` instead.
 
-    :keyword signal_dispatcher: Custom
-        :class:`~thorn.django.signals.signal_dispatcher` used to
-        connect this event to a model signal.
+            See :class:`~thorn.utils.functional.Q` for more information.
+        signal_dispatcher (~thorn.django.signals.signal_dispatcher):
+            Custom signal_dispatcher used to connect this event to a
+            model signal.
 
-    .. seealso:
-
+    See Also:
         In addition the same arguments as :class:`Event` is supported.
-
     """
     signal_dispatcher = None
 
@@ -254,10 +251,11 @@ class ModelEvent(Event):
     def send(self, instance, data=None, sender=None, **kwargs):
         """Send event for model ``instance``.
 
-        :keyword data: Event specific data.
+        Keyword Arguments:
+            data (Any): Event specific data.
 
-        See :meth:`Event.send` for more arguments supported.
-
+        See Also:
+            :meth:`Event.send` for more arguments supported.
         """
         name = self._get_name(instance)
         return self._send(name, self.to_message(

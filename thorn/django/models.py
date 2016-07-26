@@ -1,11 +1,4 @@
-"""
-
-    thorn.django.models
-    ===================
-
-    Django models required to dispatch webhook events.
-
-"""
+"""Django models required to dispatch webhook events."""
 from __future__ import absolute_import, unicode_literals
 
 from uuid import uuid4

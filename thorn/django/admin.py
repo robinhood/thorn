@@ -1,10 +1,6 @@
-"""
+"""Django-Admin interface support
 
-    thorn.django.admin
-    ==================
-
-    Django-Admin interface support for managing webhook subscriptions.
-
+Adds support for managing webhook subscriptions in the Django admin.
 """
 from __future__ import absolute_import, unicode_literals
 

@@ -1,3 +1,4 @@
+"""Recipient Validators."""
 from __future__ import absolute_import, unicode_literals
 
 import socket
@@ -48,8 +49,7 @@ def ensure_protocol(*allowed):
     """Only allow recipient URLs using specific protocols.
 
     Example:
-        ensure_protocol('https', 'http://')
-
+        >>> ensure_protocol('https', 'http://')
     """
     allowed = tuple(
         x if '://' in x else x + '://'
@@ -93,12 +93,10 @@ def _url_ip_address(url):
 def block_internal_ips():
     """Block recipient URLs that have an internal IP address.
 
-    .. warning::
-
+    Warning:
         This does not check for *private* networks, it will only
         make sure the IP address is not in a reserved private block
         (e.g. 192.168.0.1/24).
-
     """
 
     def validate_not_internal_ip(recipient_url):
@@ -117,9 +115,7 @@ def block_cidr_network(*blocked_networks):
     """Block recipient URLs from a list of CIDR networks.
 
     Example:
-
-        block_cidr_network('192.168.0.0/24', '132.34.23.0/24')
-
+        >>> block_cidr_network('192.168.0.0/24', '132.34.23.0/24')
     """
     _blocked_networks = [ip_network(text_type(x)) for x in blocked_networks]
 

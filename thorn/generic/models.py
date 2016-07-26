@@ -1,11 +1,4 @@
-"""
-
-    thorn.models
-    ============
-
-    Generic base model mixins.
-
-"""
+"""Generic base model mixins."""
 from __future__ import absolute_import, unicode_literals
 
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -53,8 +46,8 @@ class AbstractSubscriber(object):
     def from_dict(self, *args, **kwargs):
         """Create subscriber from dictionary representation.
 
-        Accept the same arguments as :class:`dict`.
-
+        Note:
+            Accepts the same arguments as :class:`dict`.
         """
         pass  # pragma: no cover
 

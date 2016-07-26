@@ -1,11 +1,4 @@
-"""
-
-    thorn.utils.hmac
-    ================
-
-    HMAC Message signing utilities.
-
-"""
+"""HMAC Message signing utilities."""
 from __future__ import absolute_import, unicode_literals
 
 import base64
@@ -14,7 +7,7 @@ import hmac
 import random
 import string
 
-from .compat import bytes_if_py3, to_bytes
+from .compat import bytes_if_py3, want_bytes
 
 try:
     import itsdangerous
@@ -36,15 +29,15 @@ def get_digest(d):
 
 def sign(digest_method, key, message):
     return base64.b64encode(bytes_if_py3(hmac.new(
-        to_bytes(key),
-        to_bytes(message),
+        want_bytes(key),
+        want_bytes(message),
         digestmod=get_digest(digest_method)).digest()))
 
 
 def verify(digest, digest_method, key, message):
     return hmac.compare_digest(
-        to_bytes(sign(digest_method, key, message)),
-        to_bytes(digest))
+        want_bytes(sign(digest_method, key, message)),
+        want_bytes(digest))
 
 
 def random_secret(

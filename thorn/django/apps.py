@@ -1,11 +1,4 @@
-"""
-
-    thorn.django.apps
-    =================
-
-    Django application configurations.
-
-"""
+"""Thorn Django application configurations."""
 from __future__ import absolute_import, unicode_literals
 
 from django.apps import AppConfig

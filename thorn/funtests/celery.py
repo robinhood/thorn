@@ -1,10 +1,6 @@
-"""
+"""Functional test Celery app.
 
-    thorn.funtests.celery
-    =====================
-
-    Celery application used for the Thorn Cyanide test suite.
-
+Celery application used for the Thorn Cyanide test suite.
 """
 from __future__ import absolute_import, unicode_literals
 

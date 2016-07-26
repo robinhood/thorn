@@ -17,6 +17,7 @@ globals().update(conf.build_config(
     html_logo='images/logo.png',
     html_favicon='images/favicon.ico',
     extra_extensions=[
+        'sphinx.ext.napoleon',
         'celery.contrib.sphinx',
     ],
     include_intersphinx={'python', 'sphinx', 'django', 'celery'},

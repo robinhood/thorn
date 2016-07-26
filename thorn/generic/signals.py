@@ -1,11 +1,4 @@
-"""
-
-    thorn.generic.signals
-    =====================
-
-    Dispatching by signal.
-
-"""
+"""Dispatching by signal."""
 from __future__ import absolute_import, unicode_literals
 
 from six import iteritems as items
@@ -16,6 +9,7 @@ __all__ = ['signal_dispatcher']
 
 
 class signal_dispatcher(object):
+
     signals = None
 
     def __init__(self, fun, use_transitions=False, **kwargs):

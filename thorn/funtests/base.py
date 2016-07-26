@@ -1,11 +1,7 @@
-"""
+"""Base-class for functional test suites.
 
-    thorn.funtests.base
-    =================================
-
-    Extends Cyanide stress test suite with utilities used
-    to test Thorn.
-
+Extends Cyanide stress test suite with utilities used
+to test Thorn.
 """
 from __future__ import absolute_import, unicode_literals
 

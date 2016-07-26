@@ -1,11 +1,4 @@
-"""
-
-    thorn.dispatch.celery
-    =====================
-
-    Celery-based webhook dispatcher.
-
-"""
+"""Celery-based webhook dispatcher."""
 from __future__ import absolute_import, unicode_literals
 
 from celery import group
@@ -21,10 +14,10 @@ __all__ = ['Dispatcher', 'WorkerDispatcher']
 class Dispatcher(base.Dispatcher):
     """Dispatcher using Celery tasks to dispatch events.
 
-    Overrides what happens when :meth:`thorn.webhook.Event.send` is called
-    so that dispatching the HTTP request tasks is performed by a worker,
-    instead of in the current process.
-
+    Note:
+        Overrides what happens when :meth:`thorn.webhook.Event.send` is
+        called so that dispatching the HTTP request tasks is performed by
+        a worker, instead of in the current process.
     """
 
     def send(self, event, payload, sender,

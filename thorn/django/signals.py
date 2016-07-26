@@ -1,11 +1,4 @@
-"""
-
-    thorn.django.signals
-    ====================
-
-    Django signal dispatchers.
-
-"""
+"""Django signal dispatchers."""
 from __future__ import absolute_import, unicode_literals
 
 from operator import attrgetter

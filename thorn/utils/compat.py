@@ -1,11 +1,4 @@
-"""
-
-    thorn.utils.compat
-    ==================
-
-    Python version compatibility utilities.
-
-"""
+"""Python version compatibility utilities."""
 from __future__ import absolute_import, unicode_literals
 
 import sys
@@ -18,14 +11,14 @@ if PY3:  # pragma: no cover
     def bytes_if_py2(s):
         return s
 
-    def to_bytes(s):
+    def want_bytes(s):
         return s.encode() if isinstance(s, str) else s
-    bytes_if_py3 = to_bytes
+    bytes_if_py3 = want_bytes
 
 else:  # pragma: no cover
-    def to_bytes(s):  # noqa
+    def want_bytes(s):  # noqa
         return s.encode() if isinstance(s, unicode) else s
-    bytes_if_py2 = to_bytes
+    bytes_if_py2 = want_bytes
 
     def bytes_if_py3(s):  # noqa
         return s

@@ -1,38 +1,34 @@
-"""
+"""Functional test suite.
 
-    thorn.funtests.suite
-    =================================
+Instructions
+============
 
-    Functional test suite.
-
-    Instructions
-    ------------
-
-    #. Start the celery worker:
+#. Start the celery worker:
 
     .. code-block:: console
 
         $ celery -A thorn.funtests worker -l info -P eventlet -c 1000
 
-    #. Start the development web server:
-
-        .. code-block:: console
-
-            $ (cd testproj; python manage.py runserver)
-
-    #. Then execute the functional test suite:
-
-        .. code-block:: console
-
-            $ celery -A thorn.funtests cyanide
-
-
-    For a list of tests that you can select see:
+#. Start the development web server:
 
     .. code-block:: console
 
-        $ celery -A thorn.funtests cyanide -l
+        $ (cd testproj; python manage.py runserver)
 
+#. Then execute the functional test suite:
+
+    .. code-block:: console
+
+        $ celery -A thorn.funtests cyanide
+
+Tips
+====
+
+For a list of tests that you can select see:
+
+.. code-block:: console
+
+    $ celery -A thorn.funtests cyanide -l
 """
 from __future__ import absolute_import, unicode_literals
 

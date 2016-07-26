@@ -1,11 +1,4 @@
-"""
-
-    thorn.django.rest_framework.serializers
-    =======================================
-
-    Rest framework serializers.
-
-"""
+"""DRF serializers."""
 from __future__ import absolute_import, unicode_literals
 
 from rest_framework import serializers

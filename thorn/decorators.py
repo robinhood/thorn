@@ -1,11 +1,4 @@
-"""
-
-    thorn.webhook.decorators
-    ========================
-
-    Webhook decorators.
-
-"""
+"""Webhook decorators."""
 from __future__ import absolute_import, unicode_literals
 
 from itertools import chain
@@ -17,72 +10,72 @@ from six.moves import UserDict
 class webhook_model(UserDict):
     """Decorates models to send webhooks based changes to that model.
 
-    :keyword on_create: Event to dispatch whenever an instance of
-        this model is created (``post_save``).
-    :keyword on_change: Event to dispatch whenever an instance of
-        this model is changed (``post_save``).
-    :keyword on_delete: Event to dispatch whenever an instance of
-        this model is deleted (``post_delete``).
-    :keyword on_$event: Additional user defined events.,
-    :keyword sender_field:
-        Default field used as a sender for events, e.g. ``"account.user"``,
-        will use ``instance.account.user``.
+    Keyword Arguments:
+        on_create (~thorn.Event): Event to dispatch whenever an instance of
+            this model is created (``post_save``).
+        on_change (~thorn.Event): Event to dispatch whenever an instance of
+            this model is changed (``post_save``).
+        on_delete (~thorn.Event): Event to dispatch whenever an instance of
+            this model is deleted (``post_delete``).
+        on_$event (~thorn.Event): Additional user defined events.,
 
-        Individual events can override the sender field user.
-    :keyword reverse:
-        A :class:`thorn.reverse.model_reverser` instance (or any callable
-        taking an model instance as argument), that describes how to get
-        the URL for an instance of this model.
+        sender_field (str):
+            Default field used as a sender for events, e.g. ``"account.user"``,
+            will use ``instance.account.user``.
 
-        Individual events can override the reverser used.
+            Individual events can override the sender field user.
+        reverse (Callable):
+            A :class:`thorn.reverse.model_reverser` instance (or any callable
+            taking an model instance as argument), that describes how to get
+            the URL for an instance of this model.
 
-    **Examples**
+            Individual events can override the reverser used.
 
-    Simple article model, where the URL reference is retrieved
-    by ``reverse('article-detail', kwargs={'uuid': article.uuid})``:
+    Examples:
+        Simple article model, where the URL reference is retrieved
+        by ``reverse('article-detail', kwargs={'uuid': article.uuid})``:
 
-    .. code-block:: python
+        .. code-block:: python
 
-        @webhook_model(
-            on_create=ModelEvent('article.created'),
-            on_change=ModelEvent('article.changed'),
-            on_delete=ModelEvent('article.removed'),
-            on_deactivate=ModelEvent(
-                'article.deactivate', deactivated__eq=True,
+            @webhook_model(
+                on_create=ModelEvent('article.created'),
+                on_change=ModelEvent('article.changed'),
+                on_delete=ModelEvent('article.removed'),
+                on_deactivate=ModelEvent(
+                    'article.deactivate', deactivated__eq=True,
+                )
+                reverse=model_reverser('article-detail', uuid='uuid'),
             )
-            reverse=model_reverser('article-detail', uuid='uuid'),
-        )
-        class Article(models.Model):
-            uuid = models.UUIDField()
+            class Article(models.Model):
+                uuid = models.UUIDField()
 
-    The URL may not actually exist after deletion, so maybe we want
-    to point the reference to something else in that special case,
-    like a category that can be reversed by doing
-    ``reverse('category-detail', args=[article.category.name])``.
+        The URL may not actually exist after deletion, so maybe we want
+        to point the reference to something else in that special case,
+        like a category that can be reversed by doing
+        ``reverse('category-detail', args=[article.category.name])``.
 
-    We can do that by having the ``on_delete`` event override
-    the reverser used for that event only:
+        We can do that by having the ``on_delete`` event override
+        the reverser used for that event only:
 
-    .. code-block:: python
+        .. code-block:: python
 
-        @webhook_model(
-            on_create=ModelEvent('article.created'),
-            on_change=ModelEvent('article.changed'),
-            on_delete=ModelEvent(
-                'article.removed',
-                reverse=model_reverser('category-detail', 'category.name'),
-            ),
+            @webhook_model(
+                on_create=ModelEvent('article.created'),
+                on_change=ModelEvent('article.changed'),
+                on_delete=ModelEvent(
+                    'article.removed',
+                    reverse=model_reverser('category-detail', 'category.name'),
+                ),
 
-            on_hipri_delete=ModelEvent(
-                'article.internal_delete', priority__gte=30.0,
-            ).dispatches_on_delete(),
+                on_hipri_delete=ModelEvent(
+                    'article.internal_delete', priority__gte=30.0,
+                ).dispatches_on_delete(),
 
-            reverse=model_reverser('article-detail', uuid='uuid'),
-        )
-        class Article(model.Model):
-            uuid = models.UUIDField()
-            category = models.ForeignKey('category')
-
+                reverse=model_reverser('article-detail', uuid='uuid'),
+            )
+            class Article(model.Model):
+                uuid = models.UUIDField()
+                category = models.ForeignKey('category')
     """
 
     def __init__(self,

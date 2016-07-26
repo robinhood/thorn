@@ -1,3 +1,4 @@
+"""Thorn Application."""
 from __future__ import absolute_import, unicode_literals
 
 from operator import attrgetter, methodcaller
@@ -121,15 +122,17 @@ class Thorn(object):
         App-compatible means the class has an 'app' attribute providing
         the default app, e.g.: ``class Foo(object): app = None``.
 
-        :param Class: The class to subclass.
-        :keyword name: Custom name for the target subclass.
-        :keyword attribute: Name of the attribute holding the app.
-            Default is ``"app"``.
-        :keyword reverse: Reverse path to this object used for pickling
-            purposes.  E.g. for ``app.AsyncResult`` use ``"AsyncResult"``.
-        :keyword keep_reduce: If enabled a custom ``__reduce__`` implementation
-           will not be provided.
+        Arguments:
+            Class (Any): The class to subclass.
 
+        Keyword Arguments:
+            name (str): Custom name for the target subclass.
+            attribute (str): Name of the attribute holding the app.
+                Default is ``"app"``.
+            reverse (str): Reverse path to this object used for pickling
+                purposes.  E.g. for ``app.AsyncResult`` use ``"AsyncResult"``.
+            keep_reduce (bool): If enabled a custom ``__reduce__``
+                implementation will not be provided.
         """
         Class = symbol_by_name(Class)
         reverse = reverse if reverse else Class.__name__

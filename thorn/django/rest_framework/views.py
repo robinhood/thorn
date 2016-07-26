@@ -1,10 +1,6 @@
-"""
+"""DRF Views.
 
-    thorn.django.rest_framework.views
-    =================================
-
-    API endpoints for users to create and manage their webhook subscriptions.
-
+API endpoints for users to create and manage their webhook subscriptions.
 """
 from __future__ import absolute_import, unicode_literals
 

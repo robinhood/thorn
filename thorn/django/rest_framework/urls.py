@@ -1,7 +1,7 @@
-"""
+"""DRF URL dispatch table.
 
-thorn.django.rest_framework.urls
-================================
+Usage
+=====
 
 To include the rest-framework API views in your project use the
 :meth:`django.conf.urls.include` function, with a proper namespace argument:
@@ -14,6 +14,9 @@ To include the rest-framework API views in your project use the
         url(r'^hooks/',
             include('thorn.django.rest_framework.urls', namespace='webhook')),
     ]
+
+Endpoints
+=========
 
 Two new API endpoints will now be available in your application:
 
@@ -36,7 +39,6 @@ Two new API endpoints will now be available in your application:
 - ``DELETE /hook/<uuid>/``
 
     Delete subscription given its unique identifier (uuid).
-
 """
 from __future__ import absolute_import, unicode_literals
 

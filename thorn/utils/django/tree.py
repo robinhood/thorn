@@ -1,6 +1,6 @@
-"""
-A class for storing a tree graph. Primarily used for filter constructs in the
-ORM.
+"""A class for storing a tree graph.
+
+Primarily used for filter constructs in the ORM.
 """
 from __future__ import absolute_import, unicode_literals
 
@@ -32,11 +32,11 @@ class Node(object):
         """This is called to create a new instance of this class when we need new
         Nodes (or subclasses) in the internal code in this class.
 
-        Normally, it just shadows __init__(). However, subclasses with an
-        __init__ signature that is not an extension of Node.__init__ might need
-        to implement this method to allow a Node to create a new instance of
-        them (if they have any extra setting up to do).
-
+        Note:
+            Normally, it just shadows __init__(). However, subclasses with an
+            __init__ signature that is not an extension of Node.__init__ might
+            need to implement this method to allow a Node to create a new
+            instance of them (if they have any extra setting up to do).
         """
         obj = Node(children, connector, negated)
         obj.__class__ = cls
@@ -72,12 +72,13 @@ class Node(object):
         This tree (self) will never be pushed to a child node of the
         combined tree, nor will the connector or negated properties change.
 
-        The function returns a node which can be used in place of data
-        regardless if the node other got squashed or not.
+        Returns:
+            Node: which can be used in place of data regardless if
+                the node other got squashed or not.
 
-        If `squash` is False the data is prepared and added as a child to
-        this tree without further logic.
-
+        Note:
+            If `squash` is False the data is prepared and added as a child to
+            this tree without further logic.
         """
         if data in self.children:
             return data

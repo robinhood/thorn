@@ -1,11 +1,4 @@
-"""
-
-    thorn.utils.log
-    ===============
-
-    Logging utilities.
-
-"""
+"""Logging utilities."""
 from __future__ import absolute_import, unicode_literals
 
 from six import string_types

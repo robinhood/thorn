@@ -1,11 +1,4 @@
-"""
-
-    thorn.tasks
-    ===========
-
-    Tasks used by the Celery dispatcher.
-
-"""
+"""Tasks used by the Celery dispatcher."""
 from __future__ import absolute_import, unicode_literals
 
 from celery import shared_task
@@ -26,9 +19,9 @@ def _worker_dispatcher():
 def send_event(event, payload, sender, timeout, context={}):
     """Task called by process dispatching the event.
 
-    This will use the WorkerDispatcher to dispatch the individual
-    HTTP requests in batches (``dispatch_requests -> dispatch_request``).
-
+    Note:
+        This will use the WorkerDispatcher to dispatch the individual
+        HTTP requests in batches (``dispatch_requests -> dispatch_request``).
     """
     _worker_dispatcher().send(
         event, payload, sender, timeout=timeout, context=context)

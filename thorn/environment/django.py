@@ -1,11 +1,4 @@
-"""
-
-    thorn.environment.django
-    ========================
-
-    Django web framework environment.
-
-"""
+"""Django web framework environment."""
 from __future__ import absolute_import, unicode_literals
 
 import importlib
@@ -18,6 +11,7 @@ __all__ = ['DjangoEnv']
 
 
 class DjangoEnv(object):
+
     settings_cls = 'django.conf:settings'
     subscriber_cls = 'thorn.django.models:Subscriber'
     signals_cls = 'thorn.django.signals'

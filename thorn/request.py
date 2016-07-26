@@ -1,11 +1,4 @@
-"""
-
-    thorn.webhook.request
-    =====================
-
-    Webhook HTTP requests.
-
-"""
+"""Webhook HTTP requests."""
 from __future__ import absolute_import, unicode_literals
 
 import thorn
@@ -27,13 +20,14 @@ from .validators import deserialize_validator, serialize_validator
 
 __all__ = ['Request']
 
-DEFAULT_USER_AGENT = 'Mozilla/5.0 (compatible; thorn/{0}; {1})'.format(
-    thorn.__version__, requests.utils.default_user_agent(),
+F_USER_AGENT = 'Mozilla/5.0 (compatible; thorn/{version}; {requests_UA})'
+
+DEFAULT_USER_AGENT = F_USER_AGENT.format(
+    version=thorn.__version__,
+    requests_UA=requests.utils.default_user_agent(),
 )
 
-REQUEST_REPR = """\
-<{0}: {1.event} -> {1.subscriber.url} sender={1.sender!r}>\
-"""
+REQUEST_REPR = '<{0}: {1.event} -> {1.subscriber.url} sender={1.sender!r}>'
 
 logger = get_logger(__name__)
 
@@ -42,30 +36,33 @@ logger = get_logger(__name__)
 class Request(ThenableProxy):
     """Webhook HTTP request
 
-    :param event: Name of event.
-    :param data: Event payload.
-    :param sender: Sender of event (or :const:`None`).
-    :param subscriber: Subscriber to dispatch the request for.
+    Arguments:
+        event (str): Name of event.
+        data (Any): Event payload.
+        sender (Any): Sender of event (or :const:`None`).
+        subscriber (~thorn.generic.models.Subscriber): Subscriber to
+            dispatch the request for.
 
-    :keyword on_success: Optional callback called if the HTTP request
-        succeeds.  Must take single argument: ``request``.
-    :keyword on_timeout: Optional callback called if the HTTP request
-        times out. Must have signature: ``(request, exc)``.
-    :keyword on_error: Optional callback called if the HTTP request
-        fails.  Must have signature: ``(request, exc)``.
-    :keyword headers: Additional HTTP headers to send with the request.
-    :keyword user_agent: Set custom HTTP user agent.
-    :keyword recipient_validators: List of serialized recipient validators.
-    :keyword allow_keepalive: Allow reusing session for this HTTP request.
-        Enabled by default.
+    Keyword Arguments:
+        on_success (Callable): Optional callback called if
+            the HTTP request succeeds.  Must take single argument: ``request``.
+        on_timeout (Callable): Optional callback called if the HTTP request
+            times out. Must have signature: ``(request, exc)``.
+        on_error (Callable): Optional callback called if the HTTP request
+            fails.  Must have signature: ``(request, exc)``.
+        headers (Mapping): Additional HTTP headers to send with the request.
+        user_agent (str): Set custom HTTP user agent.
+        recipient_validators (Sequence): List of serialized recipient
+            validators.
+        allow_keepalive (bool): Allow reusing session for this HTTP request.
+            Enabled by default.
 
-    :keyword retry: Retry in the event of timeout/failure?
-        Disabled by default.
-    :keyword retry_max: Maximum number of times to retry before giving up.
-        Default is 3.
-    :keyword retry_delay: Delay between retries in seconds int/float.
-        Default is 60 seconds.
-
+        retry (bool): Retry in the event of timeout/failure?
+            Disabled by default.
+        retry_max (int): Maximum number of times to retry before giving up.
+            Default is 3.
+        retry_delay (float): Delay between retries in seconds int/float.
+            Default is 60 seconds.
     """
 
     app = None

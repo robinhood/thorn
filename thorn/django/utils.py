@@ -1,11 +1,4 @@
-"""
-
-    thorn.django.utils
-    ==================
-
-    Django-related utilities.
-
-"""
+"""Django-related utilities."""
 from __future__ import absolute_import, unicode_literals
 
 from collections import Mapping

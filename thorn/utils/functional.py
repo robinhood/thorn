@@ -1,11 +1,4 @@
-"""
-
-    thorn.utils.functional
-    ======================
-
-    Functional-style utilities.
-
-"""
+"""Functional-style utilities."""
 from __future__ import absolute_import, unicode_literals
 
 import operator
@@ -25,9 +18,9 @@ except ImportError:  # pragma: no cover
 
 __all__ = ['groupbymax', 'Q']
 
-E_FILTER_FIELD_MISSING_OP = """\
-filter field argument {0!r} not allowed: did you mean '{0}__eq'?\
-"""
+E_FILTER_FIELD_MISSING_OP = (
+    "filter field argument {0!r} not allowed: did you mean '{0}__eq'?"
+)
 
 
 def not_contains(a, b):
@@ -87,11 +80,11 @@ def wrap_transition(op, did_change):
     """Transforms operator into a transition operator, i.e. one that
     only returns true if the ``did_change`` operator also returns true.
 
-    E.g. ``wrap_transition(operator.eq, operator.ne)`` returns function
-    with signature ``(new_value, needle, old_value)`` and only returns
-    true if new_value is equal to needle, but old_value was not equal
-    to needle.
-
+    Note:
+        E.g. ``wrap_transition(operator.eq, operator.ne)`` returns function
+        with signature ``(new_value, needle, old_value)`` and only returns
+        true if new_value is equal to needle, but old_value was not equal
+        to needle.
     """
 
     def compare(new_value, needle, old_value):
@@ -105,26 +98,23 @@ def groupbymax(it, max, key=operator.eq, sentinel=object()):
     group items together based on the key function, and produces
     one list for each group.
 
-    :param it: Iterator emitting item in order.
-    :param max: Maximum size of any group (mandatory).
-    :keyword key: Function used to compare items.
-        Defaults to :func:`operator.eq` matching values exactly.
+    Arguments:
+        it (Iterable): Iterator emitting item in order.
+        max (int): Maximum size of any group (mandatory).
+        key (Callable): Function used to compare items.
+            Defaults to :func:`operator.eq` matching values exactly.
 
     Examples:
-
-    .. code-block:: pycon
-
         >>> x = ['A', 'A', 'A', 'B', 'C', 'D', 'D', 'E']
         >>> list(groupbymax(x, 3))
         [['A', 'A', 'A'], ['A'], ['B'], ['C'], ['D', 'D'], ['E']]
 
-        # NOTE: Not technically sorted, but similar items appear in the
-        # order we're matching for.
+        >>> # NOTE: Not technically sorted, but similar items appear in the
+        >>> # order we're matching for.
         >>> x = [('foo:A', 'foo:B', 'bar:C', 'baz:D', 'baz:E', 'baz:F']
         >>> list(groupbymax(x, 10,
         ...     key=lambda a, b: a.split(':')[0] == b.split(':')[0]))
         [['foo:A', 'foo:B'], ['bar:C'], ['baz:D', 'baz:E', 'baz:F']]
-
     """
     it = iter(it)
     for item in it:
@@ -146,39 +136,33 @@ class Q(_Q_):
     This class works like :class:`django.db.models.Q`, but is used for
     filtering regular Python objects instead of database rows.
 
-    **Examples**
+    Examples:
+        >>> # Match object with `last_name` attribute set to "Costanza":
+        >>> Q(last_name__eq="Costanza")
 
-    - Match object with ``last_name`` attribute set to "Costanza"::
+        >>> # Match object with `author.last_name` attribute set to "Benes":
+        >>> Q(author__last_name__eq="Benes")
 
-        Q(last_name__eq="Costanza")
+        >>> # You are not allowed to specify any key without an operator,
+        >>> # even when the following would be fine using Django`s Q objects:
+        >>> Q(author__last_name="Benes")   # <-- ERROR, will raise ValueError
 
-    - Match object with ``author.last_name`` attribute set to "Benes"::
+        >>> # Attributes can be nested arbitrarily deep:
+        >>> Q(a__b__c__d__e__f__g__x__gt=3.03)
 
-        Q(author__last_name__eq="Benes")
+        >>> # The special `*__eq=True` means "match any *true-ish* value":
+        >>> Q(author__account__is_staff__eq=True)
 
-    - You are not allowed to specify any key without an operator,
-      event though the following would be fine using Django`s Q objects::
+        >>> # Similarly the `*__eq=False` means "match any *false-y*" value":
+        >>> Q(author__account__is_disabled=False)
 
-        Q(author__last_name="Benes")   # <-- ERROR, will raise ValueError
+    See Also:
+        :ref:`events-model-filtering-operators`.
 
-    - Attributes can be nested arbitrarily deep::
-
-        Q(a__b__c__d__e__f__g__x__gt=3.03)
-
-    - The special ``*__eq=True`` means "match any *true-ish* value"::
-
-        Q(author__account__is_staff__eq=True)
-
-    - Similarly the ``*__eq=False`` means "match any *false-y*" value"::
-
-        Q(author__account__is_disabled=False)
-
-    See :ref:`events-model-filtering-operators`.
-
-    :returns: :class:`collections.Callable`, to match an object with
-      the given predicates, call the return value with the object to match:
-      ``Q(x__eq==808)(obj)``.
-
+    Returns:
+        Callable: to match an object with the given predicates,
+            call the return value with the object to match:
+            ``Q(x__eq==808)(obj)``.
     """
 
     #: The gate decides the boolean operator of this tree node.
@@ -252,9 +236,8 @@ class Q(_Q_):
     def compile_node(self, field):
         """Compiles node into a cached function that performs the match.
 
-        :returns: unary :class:`collections.Callable` taking the object
-          to match.
-
+        Returns:
+            Callable: taking the object to match.
         """
         # can embed other Q objects
         if isinstance(field, type(self)):
