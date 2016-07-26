@@ -23,6 +23,7 @@ def log_event(request, event):
         event=event,
         ref=ref,
         data=request.body,
+        subscription=request.META.get('HTTP_HOOK_SUBSCRIPTION'),
         hmac=request.META.get('HTTP_HOOK_HMAC'),
     )
     return HttpResponse(json.dumps({'event': event, 'ref': ref}))

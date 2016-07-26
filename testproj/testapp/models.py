@@ -60,5 +60,6 @@ class Article(models.Model):
 class SubscriberLog(models.Model):
     ref = models.CharField(max_length=128)
     event = models.CharField(max_length=128)
+    subscription = models.CharField(max_length=128)
     data = models.TextField()
     hmac = models.TextField()

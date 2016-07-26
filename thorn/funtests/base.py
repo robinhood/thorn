@@ -93,9 +93,11 @@ class WebhookSuite(Suite):
         assert len(logs) == n
         if sub is not None:
             hmac_secret = sub['hmac_secret']
+            log = SubscriberLog.objects.filter(ref=ref or self.ref)[0]
             if hmac_secret:
-                log = SubscriberLog.objects.filter(ref=ref or self.ref)[0]
                 assert hmac.verify(log.hmac, 'sha256', hmac_secret, log.data)
+            assert log.subscription == sub['id']
+
         self.assert_log_matches(
             logs[0],
             event=event,
