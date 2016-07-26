@@ -198,7 +198,10 @@ class Request(ThenableProxy):
         return dict(self.headers, **extra_headers)
 
     def _serialize_validators(self, validators):
-        return [serialize_validator(v) for v in validators]
+        # not serialized will be callable, some may have already
+        # been deserialized.
+        return [serialize_validator(v)
+                for v in validators if callable(v)]
 
     def __repr__(self):
         return bytes_if_py2(REQUEST_REPR.format(type(self).__name__, self))
