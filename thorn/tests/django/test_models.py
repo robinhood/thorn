@@ -28,6 +28,7 @@ class test_Subscriber(Case):
             'content_type': self.subscriber.content_type,
             'hmac_secret': self.subscriber.hmac_secret,
             'hmac_digest': self.subscriber.hmac_digest,
+            'uuid': self.subscriber.uuid,
         })
 
     def test_from_dict__arg(self):
