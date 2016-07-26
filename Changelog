@@ -2,6 +2,20 @@
  Changelog
 ===========
 
+.. _version-1.4.1:
+
+1.4.1
+=====
+:release-date: 2016-07-26 01:06 P.M PDT
+:release-by: Ask Solem
+
+- Fixed webhook dispatch crash where validator was deserialized twice.
+
+- Celery dispatcher did not properly forward the `Hook-Subscription`
+  HTTP header.
+
+- Source code now using Google-style docstrings.
+
 .. _version-1.4.0:
 
 1.4.0
