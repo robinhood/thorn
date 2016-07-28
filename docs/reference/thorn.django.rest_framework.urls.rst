@@ -1,5 +1,5 @@
 =====================================================
- thorn.django.rest_framework.urls
+ ``thorn.django.rest_framework.urls``
 =====================================================
 
 .. contents::

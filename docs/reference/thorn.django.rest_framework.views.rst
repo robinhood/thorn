@@ -1,5 +1,5 @@
 =====================================================
- thorn.django.rest_framework.views
+ ``thorn.django.rest_framework.views``
 =====================================================
 
 .. contents::

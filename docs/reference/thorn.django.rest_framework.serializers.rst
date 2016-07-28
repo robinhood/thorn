@@ -1,5 +1,5 @@
 =====================================================
- thorn.django.rest_framework.serializers
+ ``thorn.django.rest_framework.serializers``
 =====================================================
 
 .. contents::
