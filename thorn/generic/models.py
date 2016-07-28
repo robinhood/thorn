@@ -81,7 +81,7 @@ class SubscriberModelMixin(object):
 
     def as_dict(self):
         return {
-            'uuid': self.uuid,
+            'uuid': str(self.uuid),
             'event': self.event,
             'user': self.user_ident(),
             'url': self.url,
