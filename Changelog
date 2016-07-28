@@ -2,6 +2,14 @@
  Changelog
 ===========
 
+.. _version-1.4.2:
+
+1.4.2
+=====
+:release-date: 2016-07-28 11:45 A.M PDT
+
+- Serialize uuid as string when calling Celery tasks.
+
 .. _version-1.4.1:
 
 1.4.1
