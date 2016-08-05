@@ -37,6 +37,7 @@ class test_functional_webhook_model(RealSignalCase):
         on_change.send.assert_called_with(
             instance=self.obj,
             data=self.obj.webhook_payload(),
+            headers=None,
             sender=self.obj.username,
             context={'instance': self.obj.pk},
         )
@@ -51,6 +52,7 @@ class test_functional_webhook_model(RealSignalCase):
         on_create.send.assert_called_with(
             instance=obj,
             data=obj.webhook_payload(),
+            headers=None,
             sender=None,
             context={'instance': obj.pk},
         )
@@ -65,6 +67,7 @@ class test_functional_webhook_model(RealSignalCase):
         on_delete.send.assert_called_with(
             instance=self.obj,
             data=self.obj.webhook_payload(),
+            headers=None,
             sender=None,
             context={'instance': obj_pk},
         )
@@ -88,6 +91,7 @@ class test_functional_webhook_model(RealSignalCase):
         on_jerry_delete.send.assert_called_with(
             instance=jerry,
             data=jerry.webhook_payload(),
+            headers=None,
             sender=None,
             context={'instance': jerry_pk},
         )
@@ -106,6 +110,7 @@ class test_functional_webhook_model(RealSignalCase):
         on_create.send.assert_called_with(
             instance=obj2,
             data=obj2.webhook_payload(),
+            headers=None,
             sender=None,
             context={'instance': obj2.pk},
         )
