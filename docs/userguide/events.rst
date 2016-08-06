@@ -66,6 +66,10 @@ A subscription to ``"user.*"`` will match events ``"user.created"``,
 ``"*.created"`` will match ``"user.created"``, ``"article.created"``, and so
 on.
 
+``ModelEvent`` names may include model instance's field values. For example, you
+could define ``"user.{.username}"``, and events will be fired as
+``user.alice``, ``user.bob`` and so on.
+
 .. _events-basics-sending:
 
 Sending events
