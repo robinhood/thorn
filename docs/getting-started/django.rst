@@ -207,8 +207,6 @@ This is an example Django webhook receiver view, using the json content type:
     import json
     import hashlib
 
-    from itsdangerous import URLSafeSerializer
-
     from django.http import HttpResponse
     from django.views.decorators.http import require_POST
     from django.views.decorators.csrf import csrf_exempt
@@ -216,7 +214,8 @@ This is an example Django webhook receiver view, using the json content type:
     ARTICLE_SECRET = 'C=JTX)v3~dQCl];[_h[{q{CScm]oglLoe&>ga:>R~jR$.x?t|kW!FH:s@|4bu:11'
     ARTICLE_DIGEST_TYPE = 'sha256'
 
-    def verify_webhook(secret, hmac_header, digest_method, message):
+    # also available at `thorn.utils.hmac.verify`
+    def verify(hmac_header, digest_method, secret, message):
         digestmod = getattr(hashlib, digest_method)
         signed = base64.b64encode(
             hmac.new(secret, message, digestmod).digest(),
@@ -227,9 +226,8 @@ This is an example Django webhook receiver view, using the json content type:
     @csrf_exempt()
     def handle_article_changed(request):
         digest = request.META.get('HTTP_HOOK_HMAC')
-        digest_type = request.META.get('')
         body = request.body
-        if verify_webhook(ARTICLE_SECRET, digest, ARTICLE_DIGEST_TYPE, body):
+        if verify(digest, ARTICLE_DIGEST_TYPE, ARTICLE_SECRET, body):
             payload = json.loads(body)
             print('Article changed: {0[ref]}'.format(payload)
             return HttpResponse(status=200)
