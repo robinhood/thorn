@@ -25,8 +25,8 @@ globals().update(conf.build_config(
         'requests': ('http://requests.readthedocs.org/en/latest/', None),
     },
     html_prepend_sidebars=['sidebargithub.html'],
-    django_settings='testproj.settings',
-    path_additions=[os.path.join(os.pardir, 'testproj')],
+    django_settings='proj.settings',
+    path_additions=[os.path.join(os.pardir, 't')],
     apicheck_package='thorn',
     apicheck_ignore_modules=[
         'thorn.django',

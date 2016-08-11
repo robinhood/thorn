@@ -132,11 +132,8 @@ class Event(object):
             allow_keepalive=self.allow_keepalive,
         )
 
-    def prepare_recipient_validators(self, validators):
-        return validators
-
     def __repr__(self):
-        return bytes_if_py2("<{0}: {1} ({2:#x})>".format(
+        return bytes_if_py2('<{0}: {1} ({2:#x})>'.format(
             type(self).__name__, self.name, id(self)))
 
     def __reduce__(self):
@@ -154,6 +151,17 @@ class Event(object):
             'request_data': self.request_data,
             'allow_keepalive': self.allow_keepalive,
         }
+
+    def prepare_recipient_validators(self, validators):
+        """Prepare recipient validator list (instance-wide).
+
+        Note:
+            This value will be cached
+        Return v
+
+        """
+
+        return validators
 
     @cached_property
     def prepared_recipient_validators(self):
@@ -216,6 +224,7 @@ class ModelEvent(Event):
     def __init__(self, name, *args, **kwargs):
         super(ModelEvent, self).__init__(name, **kwargs)
         self._kwargs = kwargs
+        self._kwargs.pop('app', None)  # don't use app in __reduce__
         self._filterargs = args
 
         self.models = WeakSet()

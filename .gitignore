@@ -25,3 +25,6 @@ Documentation/
 cover/
 .vagrant/
 *.sqlite3
+.cache/
+htmlcov
+coverage.xml

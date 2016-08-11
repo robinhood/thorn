@@ -21,7 +21,7 @@ FLAKEPLUSTARGET=2.7
 
 COVERAGE=coverage
 COVERAGE_HTML_DEST=cover
-TESTPROJ=testproj
+TESTPROJ=t
 
 all: help
 
@@ -86,13 +86,13 @@ configcheck:
 
 flakecheck:
 	# the only way to enable all errors, is to ignore one of them
-	$(FLAKE8) --ignore=X999 "$(PROJ)"
+	$(FLAKE8) --ignore=X999 "$(PROJ)" "$(TESTPROJ)"
 
 flakediag:
 	-$(MAKE) flakecheck
 
 flakepluscheck:
-	$(FLAKEPLUS) --$(FLAKEPLUSTARGET) "$(PROJ)"
+	$(FLAKEPLUS) --$(FLAKEPLUSTARGET) "$(PROJ)" "$(TESTPROJ)"
 
 flakeplusdiag:
 	-$(MAKE) flakepluscheck
@@ -126,7 +126,7 @@ removepyc: clean-pyc
 
 clean-build:
 	rm -rf build/ dist/ .eggs/ *.egg-info/ .tox/
-	rm -rf .coverage cover/ testproj/.coverage testproj/cover
+	rm -rf .coverage cover/ t/.coverage t/cover t/htmlcov htmlcov
 
 clean-git:
 	$(GIT) clean -xdn
@@ -140,11 +140,8 @@ test-all: clean-pyc
 test:
 	$(PYTHON) setup.py test
 
-covbuild:
-	REUSE_DB=1 $(COVERAGE) run ./testproj/manage.py test
-
-cov: covbuild
-	$(COVERAGE) html -d "$(COVERAGE_HTML_DEST)"
+cov:
+	(cd t; py.test -x --cov="$(PROJ)" --cov-report=html)
 
 build:
 	$(PYTHON) setup.py sdist bdist_wheel

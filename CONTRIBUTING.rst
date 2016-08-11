@@ -408,7 +408,7 @@ This will run all of the test, to run individual tests you need
 to working in the test project directory:
 ::
 
-    $ python testproj/manage.py test
+    $ python manage.py test
 
 Some useful options to ``manage.py test`` are:
 
@@ -428,7 +428,7 @@ If you want to run the tests for a single test file only
 you can do so like this:
 ::
 
-    $ python testproj/manage.py test thorn.tests.test_request
+    $ python manage.py test thorn.tests.test_request
 
 Running the functional test suite
 ---------------------------------
@@ -444,7 +444,7 @@ but note that this requires a working Celery installation.
 #. Start the development web server:
     ::
 
-        $ (cd testproj; python manage.py runserver)
+        $ python manage.py runserver)
 
 #. Then execute the functional test suite:
     ::

@@ -13,7 +13,7 @@ Instructions
 
     .. code-block:: console
 
-        $ (cd testproj; python manage.py runserver)
+        $ python manage.py runserver
 
 #. Then execute the functional test suite:
 

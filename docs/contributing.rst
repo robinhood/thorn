@@ -416,7 +416,7 @@ to working in the test project directory:
 
 .. code-block:: console
 
-    $ python testproj/manage.py test
+    $ python manage.py test
 
 Some useful options to :command:`manage.py test` are:
 
@@ -437,7 +437,7 @@ you can do so like this:
 
 .. code-block:: console
 
-    $ python testproj/manage.py test thorn.tests.test_request
+    $ python manage.py test thorn.tests.test_request
 
 Running the functional test suite
 ---------------------------------
@@ -455,7 +455,7 @@ but note that this requires a working Celery installation.
 
     .. code-block:: console
 
-        $ (cd testproj; python manage.py runserver)
+        $ python manage.py runserver)
 
 #. Then execute the functional test suite:
 
