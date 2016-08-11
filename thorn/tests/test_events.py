@@ -50,7 +50,7 @@ class test_Event(EventCase):
             on_success=on_success, on_error=on_error,
             timeout=3.34, on_timeout=on_timeout,
             retry=None, retry_delay=None, retry_max=None,
-            recipient_validators=None,
+            recipient_validators=None, headers=None,
             context=None, extra_subscribers=None, allow_keepalive=True,
         )
 
@@ -62,7 +62,7 @@ class test_Event(EventCase):
             on_success=None, on_error=None,
             timeout=None, on_timeout=None,
             retry=None, retry_delay=None, retry_max=None,
-            recipient_validators=None,
+            recipient_validators=None, headers=None,
             context=None, extra_subscribers=None, allow_keepalive=True,
         )
 
@@ -74,7 +74,7 @@ class test_Event(EventCase):
             on_success=None, on_error=None,
             timeout=None, on_timeout=None,
             retry=None, retry_delay=None, retry_max=None,
-            recipient_validators=None,
+            recipient_validators=None, headers=None,
             context=None, extra_subscribers=None, allow_keepalive=False,
         )
 
@@ -132,7 +132,7 @@ class test_ModelEvent(EventCase):
             on_success=None, on_error=None,
             timeout=None, on_timeout=None,
             retry=None, retry_delay=None, retry_max=None,
-            recipient_validators=None,
+            recipient_validators=None, headers=None,
             context=None, extra_subscribers=None, allow_keepalive=True,
         )
 
@@ -155,7 +155,7 @@ class test_ModelEvent(EventCase):
             on_success=None, on_error=None,
             timeout=None, on_timeout=None,
             retry=None, retry_delay=None, retry_max=None,
-            recipient_validators=None,
+            recipient_validators=None, headers=None,
             context=None, extra_subscribers=None, allow_keepalive=True,
         )
 
@@ -267,6 +267,7 @@ class test_ModelEvent(EventCase):
         event.send.assert_called_with(
             instance=instance,
             data=instance.webhook_payload.return_value,
+            headers=instance.webhook_headers.return_value,
             sender=instance.x.y.z.account,
             context={},
         )
@@ -280,6 +281,7 @@ class test_ModelEvent(EventCase):
         event.send.assert_called_with(
             instance=instance,
             data=instance.webhook_payload.return_value,
+            headers=instance.webhook_headers.return_value,
             sender=None,
             context={},
         )

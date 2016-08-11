@@ -117,12 +117,13 @@ class Event(object):
     def prepare_payload(self, data):
         return dict(self.request_data, **data) if self.request_data else data
 
-    def _send(self, name, data, sender=None,
+    def _send(self, name, data, headers=None, sender=None,
               on_success=None, on_error=None,
               timeout=None, on_timeout=None, context=None):
         timeout = timeout if timeout is not None else self.timeout
         return self.dispatcher.send(
             name, self.prepare_payload(data), sender,
+            headers=headers,
             context=context,
             on_success=on_success, on_error=on_error,
             timeout=timeout, on_timeout=on_timeout, retry=self.retry,
@@ -269,6 +270,7 @@ class ModelEvent(Event):
     def send_from_instance(self, instance, context={}, **kwargs):
         return self.send(
             instance=instance,
+            headers=self.instance_headers(instance),
             data=self.instance_data(instance),
             sender=self.instance_sender(instance),
             context=context,
@@ -287,6 +289,15 @@ class ModelEvent(Event):
         """Get event data from ``instance.webhook_payload()``."""
         try:
             handler = instance.webhook_payload
+        except AttributeError:
+            pass
+        else:
+            return handler()
+
+    def instance_headers(self, instance):
+        """Get event headers from ``instance.webhook_headers()``."""
+        try:
+            handler = instance.webhook_headers
         except AttributeError:
             pass
         else:

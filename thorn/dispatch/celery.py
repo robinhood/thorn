@@ -43,7 +43,7 @@ class WorkerDispatcher(base.Dispatcher):
             dispatch_requests.s([req.as_dict() for req in chunk])
             for chunk in self.group_requests(
                 self.prepare_requests(
-                    event, payload, sender, timeout, context))
+                    event, payload, sender, timeout, context, **kwargs))
         ).delay()
 
     def group_requests(self, requests):

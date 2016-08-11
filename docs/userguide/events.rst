@@ -472,6 +472,32 @@ the body of the article to save space.
     the body will save them from having to perform an extra HTTP request, but if
     not, you have drastically increased the size of your messages.
 
+.. _events-model-header:
+
+Modifying event headers
+-----------------------
+
+You can include additional headers for the resulting
+:ref:`model event message <events-model-message-format>` by defining a special
+method on your model class.
+
+This callback must be named ``webhook_headers``, takes no arguments,
+and must return a dictionary:
+
+.. code-block:: python
+
+    class Article(models.Model):
+        uuid = models.UUIDField()
+        title = models.CharField(max_length=128)
+        state = models.CharField(max_length=128, default='PENDING')
+        body = models.TextField()
+        user = models.ForeignKey('auth.User')
+
+        def webhook_headers(self):
+            return {
+                'Authorization': "Bearer {}".format(self.user.access_token),
+            }
+
 .. _events-model-senders:
 
 Event senders
