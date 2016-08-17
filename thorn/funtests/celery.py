@@ -14,8 +14,8 @@ dist = os.path.join(
     os.path.abspath(os.path.dirname(thorn.__file__)),
     os.pardir,
 )
-sys.path.append(os.path.join(dist, 'testproj'))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testproj.settings_funtests')
+sys.path.append(os.path.join(dist, 'proj'))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'proj.settings_funtests')
 django.setup()
 
 app = cyanide.app.App(set_as_current=False)

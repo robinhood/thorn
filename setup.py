@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from setuptools import Command, setup, find_packages
+import setuptools
+
+from setuptools.command.test import test as TestCommand
 
 import os
 import re
@@ -96,39 +98,18 @@ else:
 # -*- %%% -*-
 
 
-class RunTests(Command):
-    description = 'Run the test suite from the testproj dir.'
-    user_options = []
-    extra_env = {}
-    extra_args = []
-
-    def run(self):
-        for env_name, env_value in self.extra_env.items():
-            os.environ[env_name] = str(env_value)
-
-        this_dir = os.getcwd()
-        testproj_dir = os.path.join(this_dir, 'testproj')
-        os.chdir(testproj_dir)
-        sys.path.append(testproj_dir)
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'testproj.settings')
-        import django
-        django.setup()
-        from django.core.management import execute_from_command_line
-        prev_argv = list(sys.argv)
-        try:
-            sys.argv = [__file__, 'test'] + self.extra_args
-            execute_from_command_line(argv=sys.argv)
-        finally:
-            sys.argv = prev_argv
+class PyTest(TestCommand):
+    user_options = [('pytest-args=', 'a', 'Arguments to pass to py.test')]
 
     def initialize_options(self):
-        pass
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
 
-    def finalize_options(self):
-        pass
+    def run_tests(self):
+        import pytest
+        sys.exit(pytest.main(self.pytest_args))
 
-
-setup(
+setuptools.setup(
     name=NAME,
     version=meta['version'],
     description=meta['doc'],
@@ -137,7 +118,7 @@ setup(
     url=meta['homepage'],
     platforms=['any'],
     license='BSD',
-    packages=find_packages(exclude=['ez_setup', 'tests', 'tests.*']),
+    packages=setuptools.find_packages(exclude=['ez_setup', 't', 't.*']),
     zip_safe=False,
     install_requires=install_requires,
     tests_require=tests_require,
@@ -145,5 +126,5 @@ setup(
     classifiers=classifiers,
     entry_points=entrypoints,
     long_description=long_description,
-    cmdclass={'test': RunTests},
+    cmdclass={'test': PyTest},
     **extra)

@@ -1,6 +1,6 @@
 case>=1.2.2
-django_nose
-coverage>=3.0
+pytest
+pytest-django
 mockredispy
 djangorestframework
 pytz>dev
