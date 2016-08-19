@@ -114,13 +114,13 @@ class test_ModelEvent:
             **kwargs
         )
 
-    @pytest.fixture(autouse=True, scope='function')
+    @pytest.fixture(autouse=True)
     def setup_self(self, app, dispatcher):
         self.Model = Mock(name='Model')
         self.app = app
         self.dispatcher = dispatcher
 
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def event(self):
         return self.mock_event('george.costanza')
 

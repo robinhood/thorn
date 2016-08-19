@@ -13,7 +13,7 @@ from thorn.django.utils import serialize_model
 @pytest.mark.usefixtures('signals')
 class test_signal_handler:
 
-    @pytest.fixture(autouse=True, scope='function')
+    @pytest.fixture(autouse=True)
     def setup_self(self):
         self.dispatcher = Mock(name='dispatcher')
         self.sender = Mock(name='sender')
@@ -45,7 +45,7 @@ class SignalDispatcherCase:
     dispatcher = None
     dispatcher_args = ()
 
-    @pytest.fixture(autouse=True, scope='function')
+    @pytest.fixture(autouse=True)
     def setup_self(self, signals):
         self.signals = signals
         self.Model = Mock(name='Model')

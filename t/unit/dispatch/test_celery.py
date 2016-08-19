@@ -26,7 +26,7 @@ class test_Dispatcher:
 
 class test_WorkerDispatcher:
 
-    @pytest.fixture(autouse=True, scope='function')
+    @pytest.fixture(autouse=True)
     def setup_self(self):
         self.app = Mock(name='app')
         self.dispatcher = WorkerDispatcher(app=self.app)

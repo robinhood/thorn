@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 @pytest.mark.django_db()
 class test_SubscriberManager:
 
-    @pytest.fixture(autouse=True, scope='function')
+    @pytest.fixture(autouse=True)
     def setup_self(self):
         self.user, _ = get_user_model().objects.get_or_create(
             username='test_Subscriber',

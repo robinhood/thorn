@@ -9,12 +9,12 @@ from kombu.five import text_t
 from django.contrib.auth import get_user_model
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def user():
     return get_user_model()(username='george')
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def subscriber(user):
     return Subscriber(
         event='foo.created', user=user, url='http://example.com',

@@ -8,7 +8,7 @@ from thorn.conf import Settings, event_choices, all_settings
 from thorn.exceptions import ImproperlyConfigured
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def app():
     return Mock(name='app')
 

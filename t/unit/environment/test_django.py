@@ -7,12 +7,12 @@ from case import mock
 from thorn.environment.django import DjangoEnv
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def env():
     return DjangoEnv()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def symbol_by_name(patching):
     return patching('thorn.environment.django.symbol_by_name')
 

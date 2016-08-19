@@ -8,7 +8,7 @@ from thorn.utils import hmac
 from thorn.utils.compat import bytes_if_py3, want_bytes
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def hashlib(patching):
     return patching('thorn.utils.hmac.hashlib')
 

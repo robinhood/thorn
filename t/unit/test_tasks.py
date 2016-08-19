@@ -15,17 +15,17 @@ from case import Mock, call, patch
 from conftest import DEFAULT_RECIPIENT_VALIDATORS, mock_event
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def worker_dispatcher(patching, dispatcher):
     return patching('thorn.tasks._worker_dispatcher', return_value=dispatcher)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def mock_dispatch_request(patching):
     return patching('thorn.tasks.dispatch_request')
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def task_retry(patching):
     return patching('celery.app.task.Task.retry')
 
@@ -60,7 +60,7 @@ def test_dispatch(mock_dispatch_request, dispatcher, app):
 @pytest.mark.django_db()
 class test_dispatch_request:
 
-    @pytest.fixture(autouse=True, scope='function')
+    @pytest.fixture(autouse=True)
     def setup_self(self):
         self.session = Mock(name='session')
         self.user, _ = get_user_model().objects.get_or_create(
@@ -82,7 +82,7 @@ class test_dispatch_request:
         self.req2 = Request(
             self.subscriber2.event, 'a', 501, self.subscriber2, timeout=3.03)
 
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def app_or_default(self, patching):
         return patching('thorn.tasks.app_or_default')
 

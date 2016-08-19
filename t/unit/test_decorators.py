@@ -14,7 +14,7 @@ from testapp import models
 @pytest.mark.usefixtures('reset_signals')
 class test_functional_webhook_model:
 
-    @pytest.fixture(autouse=True, scope='function')
+    @pytest.fixture(autouse=True)
     def setup_self(self):
         self.Model = models.Foo
         self.obj, _ = self.Model.objects.get_or_create(username='elaine')
@@ -128,7 +128,7 @@ class test_functional_webhook_model:
 
 class test_webhook_model:
 
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def Model(self):
         return Mock(name='Model')
 

@@ -16,7 +16,7 @@ def subscriber_from_dict(d, event):
 
 class test_Dispatcher:
 
-    @pytest.fixture(autouse=True, scope='function')
+    @pytest.fixture(autouse=True)
     def setup_self(self, app):
         self.app = app
         self._app = Mock(name='app')

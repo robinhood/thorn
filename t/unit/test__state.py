@@ -16,7 +16,7 @@ class test_current_app:
         _state.default_app = self._prev_app
         _state._tls.current_app = None
 
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def tls(self, patching):
         return patching('thorn._state._tls')
 

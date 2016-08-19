@@ -26,12 +26,12 @@ DEFAULT_RECIPIENT_VALIDATORS = [
 sentinel = object()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def default_recipient_validators():
     return DEFAULT_RECIPIENT_VALIDATORS
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def app(request):
     _tls, _state._tls = _state._tls, _state._TLS()
     app = Thorn(set_as_current=True)
@@ -44,7 +44,7 @@ def app(request):
     return app
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def signals(patching):
     signals = Mock(name='signals')
     patching('django.db.models.signals.post_save', signals.post_save)
@@ -74,7 +74,7 @@ def _reset_signals(wanted=None):
             _reset_signal(signal, receivers)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def reset_signals(request):
     wanted = getattr(request.module, "reset_signals", None)
     ctx = _reset_signals(wanted)
@@ -82,7 +82,7 @@ def reset_signals(request):
     request.addfinalizer(lambda: ctx.__exit__(*sys.exc_info()))
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def dispatcher():
     return Mock(name='dispatcher')
 
@@ -96,11 +96,11 @@ def mock_event(name, dispatcher=None, app=None, Event=Event, **kwargs):
     )
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def event(dispatcher, app):
     return mock_event('george.costanza', dispatcher, app)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def model_event(dispatcher, app):
     return mock_event('george.costanza', dispatcher, app, Event=ModelEvent)

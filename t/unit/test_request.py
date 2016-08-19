@@ -26,25 +26,25 @@ def mock_req(event, url, **kwargs):
     )
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def req(event):
     return mock_req(event.name, 'http://example.com:80/hook#id1?x=303')
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def gethostbyname(patching):
     return patching('socket.gethostbyname',
                     return_value='123.123.123.123')
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def logger(patching):
     return patching('thorn.request.logger')
 
 
 class test_Request:
 
-    @pytest.fixture(autouse=True, scope='function')
+    @pytest.fixture(autouse=True)
     def setup_self(self, gethostbyname, req, event, app):
         self.gethostbyname = gethostbyname
         self.event = event

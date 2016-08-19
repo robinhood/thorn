@@ -11,7 +11,7 @@ from testapp.models import Article
 
 class test_deserialize_model:
 
-    @pytest.fixture(scope='function')
+    @pytest.fixture()
     def Model(self):
         m = Mock(name='Model')
         m._meta.app_label = 'app_label'
