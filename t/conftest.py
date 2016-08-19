@@ -31,25 +31,6 @@ def default_recipient_validators():
     return DEFAULT_RECIPIENT_VALIDATORS
 
 
-class _patching(object):
-
-    def __init__(self, monkeypatch):
-        self.monkeypatch = monkeypatch
-
-    def __call__(self, path, value=sentinel, name=None, **kwargs):
-        if value is sentinel:
-            value = Mock(name=name or path.rpartition('.')[2])
-        self.monkeypatch.setattr(path, value)
-        for k, v in items(kwargs):
-            setattr(value, k, v)
-        return value
-
-
-@pytest.fixture(scope='function')
-def patching(monkeypatch):
-    return _patching(monkeypatch)
-
-
 @pytest.fixture(scope='function')
 def app(request):
     _tls, _state._tls = _state._tls, _state._TLS()
