@@ -1,6 +1,8 @@
 """User-defined webhook events."""
 from __future__ import absolute_import, unicode_literals
 
+
+from functools import partial
 from operator import attrgetter
 from six import iteritems as items, iterkeys as keys
 from weakref import WeakSet
@@ -10,6 +12,12 @@ from celery.utils import cached_property
 from ._state import app_or_default
 from .utils.compat import bytes_if_py2, restore_from_keys
 from .utils.functional import Q
+
+try:
+    from django.db.transaction import TransactionManagementError, on_commit
+except ImportError:  # pragma: no cover
+    # django < 1.9
+    TransactionManagementError = on_commit = None  # nqoa
 
 __all__ = ['Event', 'ModelEvent']
 
@@ -161,7 +169,6 @@ class Event(object):
         Return v
 
         """
-
         return validators
 
     @cached_property
@@ -205,6 +212,13 @@ class ModelEvent(Event):
         sender_field (str):
             Field used as a sender for events, e.g. ``"account.user"``,
             will use ``instance.account.user``.
+        signal_honors_transaction(bool): If enabled the webhook dispatch
+            will be tied to any current database transaction:
+            webhook is sent on transaction commit, and ignored if the
+            transaction rolls back.
+
+            Default is False in Thorn 1.3 and requires Django >= 1.9.
+            This will be enabled by default in Thorn 2.0.
         $field__$op (Any): Optional filter arguments to filter the model
             instances to dispatch for.  These keyword arguments
             can be defined just like the arguments to a Django query set,
@@ -249,10 +263,12 @@ class ModelEvent(Event):
             if args or self.filter_fields else _true)
 
     def _init_attrs(self, reverse=None, sender_field=None,
-                    signal_dispatcher=None, **kwargs):
+                    signal_dispatcher=None, signal_honors_transaction=False,
+                    **kwargs):
         self.reverse = reverse
         self.sender_field = sender_field
         self.signal_dispatcher = signal_dispatcher
+        self.signal_honors_transaction = signal_honors_transaction
 
     def _get_name(self, instance):
         """Interpolates the event name with attributes from the
@@ -329,6 +345,14 @@ class ModelEvent(Event):
         return self._filter_predicate(instance)
 
     def on_signal(self, instance, **kwargs):
+        if self.signal_honors_transaction:
+            try:
+                return on_commit(partial(self._on_signal, instance, kwargs))
+            except TransactionManagementError:
+                pass  # not in transaction management, execute now.
+        return self._on_signal(instance, kwargs)
+
+    def _on_signal(self, instance, kwargs):
         if self.should_dispatch(instance, **kwargs):
             return self.send_from_instance(instance, **kwargs)
 

@@ -3,9 +3,10 @@ from __future__ import absolute_import, unicode_literals
 import pickle
 import pytest
 
-from case import Mock
+from case import Mock, patch
 
 from django.db.models.query import Q as _Q_
+from django.db.transaction import TransactionManagementError
 
 from thorn._state import current_app
 from thorn.django import signals
@@ -269,6 +270,37 @@ class test_ModelEvent:
         event = self.mock_event('x.y', sender_field='account.user')
         instance = self.Model()
         assert (event.instance_sender(instance) is instance.account.user)
+
+    @patch('thorn.events.on_commit')
+    @patch('thorn.events.partial')
+    def test_on_signal__transaction(self, partial, on_commit):
+        # test with signal_honor_transaction and in transaction
+        event = self.mock_event('x.y', sender_field=None)
+        event.signal_honors_transaction = True
+        event._on_signal = Mock(name='_on_signal')
+        instance = self.Model()
+        event.on_signal(instance, kw=1)
+        partial.assert_called_once_with(event._on_signal, instance, {'kw': 1})
+        on_commit.assert_called_once_with(partial())
+        event._on_signal.assert_not_called()
+
+    @patch('thorn.events.on_commit')
+    @patch('thorn.events.partial')
+    def test_on_signal__no_transaction(self, partial, on_commit):
+        # test with signal_honor_transaction and not in transaction
+        event = self.mock_event('x.y', sender_field=None)
+        event.signal_honors_transaction = True
+        event._on_signal = Mock(name='_on_signal')
+        instance = self.Model()
+        on_commit.side_effect = TransactionManagementError()
+        from thorn import events as _events
+        assert _events.TransactionManagementError is TransactionManagementError
+        event.on_signal(instance, kw=1)
+        partial.assert_called_once_with(event._on_signal, instance, {'kw': 1})
+        on_commit.assert_called_once_with(partial())
+        event._on_signal.assert_called_once_with(
+            instance, {'kw': 1},
+        )
 
     def test_on_signal(self):
         instance = self.Model()
