@@ -608,7 +608,7 @@ Use an existing file as a template:
 .. code-block:: console
 
     $ cd docs/reference/
-    $ cp thorn.request.rst thron.awesome.rst
+    $ cp thorn.request.rst thorn.awesome.rst
 
 Edit the file using your favorite editor:
 
