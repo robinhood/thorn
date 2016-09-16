@@ -162,6 +162,11 @@ class test_dispatch_on_delete(SignalDispatcherCase):
         )
 
 
+def test_dispatch_on_m2m_change_interface():
+    x = signals.dispatch_on_m2m_change(Mock(), Mock())
+    assert x.setup_actions() == {}
+
+
 @pytest.mark.parametrize('Dispatcher', [
     signals.dispatch_on_m2m_add,
     signals.dispatch_on_m2m_remove,
