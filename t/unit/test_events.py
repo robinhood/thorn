@@ -11,7 +11,7 @@ from django.db.transaction import TransactionManagementError
 from thorn._state import current_app
 from thorn.django import signals
 from thorn.reverse import model_reverser
-from thorn.events import Event, ModelEvent, _true
+from thorn.events import E_DISPATCH_RAISED_ERROR, Event, ModelEvent, _true
 from thorn.utils.functional import Q
 
 from conftest import mock_event
@@ -329,6 +329,26 @@ class test_ModelEvent:
             sender=None,
             context={},
         )
+
+    def test_on_signal__raises_propagate(self):
+        instance = self.Model()
+        event = self.mock_event('x.y', propagate_errors=True)
+        event.send_from_instance = Mock(name='send_from_instance')
+        event.send_from_instance.side_effect = KeyError()
+        with pytest.raises(KeyError):
+            event._on_signal(instance, {'kw': 1})
+        event.send_from_instance.assert_called_once_with(instance, kw=1)
+
+    @patch('thorn.events.logger')
+    def test_on_signal__raises_no_propagate(self, logger):
+        instance = self.Model()
+        event = self.mock_event('x.y', propagate_errors=False)
+        event.send_from_instance = Mock(name='send_from_instance')
+        exc = event.send_from_instance.side_effect = KeyError()
+        event._on_signal(instance, {'kw': 1})
+        event.send_from_instance.assert_called_once_with(instance, kw=1)
+        logger.exception.assert_called_with(
+            E_DISPATCH_RAISED_ERROR, event.name, exc)
 
     def test_reduce(self, event, app):
         event._kwargs['dispatcher'] = None

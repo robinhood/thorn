@@ -1,7 +1,6 @@
 """User-defined webhook events."""
 from __future__ import absolute_import, unicode_literals
 
-
 from functools import partial
 from operator import attrgetter
 from six import iteritems as items, iterkeys as keys
@@ -12,6 +11,7 @@ from celery.utils import cached_property
 from ._state import app_or_default
 from .utils.compat import bytes_if_py2, restore_from_keys
 from .utils.functional import Q
+from .utils.log import get_logger
 
 try:
     from django.db.transaction import TransactionManagementError, on_commit
@@ -20,6 +20,10 @@ except ImportError:  # pragma: no cover
     TransactionManagementError = on_commit = None  # nqoa
 
 __all__ = ['Event', 'ModelEvent']
+
+E_DISPATCH_RAISED_ERROR = 'Event %r dispatch raised: %r'
+
+logger = get_logger(__name__)
 
 
 def _true(*args, **kwargs):
@@ -217,8 +221,17 @@ class ModelEvent(Event):
             webhook is sent on transaction commit, and ignored if the
             transaction rolls back.
 
-            Default is False in Thorn 1.3 and requires Django >= 1.9.
+            Default is False in Thorn 1.5 and requires Django >= 1.9.
             This will be enabled by default in Thorn 2.0.
+            .. versionaddded:: 1.5
+        propagate_errors (bool): If enabled errors will propagate
+            up to the caller (even when called by signal).
+
+            Disabled by default since version 1.5.
+            .. versionadded:: 1.5
+        signal_dispatcher (~thorn.django.signals.signal_dispatcher):
+            Custom signal_dispatcher used to connect this event to a
+            model signal.
         $field__$op (Any): Optional filter arguments to filter the model
             instances to dispatch for.  These keyword arguments
             can be defined just like the arguments to a Django query set,
@@ -227,9 +240,6 @@ class ModelEvent(Event):
             and you have to use ``last_name__eq="jerry"`` instead.
 
             See :class:`~thorn.utils.functional.Q` for more information.
-        signal_dispatcher (~thorn.django.signals.signal_dispatcher):
-            Custom signal_dispatcher used to connect this event to a
-            model signal.
 
     See Also:
         In addition the same arguments as :class:`Event` is supported.
@@ -262,13 +272,18 @@ class ModelEvent(Event):
             Q(*args + restored_args, **self.filter_fields)
             if args or self.filter_fields else _true)
 
-    def _init_attrs(self, reverse=None, sender_field=None,
-                    signal_dispatcher=None, signal_honors_transaction=False,
+    def _init_attrs(self,
+                    reverse=None,
+                    sender_field=None,
+                    signal_dispatcher=None,
+                    signal_honors_transaction=False,
+                    propagate_errors=False,
                     **kwargs):
         self.reverse = reverse
         self.sender_field = sender_field
         self.signal_dispatcher = signal_dispatcher
         self.signal_honors_transaction = signal_honors_transaction
+        self.propagate_errors = propagate_errors
 
     def _get_name(self, instance):
         """Interpolates the event name with attributes from the
@@ -353,8 +368,13 @@ class ModelEvent(Event):
         return self._on_signal(instance, kwargs)
 
     def _on_signal(self, instance, kwargs):
-        if self.should_dispatch(instance, **kwargs):
-            return self.send_from_instance(instance, **kwargs)
+        try:
+            if self.should_dispatch(instance, **kwargs):
+                return self.send_from_instance(instance, **kwargs)
+        except Exception as exc:
+            if self.propagate_errors:
+                raise
+            logger.exception(E_DISPATCH_RAISED_ERROR, self.name, exc)
 
     def dispatches_on_create(self):
         return self._set_default_signal_dispatcher(
