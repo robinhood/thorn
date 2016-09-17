@@ -8,10 +8,11 @@ from case import Mock, patch
 from django.db.models.query import Q as _Q_
 from django.db.transaction import TransactionManagementError
 
+from thorn import events as _events
 from thorn._state import current_app
 from thorn.django import signals
 from thorn.reverse import model_reverser
-from thorn.events import E_DISPATCH_RAISED_ERROR, Event, ModelEvent, _true
+from thorn.events import Event, ModelEvent, _true
 from thorn.utils.functional import Q
 
 from conftest import mock_event
@@ -286,6 +287,7 @@ class test_ModelEvent:
 
     @patch('thorn.events.on_commit')
     @patch('thorn.events.partial')
+    @pytest.mark.skipif(_events.on_commit is None, reason='Django <1.9')
     def test_on_signal__no_transaction(self, partial, on_commit):
         # test with signal_honor_transaction and not in transaction
         event = self.mock_event('x.y', sender_field=None)
@@ -293,7 +295,6 @@ class test_ModelEvent:
         event._on_signal = Mock(name='_on_signal')
         instance = self.Model()
         on_commit.side_effect = TransactionManagementError()
-        from thorn import events as _events
         assert _events.TransactionManagementError is TransactionManagementError
         event.on_signal(instance, kw=1)
         partial.assert_called_once_with(event._on_signal, instance, {'kw': 1})
@@ -348,7 +349,7 @@ class test_ModelEvent:
         event._on_signal(instance, {'kw': 1})
         event.send_from_instance.assert_called_once_with(instance, kw=1)
         logger.exception.assert_called_with(
-            E_DISPATCH_RAISED_ERROR, event.name, exc)
+            _events.E_DISPATCH_RAISED_ERROR, event.name, exc)
 
     def test_reduce(self, event, app):
         event._kwargs['dispatcher'] = None
