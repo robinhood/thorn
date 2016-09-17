@@ -411,14 +411,14 @@ the test suite by calling:
 
     $ python setup.py test
 
-This will run all of the test, to run individual tests you need
-to working in the test project directory:
+This will run all of the test, to run individual tests
+you can call ``py.test`` directly:
 
 ::
 
-    $ python manage.py test
+    $ py.test
 
-Some useful options to ``manage.py test`` are:
+Some useful options to ``py.test`` are:
 
 * ``-x``
 
@@ -428,16 +428,12 @@ Some useful options to ``manage.py test`` are:
 
     Don't capture output
 
-* ``-nologcapture``
-
-    Don't capture log output.
-
 If you want to run the tests for a single test file only
 you can do so like this:
 
 ::
 
-    $ python manage.py test thorn.tests.test_request
+    $ py.test t/unit/test_request.py
 
 Running the functional test suite
 ---------------------------------
