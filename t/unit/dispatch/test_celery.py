@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import pytest
-
 from case import Mock, call
 
 from thorn.dispatch.celery import Dispatcher, WorkerDispatcher
@@ -26,8 +24,7 @@ class test_Dispatcher:
 
 class test_WorkerDispatcher:
 
-    @pytest.fixture(autouse=True)
-    def setup_self(self):
+    def setup(self):
         self.app = Mock(name='app')
         self.dispatcher = WorkerDispatcher(app=self.app)
 

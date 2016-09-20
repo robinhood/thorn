@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import pickle
-import pytest
 
 from case import Mock, call
 
@@ -16,9 +15,7 @@ def subscriber_from_dict(d, event):
 
 class test_Dispatcher:
 
-    @pytest.fixture(autouse=True)
-    def setup_self(self, app):
-        self.app = app
+    def setup(self):
         self._app = Mock(name='app')
         self.dispatcher = Dispatcher(app=self._app)
 

@@ -122,7 +122,6 @@ setuptools.setup(
     zip_safe=False,
     install_requires=install_requires,
     tests_require=tests_require,
-    test_suite='nose.collector',
     classifiers=classifiers,
     entry_points=entrypoints,
     long_description=long_description,

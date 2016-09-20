@@ -60,8 +60,7 @@ def test_dispatch(mock_dispatch_request, dispatcher, app):
 @pytest.mark.django_db()
 class test_dispatch_request:
 
-    @pytest.fixture(autouse=True)
-    def setup_self(self):
+    def setup(self):
         self.session = Mock(name='session')
         self.user, _ = get_user_model().objects.get_or_create(
             username='test_dispatch_request',

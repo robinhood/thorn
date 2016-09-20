@@ -45,11 +45,10 @@ def logger(patching):
 class test_Request:
 
     @pytest.fixture(autouse=True)
-    def setup_self(self, gethostbyname, req, event, app):
+    def setup_self(self, gethostbyname, req, event):
         self.gethostbyname = gethostbyname
         self.event = event
         self.req = req
-        self.app = app
 
     def test_custom_user_agent(self):
         x = mock_req('foo.bar', 'http://e.com', user_agent='MyAgent')

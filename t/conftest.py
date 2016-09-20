@@ -26,6 +26,17 @@ DEFAULT_RECIPIENT_VALIDATORS = [
 sentinel = object()
 
 
+@pytest.fixture(autouse=True)
+def test_cases_calls_setup_teardown(request):
+    if request.instance:
+        # we set the .patching attribute for every test class.
+        setup = getattr(request.instance, 'setup', None)
+        # we also call .setup() and .teardown() after every test method.
+        teardown = getattr(request.instance, 'teardown', None)
+        setup and setup()
+        teardown and request.addfinalizer(teardown)
+
+
 @pytest.fixture()
 def default_recipient_validators():
     return DEFAULT_RECIPIENT_VALIDATORS
@@ -42,6 +53,17 @@ def app(request):
         _state._tls = _tls
     request.addfinalizer(fin)
     return app
+
+
+@pytest.fixture(autouse=True)
+def test_cases_has_app(request, app, dispatcher, patching):
+    if request.instance:
+        if not hasattr(request.instance, 'app'):
+            request.instance.app = app
+        if not hasattr(request.instance, 'dispatcher'):
+            request.instance.dispatcher = dispatcher
+        if not hasattr(request.instance, 'patching'):
+            request.instance.patching = patching
 
 
 @pytest.fixture()
@@ -84,7 +106,7 @@ def reset_signals(request):
 
 @pytest.fixture()
 def dispatcher():
-    return Mock(name='dispatcher')
+    return Mock(name='dispatcher_set_by_fixture')
 
 
 def mock_event(name, dispatcher=None, app=None, Event=Event, **kwargs):

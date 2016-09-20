@@ -116,11 +116,8 @@ class test_ModelEvent:
             **kwargs
         )
 
-    @pytest.fixture(autouse=True)
-    def setup_self(self, app, dispatcher):
+    def setup(self):
         self.Model = Mock(name='Model')
-        self.app = app
-        self.dispatcher = dispatcher
 
     @pytest.fixture()
     def event(self):
@@ -354,7 +351,6 @@ class test_ModelEvent:
     def test_reduce(self, event, app):
         event._kwargs['dispatcher'] = None
         event.reverse._reverse = None
-        print(event.__reduce_keys__())
         e2 = pickle.loads(pickle.dumps(event))
         assert current_app() is app
         assert e2.name == event.name

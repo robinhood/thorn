@@ -9,10 +9,10 @@ from thorn import _state
 
 class test_current_app:
 
-    def setup_method(self, method):
+    def setup(self):
         self._prev_app, _state.default_app = _state.default_app, None
 
-    def teardown_method(self, method):
+    def teardown(self):
         _state.default_app = self._prev_app
         _state._tls.current_app = None
 
