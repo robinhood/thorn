@@ -11,12 +11,14 @@ __all__ = ['send_event', 'dispatch_requests', 'dispatch_request']
 
 @memoize()
 def _worker_dispatcher():
+    # type: () -> Dispatcher
     from .dispatch.celery import WorkerDispatcher
     return WorkerDispatcher()
 
 
 @shared_task(ignore_result=True)
 def send_event(event, payload, sender, timeout, context={}):
+    # type: (str, Dict, Any, float, Dict) -> None
     """Task called by process dispatching the event.
 
     Note:
@@ -29,6 +31,7 @@ def send_event(event, payload, sender, timeout, context={}):
 
 @shared_task(ignore_result=True)
 def dispatch_requests(reqs, app=None):
+    # type: (Sequence[Dict], App) -> None
     """Process a batch of HTTP requests."""
     app = app_or_default(app)
     session = app.Request.Session()
@@ -38,6 +41,7 @@ def dispatch_requests(reqs, app=None):
 @shared_task(bind=True, ignore_result=True)
 def dispatch_request(self, event, data, sender, subscriber,
                      session=None, app=None, **kwargs):
+    # type: (str, Dict, Any, Dict, requests.Session, App, **Any) -> None
     """Process a single HTTP request."""
     app = app_or_default(app)
     # the user is serialized as the pk, so we cannot pass it

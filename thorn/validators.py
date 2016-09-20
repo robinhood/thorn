@@ -19,16 +19,19 @@ validators = {}
 
 
 def validator(fun):
+    # type: (Callable) -> Callable
     """Make validator json serializable."""
     validators[fun.__name__] = fun
     return fun
 
 
 def serialize_validator(v):
+    # type: (Callable) -> Tuple[str, List]
     return (v._validator, v._args)
 
 
 def deserialize_validator(v):
+    # type: (Union[List, Tuple[str, List]) -> Callable
     if isinstance(v, (list, tuple)):
         name, args = v
         return validators[name](*args)
@@ -36,6 +39,7 @@ def deserialize_validator(v):
 
 
 def _is_internal_address(addr):
+    # type: (str) -> bool
     return any([
         addr.is_private,
         addr.is_reserved,
@@ -46,6 +50,7 @@ def _is_internal_address(addr):
 
 @validator
 def ensure_protocol(*allowed):
+    # type: (*str) -> Callable
     """Only allow recipient URLs using specific protocols.
 
     Example:
@@ -57,6 +62,7 @@ def ensure_protocol(*allowed):
     )
 
     def validate_protocol(recipient_url):
+        # type: (str) -> None
         if not recipient_url.startswith(allowed):
             raise SecurityError(
                 'Protocol of recipient URL not allowed ({0} only)'.format(
@@ -68,9 +74,11 @@ def ensure_protocol(*allowed):
 
 @validator
 def ensure_port(*allowed):
+    # type: (*Union[int, str]) -> Callable
     allowed = tuple(int(p) for p in allowed)
 
     def validate_port(recipient_url):
+        # type: (str) -> None
         port = urlparse(recipient_url).port
         if port and int(port) not in allowed:
             raise SecurityError(
@@ -82,6 +90,7 @@ def ensure_port(*allowed):
 
 
 def _url_ip_address(url):
+    # type: (str) -> ipaddress._IPAddressBase
     try:
         return ip_address(text_type(url))
     except ValueError:
@@ -91,6 +100,7 @@ def _url_ip_address(url):
 
 @validator
 def block_internal_ips():
+    # type: () -> Callable
     """Block recipient URLs that have an internal IP address.
 
     Warning:
@@ -100,6 +110,7 @@ def block_internal_ips():
     """
 
     def validate_not_internal_ip(recipient_url):
+        # type: (str) -> None
         addr = _url_ip_address(recipient_url)
         if _is_internal_address(addr):
             raise SecurityError(
@@ -112,6 +123,7 @@ def block_internal_ips():
 
 @validator
 def block_cidr_network(*blocked_networks):
+    # type: (*str) -> Callable
     """Block recipient URLs from a list of CIDR networks.
 
     Example:
@@ -120,6 +132,7 @@ def block_cidr_network(*blocked_networks):
     _blocked_networks = [ip_network(text_type(x)) for x in blocked_networks]
 
     def validate_cidr(recipient_url):
+        # type: (str) -> None
         recipient_addr = _url_ip_address(recipient_url)
         for blocked_network in _blocked_networks:
             if recipient_addr in blocked_network:

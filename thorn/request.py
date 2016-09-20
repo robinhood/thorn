@@ -88,6 +88,7 @@ class Request(ThenableProxy):
                  headers=None, user_agent=None, app=None,
                  recipient_validators=None,
                  allow_keepalive=True):
+        # type: (str, Dict, Any, Subscriber, str, Callable, Callable, float, Callable, bool, int, float, Mapping, str, App, Sequence[Callable], bool) -> None
         self.app = app_or_default(app or self.app)
         self.id = id or uuid()
         self.event = event
@@ -118,12 +119,15 @@ class Request(ThenableProxy):
             self.user_agent = user_agent
 
     def validate_recipient(self, url):
-        return [validate(url) for validate in self.recipient_validators]
+        # type: (str) -> None
+        [validate(url) for validate in self.recipient_validators]
 
     def sign_request(self, subscriber, data):
+        # type: (Subscriber, str) -> str
         return subscriber.sign(data)
 
     def dispatch(self, session=None, propagate=False):
+        # type: (requests.Session, bool) -> 'Request'
         if not self.cancelled:
             self.validate_recipient(self.subscriber.url)
             with self._finalize_unless_request_error(propagate):
@@ -132,6 +136,7 @@ class Request(ThenableProxy):
 
     @contextmanager
     def _finalize_unless_request_error(self, propagate=False):
+        # type: (bool) -> Any
         try:
             yield
         except self.timeout_errors as exc:
@@ -143,6 +148,7 @@ class Request(ThenableProxy):
 
     @contextmanager
     def session_or_acquire(self, session=None, close_session=False):
+        # type: (requests.Session, bool) -> Any
         if session is None or not self.allow_keepalive:
             session, close_session = self.Session(), True
         try:
@@ -152,6 +158,7 @@ class Request(ThenableProxy):
                 session.close()
 
     def post(self, session=None):
+        # type: (requests.Session) -> requests.Response
         with self.session_or_acquire(session) as session:
             return session.post(
                 url=self.subscriber.url,
@@ -164,6 +171,7 @@ class Request(ThenableProxy):
             )
 
     def handle_timeout_error(self, exc, propagate=False):
+        # type: (Exception, bool) -> Any
         logger.info('Timed out while dispatching webhook request: %r',
                     exc, exc_info=1, extra={'data': self.as_dict()})
         if self.on_timeout:
@@ -171,6 +179,7 @@ class Request(ThenableProxy):
         return self._p.throw(exc, propagate=propagate)
 
     def handle_connection_error(self, exc, propagate=False):
+        # type: (Exception, bool) -> None
         logger.error('Error dispatching webhook request: %r',
                      exc, exc_info=1, extra={'data': self.as_dict()})
         self._p.throw(exc, propagate=propagate)
@@ -178,6 +187,7 @@ class Request(ThenableProxy):
     def as_dict(self):
         """Return a dictionary representation of this request
         suitable for serialization."""
+        # type: () -> Dict[str, Any]
         return {
             'id': self.id,
             'event': self.event,
@@ -195,21 +205,25 @@ class Request(ThenableProxy):
         }
 
     def annotate_headers(self, extra_headers):
+        # type: (Dict[str, Any]) -> Dict[str, Any]
         return dict(self.headers, **extra_headers)
 
     def _serialize_validators(self, validators):
         # not serialized will be callable, some may have already
         # been deserialized.
+        # type: (Sequence) -> Sequence
         return [serialize_validator(v)
                 for v in validators if callable(v)]
 
     def __repr__(self):
+        # type: () -> str
         return bytes_if_py2(REQUEST_REPR.format(type(self).__name__, self))
 
     def __reduce__(self):
         return restore_from_keys, (type(self), (), self.__reduce_keys__())
 
     def __reduce_keys__(self):
+        # type: () -> Dict[str, Any]
         return dict(
             self.as_dict(),
             headers=self._headers,
@@ -218,10 +232,12 @@ class Request(ThenableProxy):
 
     @cached_property
     def headers(self):
+        # type: () -> Dict[str, Any]
         return dict(self.default_headers, **self._headers or {})
 
     @property
     def default_headers(self):
+        # type: () -> Dict[str, Any]
         return {
             'Content-Type': self.subscriber.content_type,
             'User-Agent': self.user_agent,
@@ -231,16 +247,19 @@ class Request(ThenableProxy):
 
     @cached_property
     def urlident(self):
+        # type: () -> Tuple[str, int, str]
         """Used to order HTTP requests by URL."""
         url = parse_url(self.subscriber.url)
         return url.host, url.port or 80, url.scheme or 'http'
 
     @property
     def value(self):
+        # type: () -> Optional[requests.Response]
         return self.response  # here for Thenable-compatiblity.
 
     @cached_property
     def recipient_validators(self):
+        # type: () -> Sequence[Callable]
         return [
             deserialize_validator(v) for v in self._recipient_validators
         ]

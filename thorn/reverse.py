@@ -28,11 +28,13 @@ class model_reverser(object):
     """
 
     def __init__(self, view_name, *args, **kwargs):
+        # type: (str, *Any, **Any) -> None
         self.view_name = view_name
         self.args = args
         self.kwargs = kwargs
 
     def __call__(self, instance, app=None, **kw):
+        # type: (Model, App, **Any) -> str
         return app_or_default(app).reverse(
             self.view_name,
             args=[attrgetter(arg)(instance) for arg in self.args],

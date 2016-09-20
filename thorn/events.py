@@ -27,6 +27,7 @@ logger = get_logger(__name__)
 
 
 def _true(*args, **kwargs):
+    # type: (*Any, **Any) -> bool
     return True
 
 
@@ -80,6 +81,7 @@ class Event(object):
                  recipient_validators=None, subscribers=None,
                  request_data=None, allow_keepalive=None,
                  **kwargs):
+        # type: (str, float, Dispatcher, bool, int, float, App, List, Mapping, Dict, bool) -> None
         self.name = name
         self.timeout = timeout
         self._dispatcher = dispatcher
@@ -96,6 +98,7 @@ class Event(object):
 
     def send(self, data, sender=None,
              on_success=None, on_error=None, timeout=None, on_timeout=None):
+        # type: (Any, Any, Callable, Callable, float, Callable) -> promise
         """Send event to all subscribers.
 
         Arguments:
@@ -127,11 +130,13 @@ class Event(object):
         )
 
     def prepare_payload(self, data):
+        # type: (Any) -> Any
         return dict(self.request_data, **data) if self.request_data else data
 
     def _send(self, name, data, headers=None, sender=None,
               on_success=None, on_error=None,
               timeout=None, on_timeout=None, context=None):
+        # type: (str, Any, Dict, Any, Callable, Callable, float, Callable, Dict) -> promise
         timeout = timeout if timeout is not None else self.timeout
         return self.dispatcher.send(
             name, self.prepare_payload(data), sender,
@@ -146,6 +151,7 @@ class Event(object):
         )
 
     def __repr__(self):
+        # type: () -> str
         return bytes_if_py2('<{0}: {1} ({2:#x})>'.format(
             type(self).__name__, self.name, id(self)))
 
@@ -153,6 +159,7 @@ class Event(object):
         return restore_from_keys, (type(self), (), self.__reduce_keys__())
 
     def __reduce_keys__(self):
+        # type: () -> Dict[str, Any]
         return {
             'name': self.name,
             'timeout': self.timeout,
@@ -166,6 +173,7 @@ class Event(object):
         }
 
     def prepare_recipient_validators(self, validators):
+        # type: (Sequence[Callable]) -> Sequence[Callable]
         """Prepare recipient validator list (instance-wide).
 
         Note:
@@ -177,20 +185,24 @@ class Event(object):
 
     @cached_property
     def prepared_recipient_validators(self):
+        # type: () -> Sequence[Callable]
         return self.prepare_recipient_validators(self.recipient_validators)
 
     @property
     def subscribers(self):
+        # type: () -> Sequence[Subscriber]
         return self.dispatcher.subscribers_for_event(
             self.name, extra_subscribers=self._subscribers,
         )
 
     @subscribers.setter
     def subscribers(self, subscribers):
+        # type: (Sequence[Subscriber]) -> None
         self._subscribers = subscribers
 
     @property
     def dispatcher(self):
+        # type: () -> Dispatcher
         return (self._dispatcher if self._dispatcher is not None
                 else self.app.dispatcher)
 
@@ -244,9 +256,10 @@ class ModelEvent(Event):
     See Also:
         In addition the same arguments as :class:`Event` is supported.
     """
-    signal_dispatcher = None
+    signal_dispatcher = None  # type: signal_dispatcher
 
     def __init__(self, name, *args, **kwargs):
+        # type: (str, *Any, **Any) -> None
         super(ModelEvent, self).__init__(name, **kwargs)
         self._kwargs = kwargs
         self._kwargs.pop('app', None)  # don't use app in __reduce__
@@ -279,6 +292,7 @@ class ModelEvent(Event):
                     signal_honors_transaction=False,
                     propagate_errors=False,
                     **kwargs):
+        # type: (model_reverser, str, signal_dispatcher, bool, bool, **Any) -> None
         self.reverse = reverse
         self.sender_field = sender_field
         self.signal_dispatcher = signal_dispatcher
@@ -286,11 +300,13 @@ class ModelEvent(Event):
         self.propagate_errors = propagate_errors
 
     def _get_name(self, instance):
+        # type: (Model) -> str
         """Interpolates the event name with attributes from the
         instance."""
         return self.name.format(instance)
 
     def send(self, instance, data=None, sender=None, **kwargs):
+        # type: (Model, Any, Any, **Any) -> promise
         """Send event for model ``instance``.
 
         Keyword Arguments:
@@ -308,16 +324,19 @@ class ModelEvent(Event):
         ), sender=sender, **kwargs)
 
     def get_absolute_url(self, instance):
+        # type: (Model) -> Optional[str]
         return (
             self._get_absolute_url_from_reverse(instance) or
             self._get_absolute_url_from_model(instance)
         )
 
     def _get_absolute_url_from_reverse(self, instance):
+        # type: (Model) -> Optional[str]
         if self.reverse is not None:
             return self.reverse(instance, app=self.app)
 
     def _get_absolute_url_from_model(self, instance):
+        # type: (Model) -> Optional[str]
         try:
             absurl = instance.get_absolute_url
         except AttributeError:
@@ -326,6 +345,7 @@ class ModelEvent(Event):
             return absurl()
 
     def send_from_instance(self, instance, context={}, **kwargs):
+        # type: (Model, Mapping, **Any) -> promise
         return self.send(
             instance=instance,
             headers=self.instance_headers(instance),
@@ -335,6 +355,7 @@ class ModelEvent(Event):
         )
 
     def to_message(self, data, instance=None, sender=None, ref=None):
+        # type: (Any, Model, Any, str) -> Dict[str, Any]
         name = self._get_name(instance)
         return {
             'event': name,
@@ -344,6 +365,7 @@ class ModelEvent(Event):
         }
 
     def instance_data(self, instance):
+        # type: (Model) -> Any
         """Get event data from ``instance.webhook_payload()``."""
         try:
             handler = instance.webhook_payload
@@ -353,6 +375,7 @@ class ModelEvent(Event):
             return handler()
 
     def instance_headers(self, instance):
+        # type: (Model) -> Mapping
         """Get event headers from ``instance.webhook_headers()``."""
         try:
             handler = instance.webhook_headers
@@ -362,22 +385,27 @@ class ModelEvent(Event):
             return handler()
 
     def instance_sender(self, instance):
+        # type: (Model) -> Any
         """Get event ``sender`` from model instance."""
         if self.sender_field:
             return attrgetter(self.sender_field)(instance)
 
     def connect_model(self, model):
+        # type: (Any) -> None
         self.models.add(model)
         self._connect_model_signal(model)
 
     def _connect_model_signal(self, model):
+        # type: (Any) -> None
         if self.signal_dispatcher:
             self.signal_dispatcher.connect(sender=model)
 
     def should_dispatch(self, instance, **kwargs):
+        # type: (Model, **Any) -> bool
         return self._filter_predicate(instance)
 
     def on_signal(self, instance, **kwargs):
+        # type: (Model, **Any) -> promise
         if self.signal_honors_transaction:
             try:
                 return on_commit(partial(self._on_signal, instance, kwargs))
@@ -386,6 +414,7 @@ class ModelEvent(Event):
         return self._on_signal(instance, kwargs)
 
     def _on_signal(self, instance, kwargs):
+        # type (Model, Dict) -> promise
         try:
             if self.should_dispatch(instance, **kwargs):
                 return self.send_from_instance(instance, **kwargs)
@@ -395,49 +424,60 @@ class ModelEvent(Event):
             logger.exception(E_DISPATCH_RAISED_ERROR, self.name, exc)
 
     def dispatches_on_create(self):
+        # type: () -> Event
         return self._set_default_signal_dispatcher(
             self.app.signals.dispatch_on_create)
 
     def dispatches_on_change(self):
+        # type: () -> Event
         return self._set_default_signal_dispatcher(
             self.app.signals.dispatch_on_change)
 
     def dispatches_on_delete(self):
+        # type: () -> Event
         return self._set_default_signal_dispatcher(
             self.app.signals.dispatch_on_delete)
 
     def dispatches_on_m2m_add(self, related_field):
+        # type: () -> Event
         return self._set_default_signal_dispatcher(
             self.app.signals.dispatch_on_m2m_add, related_field)
 
     def dispatches_on_m2m_remove(self, related_field):
+        # type: () -> Event
         return self._set_default_signal_dispatcher(
             self.app.signals.dispatch_on_m2m_remove, related_field)
 
     def dispatches_on_m2m_clear(self, related_field):
+        # type: () -> Event
         return self._set_default_signal_dispatcher(
             self.app.signals.dispatch_on_m2m_clear, related_field)
 
     def _set_default_signal_dispatcher(self, signal_dispatcher, *args):
+        # type: (signal_dispatcher, *Any) -> Event
         if self._signal_dispatcher is None:
             self._signal_dispatcher = self._prepare_signal_dispatcher(
                 signal_dispatcher, *args)
         return self
 
     def __reduce_keys__(self):
+        # type: () -> Dict[str, Any]
         return dict(self._kwargs, name=self.name, _filterargs=self._filterargs)
 
     def _prepare_signal_dispatcher(self, signal_dispatcher, *args):
+        # type: (type) -> signal_dispatcher
         d = signal_dispatcher(self.on_signal, *args)
         d.use_transitions = self.use_transitions
         return d
 
     @property
     def signal_dispatcher(self):
+        # type: () -> signal_dispatcher
         return self._signal_dispatcher
 
     @signal_dispatcher.setter
     def signal_dispatcher(self, signal_dispatcher):
+        # type: (signal_dispatcher) -> None
         self._signal_dispatcher = (
             self._prepare_signal_dispatcher(signal_dispatcher)
             if signal_dispatcher is not None else None

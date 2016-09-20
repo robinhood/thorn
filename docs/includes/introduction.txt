@@ -80,17 +80,22 @@ an imaginary blog engine:
 
 .. code-block:: python
 
-    from thorn import ModelEvent, model_reverser, webhook_model
+    from thorn import ModelEvent, webhook_model
 
-    @webhook_model(
-        on_create=ModelEvent('article.created')
-        on_change=ModelEvent('article.changed'),
-        on_delete=ModelEvent('article.removed'),
-        on_publish=ModelEvent(
-            'article.published',
-            state__eq='PUBLISHED').dispatches_on_change(),
-    )
+    @webhook_model   # <--- activate webhooks for this model
     class Article(models.Model):
+        uuid = models.UUIDField()
+        title = models.CharField(max_length=100)
+        body = models.TextField()
+
+        class webhooks:
+            on_create = ModelEvent('article.created')
+            on_change = ModelEvent('article.changed'),
+            on_delete = ModelEvent('article.removed'),
+            on_publish = ModelEvent(
+                'article.published',
+                state__eq='PUBLISHED',
+            ).dispatches_on_change(),
 
         @models.permalink
         def get_absolute_url(self):

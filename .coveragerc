@@ -13,3 +13,6 @@ omit =
     */testproj/*
     */testapp/*
     */migrations/*
+exclude_lines =
+    pragma: no cover
+    types for mypy

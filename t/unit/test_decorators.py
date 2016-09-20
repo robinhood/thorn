@@ -16,12 +16,17 @@ class test_functional_webhook_model:
 
     def setup(self):
         self.Model = models.Foo
+        assert not hasattr(self.Model, 'webhooks')
         self.obj, _ = self.Model.objects.get_or_create(username='elaine')
+
+    def teardown_method(self, method):
+        models.Foo.webhooks = None
+        delattr(models.Foo, 'webhooks')
 
     def test_is_dict(self):
         Model = webhook_model(on_change=ModelEvent('x.y'))(self.Model)
-        assert (Model.webhook_events['on_change'] is
-                Model.webhook_events.events['on_change'])
+        assert (Model.webhooks['on_change'] is
+                Model.webhooks.events['on_change'])
 
     def test_on_change(self):
         on_change = ModelEvent('x.change')
@@ -29,7 +34,7 @@ class test_functional_webhook_model:
             on_change=on_change,
             sender_field='username',
         )(self.Model)
-        assert Model.webhook_events.events['on_change'] is on_change
+        assert Model.webhooks.events['on_change'] is on_change
         on_change.send = Mock(name='event.send')
         self.obj.username = 'jerry'
         self.obj.save()
@@ -44,7 +49,7 @@ class test_functional_webhook_model:
     def test_on_create(self):
         on_create = ModelEvent('x.create')
         Model = webhook_model(on_create=on_create)(self.Model)
-        assert Model.webhook_events.events['on_create'] is on_create
+        assert Model.webhooks.events['on_create'] is on_create
         on_create.send = Mock(name='event.send')
         self.Model.objects.filter(username='cosmo').delete()
         obj, _ = self.Model.objects.get_or_create(username='cosmo')
@@ -59,7 +64,7 @@ class test_functional_webhook_model:
     def test_on_delete(self):
         on_delete = ModelEvent('x.delete')
         Model = webhook_model(on_delete=on_delete)(self.Model)
-        assert Model.webhook_events.events['on_delete'] is on_delete
+        assert Model.webhooks.events['on_delete'] is on_delete
         on_delete.send = Mock(name='event.send')
         obj_pk = self.obj.pk
         self.obj.delete()
@@ -76,7 +81,7 @@ class test_functional_webhook_model:
         on_jerry_delete = ModelEvent(
             'x.delete', username__eq='jerry').dispatches_on_delete()
         Model = webhook_model(on_jerry_delete=on_jerry_delete)(self.Model)
-        assert (Model.webhook_events.events['on_jerry_delete'] is
+        assert (Model.webhooks.events['on_jerry_delete'] is
                 on_jerry_delete)
         on_jerry_delete.send = Mock(name='event.send')
         self.obj.delete()
@@ -127,48 +132,88 @@ class test_functional_webhook_model:
 
 class test_webhook_model:
 
-    @pytest.fixture()
-    def Model(self):
-        return Mock(name='Model')
+    def test_with_on_create__connects(self, signals):
 
-    def test_with_on_create__connects(self, Model, signals):
-        Model = webhook_model(on_create=ModelEvent('x.create'))(Model)
+        @webhook_model
+        class Model(object):
+
+            class webhooks:
+                on_create = ModelEvent('x.create')
+
         signals.post_save.connect.assert_called_with(
             ANY, sender=Model, weak=False,
         )
 
-    def test_with_on_change__connects(self, Model, signals):
-        Model = webhook_model(on_change=ModelEvent('x.change'))(Model)
+    def test_with_on_change__connects(self, signals):
+
+        @webhook_model
+        class Model(object):
+
+            class webhooks:
+                on_change = ModelEvent('x.change')
+
         signals.post_save.connect.assert_called_with(
             ANY, sender=Model, weak=False,
         )
 
-    def test_with_on_delete__connects(self, Model, signals):
-        Model = webhook_model(on_delete=ModelEvent('x.delete'))(Model)
+    def test_with_on_delete__connects(self, signals):
+
+        @webhook_model
+        class Model(object):
+
+            class webhooks:
+                on_delete = ModelEvent('x.delete')
+
         signals.post_delete.connect.assert_called_with(
             ANY, sender=Model, weak=False,
         )
 
-    def test_with_on_custom_delete__connects(self, Model, signals):
-        Model = webhook_model(
-            on_custom=ModelEvent('x.delete').dispatches_on_delete(),
-        )(Model)
+    def test_with_on_custom_delete__connects(self, signals):
+
+        @webhook_model
+        class Model(object):
+
+            class webhooks:
+                on_custom = ModelEvent('x.delete').dispatches_on_delete()
+
         signals.post_delete.connect.assert_called_with(
             ANY, sender=Model, weak=False,
         )
 
-    def test_with_on_custom_change__connects(self, Model, signals):
-        Model = webhook_model(
-            on_custom=ModelEvent('x.change').dispatches_on_change(),
-        )(Model)
+    def test_with_on_custom_change__connects(self, signals):
+
+        @webhook_model
+        class Model(object):
+
+            class webhooks:
+                on_custom = ModelEvent('x.change').dispatches_on_change()
+
         signals.post_save.connect.assert_called_with(
             ANY, sender=Model, weak=False,
         )
 
-    def test_with_on_custom_create__connects(self, Model, signals):
-        Model = webhook_model(
-            on_custom=ModelEvent('x.create').dispatches_on_create(),
-        )(Model)
+    def test_with_on_custom_create__connects(self, signals):
+
+        @webhook_model
+        class Model(object):
+
+            class webhooks:
+                on_custom = ModelEvent('x.create').dispatches_on_create()
+
         signals.post_save.connect.assert_called_with(
             ANY, sender=Model, weak=False,
         )
+
+    def test_with_many_args(self, signals):
+        with pytest.raises(TypeError):
+            webhook_model('foo', 'foo')
+
+    def test_arg_not_callable(self, signals):
+        with pytest.raises(TypeError):
+            webhook_model('foo')
+
+    def test_webhooks_not_a_class(self, signals):
+        with pytest.raises(TypeError):
+            @webhook_model
+            class Model(object):
+                webhooks = 42

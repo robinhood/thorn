@@ -239,19 +239,20 @@ Here's an example decorating a Django ORM model:
     from thorn import ModelEvent, webhook_model
 
 
-    @webhook_model(
-        on_create=ModelEvent('article.created'),
-        on_change=ModelEvent('article.changed'),
-        on_delete=ModelEvent('article.removed'),
-        on_publish=ModelEvent(
-            'article.published', state__now_eq='PUBLISHED',
-        ).dispatches_on_change(),
-    )
+    @webhook_model
     class Article(models.Model):
         uuid = models.UUIDField()
         title = models.CharField(max_length=128)
         state = models.CharField(max_length=128, default='PENDING')
         body = models.TextField()
+
+        class webhooks:
+            on_create = ModelEvent('article.created')
+            on_change = ModelEvent('article.changed')
+            on_delete = ModelEvent('article.removed')
+            on_publish = ModelEvent(
+                'article.published', state__now_eq='PUBLISHED',
+            ).dispatches_on_change()
 
         def webhook_payload(self):
             return {
@@ -272,14 +273,16 @@ Here's an example decorating a Django ORM model:
     Please get in touch if you want to add support for additional
     frameworks, it's not as tricky as it sounds and we can help!
 
+The webhooks we want to define is deferred to a private class
+inside the model.
 
-The arguments to this decorator is probably a bit confusing at first,
+The attributes of this class are probably a bit confusing at first,
 but how expressive this interface is will be apparent once you learn more
 about them.
 
 So let's discuss the decorator arguments one by one:
 
-#. ``on_create=ModelEvent('article.created')``
+#. ``on_create = ModelEvent('article.created')``
 
     Here we specify an event to be sent every time a new object of this
     model type is created.
@@ -293,18 +296,18 @@ So let's discuss the decorator arguments one by one:
     The name ``"article.created"`` here is the event name that subscribers can
     use to subscribe to this event.
 
-#. ``on_change=ModelEvent('article.changed')``
+#. ``on_change = ModelEvent('article.changed')``
 
     Just like ``on_create`` and ``on_delete`` the decorator does not need
     to know when an ``on_change`` event is to be dispatched: it will be sent
     whenever an object of this model type is changed.
 
-#. ``on_delete=ModelEvent('article.deleted')``
+#. ``on_delete = ModelEvent('article.deleted')``
 
     I'm sure you can guess what this one does already! This event will
     be sent whenever an object of this model type is deleted.
 
-#. ``on_publish=ModelEvent('article.published', state__now_eq='PUBLISHED')``
+#. ``on_publish = ModelEvent('article.published', state__now_eq='PUBLISHED')``
 
     Here we define a custom event type with an active filter.
 
@@ -322,6 +325,11 @@ So let's discuss the decorator arguments one by one:
     You can even use ``Q`` objects to create elaborate boolean structures,
     which is described in detail in the :ref:`events-model-filtering`
     section.
+
+#. ``def webhook_payload``
+
+    This method defines what to include in the ``data`` section of the
+    webhooks sent for this model.
 
 #. ``@models.permalink`
 
@@ -811,12 +819,12 @@ Tips
 Sending model events manually
 -----------------------------
 
-The webhook model decorator will add a new ``webhook_events`` attribute
+The webhook model decorator will add a new ``webhooks`` attribute
 to your model that can be used to access the individual model events:
 
 .. code-block:: pycon
 
-    >>> on_create = Article.webhook_events.events['on_create']
+    >>> on_create = Article.webhooks.events['on_create']
 
 With this you can send the event manually just like any other
 :class:`~thorn.Event`:
