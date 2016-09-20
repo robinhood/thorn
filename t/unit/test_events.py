@@ -152,7 +152,7 @@ class test_ModelEvent:
         self.dispatcher.send.assert_called_with(
             event.name,
             {
-                'ref': None,
+                'ref': instance.get_absolute_url(),
                 'data': {
                     'foo': 'bar',
                 },
@@ -168,6 +168,29 @@ class test_ModelEvent:
             context=None, extra_subscribers=None, allow_keepalive=True,
         )
 
+    def test_get_absolute_url__reverser(self):
+        instance = Mock(name='instance')
+        event = self.mock_modelevent('article.created')
+        event.reverse = Mock(name='.reverse')
+        assert event.get_absolute_url(instance) is event.reverse.return_value
+        event.reverse.assert_called_once_with(instance, app=event.app)
+
+    def test_get_absolute_url__model(self):
+        instance = Mock(name='instance')
+        event = self.mock_modelevent('article.created')
+        event.reverse = None
+        assert (
+            event.get_absolute_url(instance) is
+            instance.get_absolute_url.return_value
+        )
+        instance.get_absolute_url.assert_called_once_with()
+
+    def test_get_absolute_url__model_but_not_defined(self):
+        instance = Mock(name='instance', spec=[])
+        event = self.mock_modelevent('article.created')
+        event.reverse = None
+        assert event.get_absolute_url(instance) is None
+
     def test_send__with_format_name(self):
         event = self.mock_modelevent('created.{.occasion}')
         event.reverse = None
@@ -176,7 +199,7 @@ class test_ModelEvent:
         self.dispatcher.send.assert_called_with(
             'created.festivus',
             {
-                'ref': None,
+                'ref': instance.get_absolute_url(),
                 'data': {
                     'foo': 'bar',
                 },

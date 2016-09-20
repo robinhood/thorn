@@ -236,7 +236,7 @@ Here's an example decorating a Django ORM model:
 
     from django.db import models
 
-    from thorn import ModelEvent, model_reverser, webhook_model
+    from thorn import ModelEvent, webhook_model
 
 
     @webhook_model(
@@ -246,7 +246,6 @@ Here's an example decorating a Django ORM model:
         on_publish=ModelEvent(
             'article.published', state__now_eq='PUBLISHED',
         ).dispatches_on_change(),
-        reverse=model_reverser('article:detail', uuid='uuid'),
     )
     class Article(models.Model):
         uuid = models.UUIDField()
@@ -258,6 +257,10 @@ Here's an example decorating a Django ORM model:
             return {
                 'title': self.title,
             }
+
+        @models.permalink
+        def get_absolute_url(self):
+            return ('blog:article-detail', None, {'uuid': self.uuid})
 
 .. admonition:: Why is this example using Django?
 
@@ -320,22 +323,20 @@ So let's discuss the decorator arguments one by one:
     which is described in detail in the :ref:`events-model-filtering`
     section.
 
-#. ``reverse=model_reverser('article.detail', uuid='uuid')``
+#. ``@models.permalink`
 
-    This tells the decorator how to get the canonical URL of an object of
+    This tells Thorn how to get the canonical URL of an object of
     this model type, which is used as the ``ref`` field in the webhook
     :ref:`message payload <events-model-message-format>`.
 
-    In this case the reverser, when using Django, will translate directly
+    In this case, when using Django, will translate directly
     into:
 
     .. code-block:: pycon
 
         >>> from django.core.urlresolvers import reverse
-        >>> reverse('article.detail', kwargs={'uuid': instance.uuid})
-        http://example.com/article/3d90c42c-d61e-4579-ab8f-733d955529ad/
-
-    See :ref:`events-model-reverse` for more examples of model reversers.
+        >>> reverse('blog:article_detail', kwargs={'uuid': article.uuid})
+        http://example.com/blog/article/3d90c42c-d61e-4579-ab8f-733d955529ad/
 
 .. admonition:: Django signals and bulk updates
 
@@ -535,6 +536,23 @@ URL references
 To be able to provide a URL reference back to your model object
 the event needs to know how to call :func:`django.core.urlresolvers.reverse`
 (or equivalent in your web framework) and what arguments to use.
+
+A best practice when writing Django apps is to always add a
+``get_absolute_url`` method to your models:
+
+.. code-block:: python
+
+    class Article(models.Model):
+
+        @models.permalink
+        def get_absolute_url(self):
+            return ('article:detail', None, {'uuid': self.uuid})
+
+If you define this method, then Thorn will happily use it, but some times
+you may also want to define alternate reversing strategies for specific events
+(such as ``article.deleted``: when the article is deleted referring to the
+URL of the article does not make sense, but you could point to the category
+an article belongs to for example).
 
 This is where the :class:`~thorn.model_reverser` helper comes in,
 which simply describes how to turn an instance of your model into the

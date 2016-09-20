@@ -31,6 +31,9 @@ class webhook_model(UserDict):
 
             Individual events can override the reverser used.
 
+            Note: On Django you can instead define a `get_absolute_url`
+            method on the Model.
+
     Examples:
         Simple article model, where the URL reference is retrieved
         by ``reverse('article-detail', kwargs={'uuid': article.uuid})``:
@@ -44,10 +47,13 @@ class webhook_model(UserDict):
                 on_deactivate=ModelEvent(
                     'article.deactivate', deactivated__eq=True,
                 )
-                reverse=model_reverser('article-detail', uuid='uuid'),
             )
             class Article(models.Model):
                 uuid = models.UUIDField()
+
+                @models.permalink
+                def get_absolute_url(self):
+                    return ('blog:article-detail', None, {'uuid': self.uuid})
 
         The URL may not actually exist after deletion, so maybe we want
         to point the reference to something else in that special case,
@@ -55,7 +61,8 @@ class webhook_model(UserDict):
         ``reverse('category-detail', args=[article.category.name])``.
 
         We can do that by having the ``on_delete`` event override
-        the reverser used for that event only:
+        the method used to get the absolute url (reverser), for that event
+        only:
 
         .. code-block:: python
 
@@ -70,12 +77,14 @@ class webhook_model(UserDict):
                 on_hipri_delete=ModelEvent(
                     'article.internal_delete', priority__gte=30.0,
                 ).dispatches_on_delete(),
-
-                reverse=model_reverser('article-detail', uuid='uuid'),
             )
             class Article(model.Model):
                 uuid = models.UUIDField()
                 category = models.ForeignKey('category')
+
+                @models.permalink
+                def get_absolute_url(self):
+                    return ('blog:article-detail', None, {'uuid': self.uuid})
     """
 
     def __init__(self,

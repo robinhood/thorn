@@ -304,8 +304,26 @@ class ModelEvent(Event):
             data,
             instance=instance,
             sender=sender,
-            ref=self.reverse(instance, app=self.app) if self.reverse else None,
+            ref=self.get_absolute_url(instance),
         ), sender=sender, **kwargs)
+
+    def get_absolute_url(self, instance):
+        return (
+            self._get_absolute_url_from_reverse(instance) or
+            self._get_absolute_url_from_model(instance)
+        )
+
+    def _get_absolute_url_from_reverse(self, instance):
+        if self.reverse is not None:
+            return self.reverse(instance, app=self.app)
+
+    def _get_absolute_url_from_model(self, instance):
+        try:
+            absurl = instance.get_absolute_url
+        except AttributeError:
+            pass
+        else:
+            return absurl()
 
     def send_from_instance(self, instance, context={}, **kwargs):
         return self.send(

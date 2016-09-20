@@ -89,10 +89,12 @@ an imaginary blog engine:
         on_publish=ModelEvent(
             'article.published',
             state__eq='PUBLISHED').dispatches_on_change(),
-        reverse=model_reverser('article:detail', uuid='uuid'),
     )
     class Article(models.Model):
-        pass  # ...
+
+        @models.permalink
+        def get_absolute_url(self):
+            return 'article:detail', None, {'uuid': self.uuid}
 
 Users can now subscribe to the four events individually, or all of them
 by subscribing to ``article.*``, and will be notified every time
@@ -120,6 +122,11 @@ What do I need?
     - Python (2.7, 3.4, 3.5)
     - PyPy (5.1.1)
     - Jython (2.7).
+
+    - Django (1.8, 1.9, 1.10)
+        Django 1.9 adds the ``transaction.on_commit()`` feature,
+        and Thorn takes advantage of this to send events only when
+        the transaction is committed.
 
 Thorn currently only supports `Django`_, and an API for subscribing to events
 is only provided for `Django REST Framework`_.
