@@ -1,6 +1,5 @@
 setuptools>=20.6.7
 wheel>=0.29.0
-flake8>=2.5.4
 flake8-putty
 flake8==2.6.2
 flakeplus>=1.1
