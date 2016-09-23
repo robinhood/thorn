@@ -19,21 +19,6 @@ __all__ = [
 ]
 
 
-class signal_handler(object):
-
-    def __init__(self, dispatcher, *args, **kwargs):
-        self.dispatcher = dispatcher
-        self.sender = kwargs.pop('sender', None)
-        self.args = args
-        self.kwargs = kwargs
-
-    def __call__(self, fun):
-        self.dispatcher(fun, *self.args, **self.kwargs).connect(
-            sender=self.sender,
-        )
-        return fun
-
-
 class dispatch_on_create(signal_dispatcher):
 
     def setup_signals(self):

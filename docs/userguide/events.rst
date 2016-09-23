@@ -254,16 +254,17 @@ Here's an example decorating a Django ORM model:
                 'article.published', state__now_eq='PUBLISHED',
             ).dispatches_on_change()
 
-        def webhook_payload(self):
-            return {
-                'title': self.title,
-            }
+            def payload(self, article):
+                return {
+                    'title': article.title,
+                }
 
         @models.permalink
         def get_absolute_url(self):
             return ('blog:article-detail', None, {'uuid': self.uuid})
 
-.. admonition:: Why is this example using Django?
+
+.. sidebar:: Why is this example using Django?
 
     Rest assured that Thorn is not a Django-specific library
     and should be flexible enough to integrate with any framework,
@@ -331,7 +332,7 @@ So let's discuss the decorator arguments one by one:
     This method defines what to include in the ``data`` section of the
     webhooks sent for this model.
 
-#. ``@models.permalink`
+#. ``@models.permalink``
 
     This tells Thorn how to get the canonical URL of an object of
     this model type, which is used as the ``ref`` field in the webhook
@@ -345,13 +346,6 @@ So let's discuss the decorator arguments one by one:
         >>> from django.core.urlresolvers import reverse
         >>> reverse('blog:article_detail', kwargs={'uuid': article.uuid})
         http://example.com/blog/article/3d90c42c-d61e-4579-ab8f-733d955529ad/
-
-.. admonition:: Django signals and bulk updates
-
-    A limitation with database signals in Django is that signals are not
-    dispatched for bulk operations (``objects.delete()``/
-    ``objects.update()``), so you need to dispatch events manually when
-    you use this functionality.
 
 
 .. _events-model-event:
@@ -368,10 +362,21 @@ in greater detail.
 Signal dispatch
 ---------------
 
+.. sidebar:: Django signals and bulk updates
+
+    A limitation with database signals in Django is that signals are not
+    dispatched for bulk operations (``objects.delete()``/
+    ``objects.update()``), so you need to dispatch events manually when
+    you use this functionality.
+
 A model event will usually be dispatched in reaction to a signal [*]_,
 on Django this means connecting to the
 :data:`~django.db.models.signals.post_save` and
 :data:`~django.db.models.signals.post_delete` signals.
+
+By signals we mean an implementation of the `Observer Pattern`_,
+such as :class:`django.dispatch.Signal`,
+:class:`celery.utils.dispatch.Signal`, or :pypi:`blinker` (used by Flask).
 
 There are three built-in signal dispatch handlers:
 
@@ -426,14 +431,72 @@ There are three built-in signal dispatch handlers:
     The event will dispatch whenever ``Model.tags.clear()``
     happens.
 
-All of these will only be sent when the transaction is committed, or by other
-means the changes are final in the database.
-
 The webhook model decorator treats the ``on_create``, ``on_change``, and
 ``on_delete`` arguments specially so that you don't have to specify
 the dispatch mechanism for these, but that is not true for any custom
 events you specify by using the ``on_`` argument prefix to
 :class:`~thorn.webhook_model`.
+
+.. admonition:: Side effects in signals
+
+    Performing side-effects such as network operations inside a signal
+    handler can make your code harder to reason about.
+
+    You can always send events manually, so you can opt-out of using
+    signal-invalidation, but it's also a very convenient feature
+    and it tends to work well.
+
+    Using signal-invalidation means that whenever a model instance
+    is saved (using ``model.save()``), or deleted, the signal handler
+    will automatically also invalidate the cache for you by communicating
+    with the cache server.
+
+    This has the potential of disrupting your database transaction
+    in several ways, but we do include some options for you to control this:
+
+    * ``signal_honors_transaction=True``
+        :default: :const:`False` (see note below)
+
+        .. versionadded:: 1.5
+
+
+        Example enabling this option:
+
+        .. code-block:: python
+
+            ModelEvent(signal_honors_transaction=True, …)
+
+        When this option is enabled, the actual communication with the cache
+        server to invalidate your keys will be moved to a
+        ``transaction.on_commit`` handler.
+
+        This means that if there are multiple webhooks
+        being sent in the same database transaction they will be sent
+        together in one go at the point when the transaction is committed.
+
+        It also means that if the database transaction is rolled back,
+        all the webhooks assocatied with that transaction will be discarded.
+
+        **This option requires Django 1.9+ and is disabled by default.**
+        **It will be enabled by default in Thorn 2.0.**
+
+    * ``propagate_errors``
+        :default: :const:`True`
+
+        .. versionadded:: 1.5
+
+        Example disabling this option:
+
+        .. code-block:: python
+
+            ModelEvent(propagate_errors=False, …)
+
+        By default errors raised while sending a webhook will be logged and
+        ignored (make sure you have Python logging setup in your application).
+
+        You can disable this option to have errors propagate up to the
+        caller, but note that this means a ``model.save()`` call will
+        roll back the database transaction if there's a problem sending the webhook.
 
 .. _events-model-payload:
 
@@ -857,11 +920,6 @@ The payload will then look like:
        formats.  If this is something you would like to work on then
        please create an issue on the `Github issue tracker`_ or
        otherwise get in touch with the project.
-
-.. [*] By signals we mean an implementation of the `Observer Pattern`_,
-       such as :class:`django.dispatch.Signal`,
-       :class:`celery.utils.dispatch.Signal`, or :pypi:`blinker` (used by
-       Flask).
 
 .. _`Github issue tracker`: https://github.com/robinhood/thorn/issues/
 .. _`Observer Pattern`: https://en.wikipedia.org/wiki/Observer_pattern

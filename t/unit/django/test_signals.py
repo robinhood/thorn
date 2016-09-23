@@ -11,31 +11,6 @@ from thorn.django.utils import serialize_model
 
 
 @pytest.mark.usefixtures('signals')
-class test_signal_handler:
-
-    @pytest.fixture(autouse=True)
-    def setup_self(self):
-        self.dispatcher = Mock(name='dispatcher')
-        self.sender = Mock(name='sender')
-        self.handler = signals.signal_handler(
-            self.dispatcher, 1, 2, 3, sender=self.sender, foo=4,
-        )
-
-    def test_init(self):
-        assert self.handler.dispatcher is self.dispatcher
-        assert self.handler.sender is self.sender
-        assert self.handler.args == (1, 2, 3)
-        assert self.handler.kwargs == {'foo': 4}
-
-    def test_call(self):
-        fun = Mock(name='fun')
-        ret = self.handler(fun)
-        self.dispatcher.assert_called_with(fun, 1, 2, 3, foo=4)
-        self.dispatcher().connect.assert_called_with(sender=self.sender)
-        assert ret is fun
-
-
-@pytest.mark.usefixtures('signals')
 def test_signal_dispatcher():
     x = signals.signal_dispatcher(Mock())
     assert x.setup_signals() == {}

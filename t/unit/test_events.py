@@ -282,7 +282,7 @@ class test_ModelEvent:
     def test_instance_data__defined(self, event):
         instance = self.Model()
         assert (event.instance_data(instance) is
-                instance.webhook_payload.return_value)
+                instance.webhooks.payload.return_value)
 
     def test_instance_sender__field_undefined(self, event):
         assert not event.instance_sender(self.Model())
@@ -331,8 +331,8 @@ class test_ModelEvent:
         event.on_signal(instance)
         event.send.assert_called_with(
             instance=instance,
-            data=instance.webhook_payload.return_value,
-            headers=instance.webhook_headers.return_value,
+            data=instance.webhooks.payload.return_value,
+            headers=instance.webhooks.headers.return_value,
             sender=instance.x.y.z.account,
             context={},
         )
@@ -345,8 +345,8 @@ class test_ModelEvent:
         event.on_signal(instance)
         event.send.assert_called_with(
             instance=instance,
-            data=instance.webhook_payload.return_value,
-            headers=instance.webhook_headers.return_value,
+            data=instance.webhooks.payload.return_value,
+            headers=instance.webhooks.headers.return_value,
             sender=None,
             context={},
         )

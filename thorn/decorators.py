@@ -174,6 +174,18 @@ class WebhookCapable(object):
         model.webhook_events = self  # XXX remove for Thorn 2.0
         return model
 
+    def payload(self, instance):
+        return self.delegate_to_model(instance, 'webhook_payload')
+
+    def headers(self, instance):
+        return self.delegate_to_model(instance, 'webhook_headers')
+
+    def delegate_to_model(self, instance, meth, *args, **kwargs):
+        # type: (Model, str, *Any, **Any) -> Any
+        fun = getattr(instance, meth, None)
+        if fun is not None:
+            return fun(*args, **kwargs)
+
     def __getitem__(self, key):
         # type: (str) -> Any
         return self.events[key]

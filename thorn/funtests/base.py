@@ -98,7 +98,7 @@ class WebhookSuite(Suite):
             logs[0],
             event=event,
             ref=reverse or self.reverse_article(article),
-            data=article.webhook_payload(),
+            data=article.webhooks.payload(article),
         )
 
     def reverse_article(self, article):

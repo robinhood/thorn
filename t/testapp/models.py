@@ -10,6 +10,8 @@ class Foo(models.Model):
     username = models.CharField(max_length=128)
 
     def webhook_payload(self):
+        # webhooks.payload() defaults to taking the payload
+        # from here, for backwards compatibility.
         return {'username': self.username}
 
 
@@ -44,15 +46,15 @@ class Article(models.Model):
         on_published = ModelEvent(
             'article.published', state__eq='PUBLISHED').dispatches_on_change()
 
-    def webhook_payload(self):
-        return {
-            'title': self.title,
-            'state': self.state,
-            'author': ', '.join([
-                self.author.last_name,
-                self.author.first_name,
-            ]),
-        }
+        def payload(self, article):
+            return {
+                'title': article.title,
+                'state': article.state,
+                'author': ', '.join([
+                    article.author.last_name,
+                    article.author.first_name,
+                ]),
+            }
 
     @models.permalink
     def get_absolute_url(self):

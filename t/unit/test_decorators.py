@@ -12,6 +12,7 @@ from testapp import models
 
 @pytest.mark.django_db()
 @pytest.mark.usefixtures('reset_signals')
+@pytest.mark.usefixtures('transactional_db')
 class test_functional_webhook_model:
 
     def setup(self):
@@ -40,7 +41,7 @@ class test_functional_webhook_model:
         self.obj.save()
         on_change.send.assert_called_with(
             instance=self.obj,
-            data=self.obj.webhook_payload(),
+            data=self.obj.webhooks.payload(self.obj),
             headers=None,
             sender=self.obj.username,
             context={'instance': self.obj.pk},
@@ -55,7 +56,7 @@ class test_functional_webhook_model:
         obj, _ = self.Model.objects.get_or_create(username='cosmo')
         on_create.send.assert_called_with(
             instance=obj,
-            data=obj.webhook_payload(),
+            data=obj.webhooks.payload(obj),
             headers=None,
             sender=None,
             context={'instance': obj.pk},
@@ -70,7 +71,7 @@ class test_functional_webhook_model:
         self.obj.delete()
         on_delete.send.assert_called_with(
             instance=self.obj,
-            data=self.obj.webhook_payload(),
+            data=self.obj.webhooks.payload(self.obj),
             headers=None,
             sender=None,
             context={'instance': obj_pk},
@@ -92,7 +93,7 @@ class test_functional_webhook_model:
 
         on_jerry_delete.send.assert_called_with(
             instance=jerry,
-            data=jerry.webhook_payload(),
+            data=jerry.webhooks.payload(jerry),
             headers=None,
             sender=None,
             context={'instance': jerry_pk},
@@ -111,7 +112,7 @@ class test_functional_webhook_model:
 
         on_create.send.assert_called_with(
             instance=obj2,
-            data=obj2.webhook_payload(),
+            data=obj2.webhooks.payload(obj2),
             headers=None,
             sender=None,
             context={'instance': obj2.pk},
