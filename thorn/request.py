@@ -250,7 +250,7 @@ class Request(ThenableProxy):
         # type: () -> Tuple[str, int, str]
         """Used to order HTTP requests by URL."""
         url = parse_url(self.subscriber.url)
-        return url.host, url.port or 80, url.scheme or 'http'
+        return url.scheme or 'http', url.port or 80, url.host
 
     @property
     def value(self):
