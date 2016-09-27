@@ -459,12 +459,11 @@ events you specify by using the ``on_`` argument prefix to
 
         .. versionadded:: 1.5
 
-
         Example enabling this option:
 
         .. code-block:: python
 
-            ModelEvent(signal_honors_transaction=True, …)
+            ModelEvent(signal_honors_transaction=True, ...)
 
         When this option is enabled, the actual communication with the cache
         server to invalidate your keys will be moved to a
@@ -489,7 +488,7 @@ events you specify by using the ``on_`` argument prefix to
 
         .. code-block:: python
 
-            ModelEvent(propagate_errors=False, …)
+            ModelEvent(propagate_errors=False, ...)
 
         By default errors raised while sending a webhook will be logged and
         ignored (make sure you have Python logging setup in your application).

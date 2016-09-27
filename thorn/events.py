@@ -40,7 +40,7 @@ class Event(object):
         retry_max (int): Max number of retries (3 by default).
         retry_delay (float): Delay between retries (60 seconds by default).
         recipient_validators (Sequence): List of functions validating the
-            recipient URL string.  Functions must return False if the URL is
+            recipient URL string.  Functions must raise an error if the URL is
             blocked.  Default is to only allow HTTP and HTTPS, with respective
             reserved ports 80 and 443, and to block internal IP networks, and
             can be changed using the :setting:`THORN_RECIPIENT_VALIDATORS`
@@ -228,16 +228,18 @@ class ModelEvent(Event):
 
             Default is True (taken from the
                 :setting:`THORN_SIGNAL_HONORS_TRANSACTION` setting), but
-            requires Django >= 1.9.  Earlier Django versions will execute
+            requires Django 1.9 or greater.  Earlier Django versions will execute
             the dispatch immediately.
 
-            .. versionaddded:: 1.5
+            .. versionadded:: 1.5
 
         propagate_errors (bool): If enabled errors will propagate
             up to the caller (even when called by signal).
 
             Disabled by default.
+
             .. versionadded:: 1.5
+
         signal_dispatcher (~thorn.django.signals.signal_dispatcher):
             Custom signal_dispatcher used to connect this event to a
             model signal.
