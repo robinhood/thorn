@@ -228,8 +228,8 @@ class ModelEvent(Event):
 
             Default is True (taken from the
                 :setting:`THORN_SIGNAL_HONORS_TRANSACTION` setting), but
-            requires Django 1.9 or greater.  Earlier Django versions will execute
-            the dispatch immediately.
+            requires Django 1.9 or greater.  Earlier Django versions will
+            execute the dispatch immediately.
 
             .. versionadded:: 1.5
 

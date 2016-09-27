@@ -90,8 +90,9 @@ class Settings(object):
 
     @cached_property
     def THORN_RECIPIENT_VALIDATORS(self):
-        return self._get(
-            'THORN_RECIPIENT_VALIDATORS', self.default_recipient_validators)
+        return self._get_lazy(
+            'THORN_RECIPIENT_VALIDATORS',
+            lambda: list(self.default_recipient_validators))
 
     @cached_property
     def THORN_SIGNAL_HONORS_TRANSACTION(self):

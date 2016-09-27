@@ -38,11 +38,6 @@ def test_cases_calls_setup_teardown(request):
 
 
 @pytest.fixture()
-def default_recipient_validators():
-    return DEFAULT_RECIPIENT_VALIDATORS
-
-
-@pytest.fixture()
 def app(request):
     _tls, _state._tls = _state._tls, _state._TLS()
     app = Thorn(set_as_current=True)
@@ -126,3 +121,10 @@ def event(dispatcher, app):
 @pytest.fixture()
 def model_event(dispatcher, app):
     return mock_event('george.costanza', dispatcher, app, Event=ModelEvent)
+
+
+@pytest.fixture()
+def default_recipient_validators(app):
+    val = app.settings.THORN_RECIPIENT_VALIDATORS = \
+        app.settings.default_recipient_validators
+    return val

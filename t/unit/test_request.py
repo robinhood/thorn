@@ -45,7 +45,8 @@ def logger(patching):
 class test_Request:
 
     @pytest.fixture(autouse=True)
-    def setup_self(self, gethostbyname, req, event):
+    def setup_self(self, default_recipient_validators,
+                   gethostbyname, req, event):
         self.gethostbyname = gethostbyname
         self.event = event
         self.req = req

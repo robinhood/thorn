@@ -58,6 +58,7 @@ def test_dispatch(mock_dispatch_request, dispatcher, app):
 
 
 @pytest.mark.django_db()
+@pytest.mark.usefixtures('default_recipient_validators')
 class test_dispatch_request:
 
     def setup(self):
