@@ -118,3 +118,21 @@ def test_subclass_with_self__keep_reduce(app):
 
     AppObject = app.subclass_with_self(Object, keep_reduce=True)
     assert AppObject().__reduce__() == 303
+
+
+class test_buffering:
+
+    def test_enable_buffer(self, app):
+        app.dispatcher = Mock(name='dispatcher')
+        app.enable_buffer()
+        app.dispatcher.enable_buffer.assert_called_once_with()
+
+    def test_dispable_buffer(self, app):
+        app.dispatcher = Mock(name='dispatcher')
+        app.disable_buffer()
+        app.dispatcher.disable_buffer.assert_called_once_with()
+
+    def test_flush_buffer(self, app):
+        app.dispatcher = Mock(name='dispatcher')
+        app.flush_buffer()
+        app.dispatcher.flush_buffer.assert_called_once_with()

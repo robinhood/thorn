@@ -12,3 +12,7 @@ class ImproperlyConfigured(ThornError):
 
 class SecurityError(ThornError):
     pass
+
+
+class BufferNotEmpty(Exception):
+    pass

@@ -130,6 +130,17 @@ class test_functional_webhook_model:
         assert on_create.reverse is reverse
         assert on_change.reverse is reverse2
 
+    def test_dict_compat(self):
+        on_create = ModelEvent('x.create')
+        self.Model = webhook_model(
+            on_create=on_create)(self.Model)
+        assert self.Model.webhooks['on_create'] is on_create
+        self.Model.webhooks['on_create'] = 42
+        assert self.Model.webhooks['on_create'] == 42
+        del(self.Model.webhooks['on_create'])
+        with pytest.raises(KeyError):
+            self.Model.webhooks['on_create']
+
 
 class test_webhook_model:
 

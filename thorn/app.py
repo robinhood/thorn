@@ -21,105 +21,169 @@ class Thorn(object):
     settings_cls = 'thorn.conf:Settings'
     request_cls = 'thorn.request:Request'
 
-    dispatchers = {
+    dispatchers = {  # type: Mapping[str, str]
         'default': 'thorn.dispatch.base:Dispatcher',
         'celery': 'thorn.dispatch.celery:Dispatcher',
         'disabled': 'thorn.dispatch.disabled:Dispatcher',
     }
-    environments = {
+    environments = {  # type: Set[str]
         'thorn.environment.django:DjangoEnv',
     }
 
     def __init__(self, dispatcher=None, set_as_current=True):
+        # type: (Union[str, Dispatcher], bool) -> None
         self._dispatcher = dispatcher
         if set_as_current:
             self.set_current()
 
+    def enable_buffer(self):
+        # type: () -> None
+        """Start buffering up events instead of dispatching them directly.
+
+        Note:
+            User will be responsible for flushing the buffer via
+            :meth:`flush_buffer`, say periodically or at the end of a
+            web request.
+        """
+        self.dispatcher.enable_buffer()
+
+    def disable_buffer(self):
+        # type: () -> None
+        """Disable buffering.
+
+        Raises:
+            ~thorn.exceptions.BufferNotEmpty: if there are still items in the
+            buffer when disabling.
+        """
+        self.dispatcher.disable_buffer()
+
+    def flush_buffer(self):
+        # type: () -> None
+        """Flush events accumulated while buffering active.
+
+        Note:
+            This will force send any buffered events, but the mechanics of how
+            this happens is up to the dispatching backend:
+
+            - ``default``
+
+                Sends buffered events one by one.
+
+            - ``celery``
+
+                Sends a single message containing all buffered
+                events, a worker will then pick that up and execute the
+                web requests.
+        """
+        self.dispatcher.flush_buffer()
+
     def set_current(self):
+        # type: () -> None
         _state.set_current_app(self)
 
     def set_default(self):
+        # type: () -> None
         _state.set_default_app(self)
 
     def autodetect_env(self, apply=methodcaller('autodetect')):
+        # type: (Callable) -> Any
         return first(apply, map(symbol_by_name, self.environments))()
 
     def _get_dispatcher(self, dispatcher=None):
+        # type: (Union[str, Dispatcher]) -> Dispatcher
         if dispatcher is None:
             dispatcher = self.settings.THORN_DISPATCHER
         return symbol_by_name(dispatcher, self.dispatchers)
 
     @cached_property
     def dispatcher(self):
+        # type: () -> Dispatcher
         return self.Dispatcher()
 
     @cached_property
     def Dispatcher(self):
+        # type: () -> type
         return self.subclass_with_self(self._get_dispatcher(self._dispatcher))
 
     @cached_property
     def hmac_sign(self):
+        # type: () -> Callable
         return symbol_by_name(self.settings.THORN_HMAC_SIGNER)
 
     @property
     def config(self):
+        # type: () -> Any
         return self.env.config
 
     @property
     def on_commit(self):
+        # type: () -> Callable
         return self.env.on_commit
 
     @property
     def Subscriber(self):
+        # type: () -> type
         return self.env.Subscriber
 
     @property
     def Subscribers(self):
+        # type: () -> type
         return self.env.Subscribers
 
     @property
     def signals(self):
+        # type: () -> Any
         return self.env.signals
 
     @property
     def reverse(self):
+        # type: () -> Callable
         return self.env.reverse
 
     @cached_property
     def Settings(self):
+        # type: () -> type
         return self.subclass_with_self(self.settings_cls)
 
     @cached_property
     def settings(self):
+        # type: () -> Settings
         return self.Settings()
 
     @cached_property
     def env(self):
+        # type: () -> Env
         return self.autodetect_env()
 
     @cached_property
     def Event(self):
+        # type: () -> type
         return self.subclass_with_self(self.event_cls)
 
     @cached_property
     def ModelEvent(self):
+        # type: () -> type
         return self.subclass_with_self(self.model_event_cls)
 
     @cached_property
     def webhook_model(self):
+        # type: () -> Callable
         return symbol_by_name('thorn.decorators.webhook_model')
 
     @cached_property
     def model_reverser(self):
+        # type: () -> Callable
         return symbol_by_name('thorn.reverse.model_reverser')
 
     @cached_property
     def Request(self):
+        # type: () -> type
         return self.subclass_with_self(self.request_cls)
 
     def subclass_with_self(self, Class,
                            name=None, attribute='app',
                            reverse=None, keep_reduce=False, **kw):
+        # type: (type, str, str, str, bool, **Any) -> type
         """Subclass an app-compatible class by setting its app attribute
         to this instance.
 

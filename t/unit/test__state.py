@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import pytest
+import thorn
 
 from case import Mock
 
@@ -36,3 +37,25 @@ class test_current_app:
         tls.current_app = None
         _state.set_default_app(default_app)
         assert _state.current_app() is default_app
+
+
+class test_buffer_events:
+
+    def test_context(self):
+        app = Mock(name='app')
+
+        with thorn.buffer_events(app=app):
+            app.enable_buffer.assert_called_once_with()
+        app.flush_buffer.called_once_with()
+        app.disable_buffer.called_once_with()
+
+    def test_explicit_flush(self):
+        app = Mock(name='app')
+        with thorn.buffer_events(app=app) as buffer:
+            app.enable_buffer.assert_called_once_with()
+            buffer.flush()
+            app.flush_buffer.assert_called_once_with()
+            buffer.flush()
+            assert app.flush_buffer.call_count == 2
+        assert app.flush_buffer.call_count == 3
+        assert app.disable_buffer.called_once_with()

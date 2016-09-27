@@ -4,24 +4,15 @@ import pytest
 
 from case import Mock, patch
 
-from thorn.utils.functional import Q, groupbymax, traverse_subscribers
+from thorn.utils.functional import Q, chunks, traverse_subscribers
 
 
-class test_groupbymax:
-
-    def test_scalar(self):
-        assert list(groupbymax(['a'], 10)) == [['a']]
-
-    def test_maxsize(self):
-        assert list(groupbymax('aaaabcdde', 3)) == [
-            ['a', 'a', 'a'], ['a'], ['b'], ['c'], ['d', 'd'], ['e'],
-        ]
-
-    def test_random(self):
-        assert list(groupbymax(range(10), 10)) == [[i] for i in range(10)]
-
-    def test_buf_extends(self):
-        assert list(groupbymax('a' * 100, 200)) == [['a'] * 100]
+@pytest.mark.parametrize('max,input,expected', [
+    (2, range(10), [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9]]),
+    (2, range(9), [[0, 1], [2, 3], [4, 5], [6, 7], [8]]),
+])
+def test_chunks(max, input, expected):
+    assert list(chunks(iter(input), max)) == expected
 
 
 class test_Q:

@@ -1,9 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 
 import pickle
+import pytest
 
 from case import Mock, call
 
+from thorn.exceptions import BufferNotEmpty
 from thorn.dispatch.base import Dispatcher
 
 
@@ -23,6 +25,35 @@ class test_Dispatcher:
         request = Mock(name='request')
         self.dispatcher.dispatch_request(request)
         request.dispatch.assert_called_with()
+
+    def test_enable_buffer(self):
+        assert not self.dispatcher._buffer
+        self.dispatcher.enable_buffer()
+        assert self.dispatcher._buffer
+        self.dispatcher.disable_buffer()
+        assert not self.dispatcher._buffer
+
+    def test_disable_buffer__buffer_not_empty(self):
+        self.dispatcher.enable_buffer()
+        self.dispatcher.pending_outbound.append(32)
+        with pytest.raises(BufferNotEmpty):
+            self.dispatcher.disable_buffer()
+
+    def test_buffering(self):
+        self.dispatcher.enable_buffer()
+        assert not self.dispatcher.pending_outbound
+        req = Mock(name='req1')
+        self.dispatcher.dispatch_request(req)
+        req.dispatch.assert_not_called()
+        assert req in self.dispatcher.pending_outbound
+        req2 = Mock(name='req2')
+        self.dispatcher.dispatch_request(req2)
+        assert req2 in self.dispatcher.pending_outbound
+        req2.dispatch.assert_not_called()
+        req.dispatch_assert_not_called()
+        self.dispatcher.flush_buffer()
+        req.dispatch.assert_called()
+        req2.dispatch.assert_called()
 
     def test_send(self, patching):
         barrier = patching('thorn.dispatch.base.barrier')

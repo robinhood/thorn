@@ -5,6 +5,7 @@ import operator
 
 from collections import Callable, deque
 from functools import partial
+from itertools import islice
 from six import string_types
 
 from celery.utils import cached_property
@@ -16,7 +17,7 @@ try:
 except ImportError:  # pragma: no cover
     from .django.query_utils import Q as _Q_  # noqa
 
-__all__ = ['groupbymax', 'Q']
+__all__ = ['chunks', 'Q']
 
 E_FILTER_FIELD_MISSING_OP = (
     "filter field argument {0!r} not allowed: did you mean '{0}__eq'?"
@@ -93,41 +94,22 @@ def wrap_transition(op, did_change):
     return compare
 
 
-def groupbymax(it, max, key=operator.eq, sentinel=object()):
-    """Given an iterator emitting items in sorted order, this will
-    group items together based on the key function, and produces
-    one list for each group.
+def chunks(it, n):
+    """Split an iterator into chunks with `n` elements each.
 
-    Arguments:
-        it (Iterable): Iterator emitting item in order.
-        max (int): Maximum size of any group (mandatory).
-        key (Callable): Function used to compare items.
-            Defaults to :func:`operator.eq` matching values exactly.
+    Example:
+        # n == 2
+        >>> x = chunks(iter([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 2)
+        >>> list(x)
+        [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10]]
 
-    Examples:
-        >>> x = ['A', 'A', 'A', 'B', 'C', 'D', 'D', 'E']
-        >>> list(groupbymax(x, 3))
-        [['A', 'A', 'A'], ['A'], ['B'], ['C'], ['D', 'D'], ['E']]
-
-        >>> # NOTE: Not technically sorted, but similar items appear in the
-        >>> # order we're matching for.
-        >>> x = [('foo:A', 'foo:B', 'bar:C', 'baz:D', 'baz:E', 'baz:F']
-        >>> list(groupbymax(x, 10,
-        ...     key=lambda a, b: a.split(':')[0] == b.split(':')[0]))
-        [['foo:A', 'foo:B'], ['bar:C'], ['baz:D', 'baz:E', 'baz:F']]
+        # n == 3
+        >>> x = chunks(iter([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 3)
+        >>> list(x)
+        [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9, 10]]
     """
-    it = iter(it)
-    for item in it:
-        buf = []
-        while 1:
-            nxt = next(it, sentinel)
-            if nxt is sentinel or (
-                    not key(nxt, item) or len(buf) >= max - 1):
-                yield [item] + buf if buf else [item]
-                if nxt is not sentinel:
-                    yield [nxt]
-                break
-            buf.append(nxt)
+    for first in it:
+        yield [first] + list(islice(it, n - 1))
 
 
 class Q(_Q_):

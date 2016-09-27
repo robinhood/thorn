@@ -85,3 +85,49 @@ HTTPS/SSL Requests
 Thorn supports using ``https://`` URLs as callbacks, but for that to work
 the destination web server must be properly configured for HTTPS and have
 a valid server certificate.
+
+.. _event-buffering:
+
+Buffering
+=========
+
+By default Thorn will send webhooks as they happen, but you can also enable
+event buffering:
+
+.. code-block:: python
+
+    import thorn
+
+    with thorn.buffer_events():
+        ...
+
+Within this block all events sent will be moved to a list to be dispatched when
+the block exits, or the buffer is otherwise explicitly flushed.
+
+You also can keep a reference to the context to flush the buffer manually within
+the block:
+
+.. code-block:: python
+
+    with thorn.buffer_events() as buffer:
+        Article.objects.create(...)
+        Article.objects.create(...)
+        buffer.flush()
+        Article.objects.create(...)
+        buffer.flush()
+
+The mechanism of flushing the buffer will depend on the dispatcher backend:
+
+- ``default`` dispatcher
+
+    Flushing the buffer will send each event in the buffer in turn,
+    dispatching the events form the current process.
+
+- ``celery`` dispatcher
+
+    Flushing the buffer will chunk buffered requests together
+    in sizes defined by the :setting:`THORN_CHUNKSIZE` setting.
+
+    If the chunk size is 10 (default), this means 100 events will be delivered
+    to workers in 10 messages.  The events will be ordered by hostname to take
+    advantage of keepalive-capable web servers.

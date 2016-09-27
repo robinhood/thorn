@@ -1,6 +1,7 @@
 """Default webhook dispatcher."""
 from __future__ import absolute_import, unicode_literals
 
+from collections import deque
 from functools import partial
 from itertools import chain
 
@@ -8,6 +9,7 @@ from celery.utils.functional import maybe_list
 from vine import barrier
 
 from thorn._state import app_or_default
+from thorn.exceptions import BufferNotEmpty
 from thorn.generic.models import AbstractSubscriber
 from thorn.utils.compat import restore_from_keys
 from thorn.utils.functional import traverse_subscribers
@@ -18,8 +20,10 @@ __all__ = ['Dispatcher']
 class Dispatcher(object):
     app = None
 
-    def __init__(self, timeout=None, app=None):
+    def __init__(self, timeout=None, app=None, buffer=False):
         self.app = app_or_default(app or self.app)
+        self._buffer = buffer
+        self.pending_outbound = deque()
         self.timeout = (
             timeout if timeout is not None
             else self.app.settings.THORN_EVENT_TIMEOUT
@@ -29,11 +33,17 @@ class Dispatcher(object):
             self._stored_subscribers,
         ]
 
-    def __reduce__(self):
-        return restore_from_keys, (type(self), (), self.__reduce_keys__())
+    def enable_buffer(self):
+        self._buffer = True
 
-    def __reduce_keys__(self):
-        return {'timeout': self.timeout}
+    def disable_buffer(self):
+        if self.pending_outbound:
+            raise BufferNotEmpty('Please flush_buffer(), before disabling it.')
+        self._buffer = False
+
+    def flush_buffer(self):
+        while self.pending_outbound:
+            self._dispatch_request(self.pending_outbound.popleft())
 
     def send(self, event, payload, sender,
              context=None, extra_subscribers=None,
@@ -49,6 +59,12 @@ class Dispatcher(object):
         ])
 
     def dispatch_request(self, request):
+        if self._buffer:
+            self.pending_outbound.append(request)
+            return request
+        return self._dispatch_request(request)
+
+    def _dispatch_request(self, request):
         return request.dispatch()
 
     def prepare_requests(self, event, payload, sender,
@@ -115,3 +131,9 @@ class Dispatcher(object):
 
     def _stored_subscribers(self, name, sender=None, **context):
         return self.app.Subscribers.matching(event=name, user=sender)
+
+    def __reduce__(self):
+        return restore_from_keys, (type(self), (), self.__reduce_keys__())
+
+    def __reduce_keys__(self):
+        return {'timeout': self.timeout}

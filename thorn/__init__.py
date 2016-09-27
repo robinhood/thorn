@@ -10,6 +10,7 @@ from .events import Event, ModelEvent
 from .decorators import webhook_model
 from .reverse import model_reverser
 from .utils.functional import Q
+from ._state import buffer_events
 
 
 __version__ = '1.4.2'
@@ -35,5 +36,5 @@ del(re)
 
 __all__ = [
     'Thorn', 'Event', 'ModelEvent',
-    'Q', 'model_reverser', 'webhook_model',
+    'Q', 'model_reverser', 'webhook_model', 'buffer_events',
 ]

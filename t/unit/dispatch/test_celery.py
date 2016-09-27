@@ -1,8 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-from case import Mock, call
+from case import ANY, Mock, call, patch
 
 from thorn.dispatch.celery import Dispatcher, WorkerDispatcher
+from thorn.request import Request
 
 
 class test_Dispatcher:
@@ -20,6 +21,29 @@ class test_Dispatcher:
         )
         send_event.s().apply_async.assert_called_once_with()
         assert res is send_event.s().apply_async()
+
+    @patch('thorn.dispatch.celery.group')
+    def test_flush_buffer(self, group, app):
+        g = [None]
+
+        subscriber = Mock(name='subscriber')
+        subscriber.url = 'http://example.com/?e=1'
+
+        def group_consume_generator(arg):
+            g[0] = list(arg)
+            return group.return_value
+        group.side_effect = group_consume_generator
+
+        d = Dispatcher()
+        d.pending_outbound.extend(
+            Request('order.created', {}, None, subscriber)
+            for i in range(100)
+        )
+        d.flush_buffer()
+        assert g[0]
+        assert len(g[0]) == 100 / app.settings.THORN_CHUNKSIZE
+        group.return_value.delay.assert_called_once_with()
+        assert not d.pending_outbound
 
 
 class test_WorkerDispatcher:
@@ -49,15 +73,12 @@ class test_WorkerDispatcher:
         ])
 
     def test_group_requests(self, patching):
-        groupbymax = patching('thorn.dispatch.celery.groupbymax')
+        chunks = patching('thorn.dispatch.celery.chunks')
         reqs = [Mock(name='r1'), Mock(name='r2'), Mock(name='r3')]
         ret = self.dispatcher.group_requests(reqs)
-        groupbymax.assert_called_with(
-            reqs,
-            max=self.app.settings.THORN_CHUNKSIZE,
-            key=self.dispatcher._compare_requests,
-        )
-        assert ret is groupbymax()
+        chunks.assert_called_with(
+            ANY, self.app.settings.THORN_CHUNKSIZE)
+        assert ret is chunks()
 
     def test_compare_requests(self):
         a = Mock(name='r1')

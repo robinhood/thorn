@@ -277,9 +277,6 @@ class test_ModelEvent:
         event = self.mock_event('foo.custom')
         event.connect_model(self.Model)
 
-    def test_instance_data__undefined(self, event):
-        assert not event.instance_data(object())
-
     def test_instance_data__defined(self, event):
         instance = self.Model()
         assert (event.instance_data(instance) is

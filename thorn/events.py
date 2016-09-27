@@ -366,22 +366,12 @@ class ModelEvent(Event):
     def instance_data(self, instance):
         # type: (Model) -> Any
         """Get event data from ``instance.webhooks.payload()``."""
-        try:
-            handler = instance.webhooks.payload
-        except AttributeError:
-            pass
-        else:
-            return handler(instance)
+        return instance.webhooks.payload(instance)
 
     def instance_headers(self, instance):
         # type: (Model) -> Mapping
         """Get event headers from ``instance.webhooks.headers()``."""
-        try:
-            handler = instance.webhooks.headers
-        except AttributeError:
-            pass
-        else:
-            return handler(instance)
+        return instance.webhooks.headers(instance)
 
     def instance_sender(self, instance):
         # type: (Model) -> Any
