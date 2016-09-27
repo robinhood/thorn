@@ -1,7 +1,6 @@
 """User-defined webhook events."""
 from __future__ import absolute_import, unicode_literals
 
-from functools import partial
 from operator import attrgetter
 from six import iteritems as items, iterkeys as keys
 from weakref import WeakSet
@@ -12,12 +11,6 @@ from ._state import app_or_default
 from .utils.compat import bytes_if_py2, restore_from_keys
 from .utils.functional import Q
 from .utils.log import get_logger
-
-try:
-    from django.db.transaction import TransactionManagementError, on_commit
-except ImportError:  # pragma: no cover
-    # django < 1.9
-    TransactionManagementError = on_commit = None  # nqoa
 
 __all__ = ['Event', 'ModelEvent']
 
@@ -233,13 +226,17 @@ class ModelEvent(Event):
             webhook is sent on transaction commit, and ignored if the
             transaction rolls back.
 
-            Default is False in Thorn 1.5 and requires Django >= 1.9.
-            This will be enabled by default in Thorn 2.0.
+            Default is True (taken from the
+                :setting:`THORN_SIGNAL_HONORS_TRANSACTION` setting), but
+            requires Django >= 1.9.  Earlier Django versions will execute
+            the dispatch immediately.
+
             .. versionaddded:: 1.5
+
         propagate_errors (bool): If enabled errors will propagate
             up to the caller (even when called by signal).
 
-            Disabled by default since version 1.5.
+            Disabled by default.
             .. versionadded:: 1.5
         signal_dispatcher (~thorn.django.signals.signal_dispatcher):
             Custom signal_dispatcher used to connect this event to a
@@ -289,14 +286,14 @@ class ModelEvent(Event):
                     reverse=None,
                     sender_field=None,
                     signal_dispatcher=None,
-                    signal_honors_transaction=False,
+                    signal_honors_transaction=None,
                     propagate_errors=False,
                     **kwargs):
         # type: (model_reverser, str, signal_dispatcher, bool, bool, **Any) -> None
         self.reverse = reverse
         self.sender_field = sender_field
         self.signal_dispatcher = signal_dispatcher
-        self.signal_honors_transaction = signal_honors_transaction
+        self._signal_honors_transaction = signal_honors_transaction
         self.propagate_errors = propagate_errors
 
     def _get_name(self, instance):
@@ -407,10 +404,7 @@ class ModelEvent(Event):
     def on_signal(self, instance, **kwargs):
         # type: (Model, **Any) -> promise
         if self.signal_honors_transaction:
-            try:
-                return on_commit(partial(self._on_signal, instance, kwargs))
-            except TransactionManagementError:
-                pass  # not in transaction management, execute now.
+            return self.app.on_commit(self._on_signal, instance, kwargs)
         return self._on_signal(instance, kwargs)
 
     def _on_signal(self, instance, kwargs):
@@ -482,3 +476,9 @@ class ModelEvent(Event):
             self._prepare_signal_dispatcher(signal_dispatcher)
             if signal_dispatcher is not None else None
         )
+
+    @cached_property
+    def signal_honors_transaction(self):
+        if self._signal_honors_transaction is None:
+            return self.app.settings.THORN_SIGNAL_HONORS_TRANSACTION
+        return self._signal_honors_transaction

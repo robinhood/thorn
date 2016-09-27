@@ -66,6 +66,10 @@ class Thorn(object):
         return self.env.config
 
     @property
+    def on_commit(self):
+        return self.env.on_commit
+
+    @property
     def Subscriber(self):
         return self.env.Subscriber
 

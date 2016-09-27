@@ -10,6 +10,7 @@ from django.db.transaction import TransactionManagementError
 
 from thorn import events as _events
 from thorn._state import current_app
+from thorn.environment import django
 from thorn.django import signals
 from thorn.reverse import model_reverser
 from thorn.events import Event, ModelEvent, _true
@@ -292,8 +293,8 @@ class test_ModelEvent:
         instance = self.Model()
         assert (event.instance_sender(instance) is instance.account.user)
 
-    @patch('thorn.events.on_commit')
-    @patch('thorn.events.partial')
+    @patch('thorn.environment.django.on_commit')
+    @patch('thorn.environment.django.partial')
     def test_on_signal__transaction(self, partial, on_commit):
         # test with signal_honor_transaction and in transaction
         event = self.mock_event('x.y', sender_field=None)
@@ -305,9 +306,9 @@ class test_ModelEvent:
         on_commit.assert_called_once_with(partial())
         event._on_signal.assert_not_called()
 
-    @patch('thorn.events.on_commit')
-    @patch('thorn.events.partial')
-    @pytest.mark.skipif(_events.on_commit is None, reason='Django <1.9')
+    @patch('thorn.environment.django.on_commit')
+    @patch('thorn.environment.django.partial')
+    @pytest.mark.skipif(django.on_commit is None, reason='Django <1.9')
     def test_on_signal__no_transaction(self, partial, on_commit):
         # test with signal_honor_transaction and not in transaction
         event = self.mock_event('x.y', sender_field=None)
@@ -315,19 +316,22 @@ class test_ModelEvent:
         event._on_signal = Mock(name='_on_signal')
         instance = self.Model()
         on_commit.side_effect = TransactionManagementError()
-        assert _events.TransactionManagementError is TransactionManagementError
+        assert django.TransactionManagementError is TransactionManagementError
         event.on_signal(instance, kw=1)
         partial.assert_called_once_with(event._on_signal, instance, {'kw': 1})
         on_commit.assert_called_once_with(partial())
-        event._on_signal.assert_called_once_with(
-            instance, {'kw': 1},
-        )
+        partial.return_value.assert_called_once_with()
 
-    def test_on_signal(self):
+    @patch('thorn.environment.django.on_commit')
+    def test_on_signal(self, on_commit):
         instance = self.Model()
-        event = self.mock_event('x.y', sender_field='x.y.z.account')
+        event = self.mock_event(
+            'x.y',
+            sender_field='x.y.z.account',
+            signal_honors_transaction=False)
         event.dispatches_on_change()
         event.send = Mock(name='ModelEvent.send')
+        assert not event.signal_honors_transaction
         event.on_signal(instance)
         event.send.assert_called_with(
             instance=instance,
@@ -336,10 +340,12 @@ class test_ModelEvent:
             sender=instance.x.y.z.account,
             context={},
         )
+        on_commit.assert_not_called()
 
     def test_on_signal__no_sender_field(self):
         instance = self.Model()
-        event = self.mock_event('x.y', sender_field=None)
+        event = self.mock_event(
+            'x.y', sender_field=None, signal_honors_transaction=False)
         event.dispatches_on_change()
         event.send = Mock(name='ModelEvent.send')
         event.on_signal(instance)
@@ -370,6 +376,16 @@ class test_ModelEvent:
         event.send_from_instance.assert_called_once_with(instance, kw=1)
         logger.exception.assert_called_with(
             _events.E_DISPATCH_RAISED_ERROR, event.name, exc)
+
+    def test_signal_honors_transaction__from_setting(self):
+        self.app.config.THORN_SIGNAL_HONORS_TRANSACTION = True
+        event = self.mock_event('x.y')
+        assert event.signal_honors_transaction
+
+    def test_signal_honors_transaction__override(self):
+        self.app.config.THORN_SIGNAL_HONORS_TRANSACTION = False
+        event = self.mock_event('x.y', signal_honors_transaction=True)
+        assert event.signal_honors_transaction
 
     def test_reduce(self, event, app):
         event._kwargs['dispatcher'] = None

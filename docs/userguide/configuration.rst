@@ -203,6 +203,22 @@ This is expressed in configuration as:
 More validators can be found in the API reference for the
 :mod:`thorn.validators` module.
 
+.. setting:: THORN_SIGNAL_HONORS_TRANSACTION
+
+``THORN_SIGNAL_HONORS_TRANSACTION``
+-----------------------------------
+:Default: :const:`False`
+
+.. versionadded:: 1.5
+
+When enabled the webhook dispatch will be tied to any current database
+transaction: webhook is sent on transaction commit, and ignored if the
+transaction rolls back.
+
+.. warning::
+
+    When using Django this requires Django versions 1.9 or above.
+
 .. setting:: THORN_SUBSCRIBER_MODEL
 
 ``THORN_SUBSCRIBER_MODEL``

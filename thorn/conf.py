@@ -32,6 +32,7 @@ class Settings(object):
         validators.ensure_protocol('http', 'https'),
         validators.ensure_port(80, 443),
     ]
+    default_signal_honors_transaction = False
     default_hmac_signer = 'thorn.utils.hmac:compat_sign'
 
     def __init__(self, app=None):
@@ -39,88 +40,72 @@ class Settings(object):
 
     @cached_property
     def THORN_CHUNKSIZE(self):
-        return (
-            getattr(self.app.config, 'THORN_CHUNKSIZE', None) or
-            self.default_chunksize
-        )
+        return self._get('THORN_CHUNKSIZE', self.default_chunksize)
 
     @cached_property
     def THORN_CODECS(self):
-        return (
-            getattr(self.app.config, 'THORN_CODECS', None) or
-            self.default_codecs
-        )
+        return self._get('THORN_CODECS', self.default_codecs)
 
     @cached_property
     def THORN_SUBSCRIBERS(self):
-        return getattr(self.app.config, 'THORN_SUBSCRIBERS', None) or {}
+        return self._get_lazy('THORN_SUBSCRIBERS', dict)
 
     @cached_property
     def THORN_SUBSCRIBER_MODEL(self):
-        return getattr(self.app.config, 'THORN_SUBSCRIBER_MODEL', None)
+        return self._get('THORN_SUBSCRIBER_MODEL')
 
     @cached_property
     def THORN_HMAC_SIGNER(self):
-        return (
-            getattr(self.app.config, 'THORN_HMAC_SIGNER', None) or
-            self.default_hmac_signer
-        )
+        return self._get('THORN_HMAC_SIGNER', self.default_hmac_signer)
 
     @cached_property
     def THORN_DISPATCHER(self):
-        return (
-            getattr(self.app.config, 'THORN_DISPATCHER', None) or
-            self.default_dispatcher
-        )
+        return self._get('THORN_DISPATCHER', self.default_dispatcher)
 
     @cached_property
     def THORN_EVENT_CHOICES(self):
-        return (
-            getattr(self.app.config, 'THORN_EVENT_CHOICES', None) or
-            self.default_event_choices
-        )
+        return self._get('THORN_EVENT_CHOICES', self.default_event_choices)
 
     @cached_property
     def THORN_DRF_PERMISSION_CLASSES(self):
-        return (
-            getattr(self.app.config, 'THORN_DRF_PERMISSION_CLASSES', None) or
-            self.default_drf_permission_classes
-        )
+        return self._get(
+            'THORN_DRF_PERMISSION_CLASSES',
+            self.default_drf_permission_classes)
 
     @cached_property
     def THORN_EVENT_TIMEOUT(self):
-        return (
-            getattr(self.app.config, 'THORN_EVENT_TIMEOUT', None) or
-            self.default_timeout
-        )
+        return self._get('THORN_EVENT_TIMEOUT', self.default_timeout)
 
     @cached_property
     def THORN_RETRY(self):
-        return (
-            getattr(self.app.config, 'THORN_RETRY', None) or
-            self.default_retry
-        )
+        return self._get('THORN_RETRY', self.default_retry)
 
     @cached_property
     def THORN_RETRY_MAX(self):
-        return (
-            getattr(self.app.config, 'THORN_RETRY_MAX', None) or
-            self.default_retry_max
-        )
+        return self._get('THORN_RETRY_MAX', self.default_retry_max)
 
     @cached_property
     def THORN_RETRY_DELAY(self):
-        return (
-            getattr(self.app.config, 'THORN_RETRY_DELAY', None) or
-            self.default_retry_delay,
-        )
+        return self._get('THORN_RETRY_DELAY', self.default_retry_delay)
 
     @cached_property
     def THORN_RECIPIENT_VALIDATORS(self):
-        return getattr(
-            self.app.config, 'THORN_RECIPIENT_VALIDATORS',
-            self.default_recipient_validators,
-        )
+        return self._get(
+            'THORN_RECIPIENT_VALIDATORS', self.default_recipient_validators)
+
+    @cached_property
+    def THORN_SIGNAL_HONORS_TRANSACTION(self):
+        return self._get(
+            'THORN_SIGNAL_HONORS_TRANSACTION',
+            self.default_signal_honors_transaction)
+
+    def _get(self, key, default=None):
+        # type: (str, Any) -> Any
+        return self._get_lazy(key, lambda: default)
+
+    def _get_lazy(self, key, default=None):
+        # type: (str, Callable[None, Any]) -> Any
+        return getattr(self.app.config, key, None) or default()
 settings = Settings()
 
 
