@@ -105,7 +105,8 @@ class Settings(object):
 
     def _get_lazy(self, key, default=None):
         # type: (str, Callable[None, Any]) -> Any
-        return getattr(self.app.config, key, None) or default()
+        val = getattr(self.app.config, key, None)
+        return val if val is not None else default()
 settings = Settings()
 
 

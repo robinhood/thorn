@@ -40,6 +40,7 @@ THORN_EVENTS = [
 ]
 
 THORN_HMAC_SIGNER = 'thorn.utils.hmac:sign'
+THORN_RECIPIENT_VALIDATORS = []
 
 
 # Application definition
