@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 from collections import deque
 from functools import partial
 from itertools import chain
+from weakref import ref
 
 from celery.utils.functional import maybe_list
 from vine import barrier
@@ -23,6 +24,7 @@ class Dispatcher(object):
     def __init__(self, timeout=None, app=None, buffer=False):
         self.app = app_or_default(app or self.app)
         self._buffer = buffer
+        self._buffer_owner = None
         self.pending_outbound = deque()
         self.timeout = (
             timeout if timeout is not None
@@ -33,17 +35,31 @@ class Dispatcher(object):
             self._stored_subscribers,
         ]
 
-    def enable_buffer(self):
-        self._buffer = True
+    def enable_buffer(self, owner=None):
+        if not self._buffer:
+            self._buffer = True
+            self._buffer_owner = ref(owner) if owner else None
 
-    def disable_buffer(self):
-        if self.pending_outbound:
-            raise BufferNotEmpty('Please flush_buffer(), before disabling it.')
-        self._buffer = False
+    def _is_buffer_owner(self, obj):
+        owner_ref = self._buffer_owner
+        if owner_ref is None:
+            return True  # nobody owns the buffer
+        owner = owner_ref()
+        # if owner went out of scope, steal it, otherwise check owner.
+        return owner is None or owner is obj
 
-    def flush_buffer(self):
-        while self.pending_outbound:
-            self._dispatch_request(self.pending_outbound.popleft())
+    def disable_buffer(self, owner=None):
+        if self._buffer:
+            if not owner or self._is_buffer_owner(owner):
+                if self.pending_outbound:
+                    raise BufferNotEmpty(
+                        'please flush_buffer(), before disabling it.')
+                self._buffer = False
+
+    def flush_buffer(self, owner=None):
+        if not owner or self._is_buffer_owner(owner):
+            while self.pending_outbound:
+                self._dispatch_request(self.pending_outbound.popleft())
 
     def send(self, event, payload, sender,
              context=None, extra_subscribers=None,

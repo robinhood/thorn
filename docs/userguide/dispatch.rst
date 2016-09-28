@@ -91,7 +91,7 @@ a valid server certificate.
 Buffering
 =========
 
-By default Thorn will send webhooks as they happen, but you can also enable
+By default Thorn will dispatch events as they happen, but you can also enable
 event buffering:
 
 .. code-block:: python
@@ -101,11 +101,11 @@ event buffering:
     with thorn.buffer_events():
         ...
 
-Within this block all events sent will be moved to a list to be dispatched when
-the block exits, or the buffer is otherwise explicitly flushed.
+All events sent within this block will be moved to a list, to be dispatched
+as soon as the block exits, or the buffer is explicitly flushed.
 
-You also can keep a reference to the context to flush the buffer manually within
-the block:
+If you want to flush the buffer manually, you may keep a reference to the
+context:
 
 .. code-block:: python
 
@@ -116,12 +116,7 @@ the block:
         Article.objects.create(...)
         buffer.flush()
 
-The mechanism of flushing the buffer will depend on the dispatcher backend:
-
-- ``default`` dispatcher
-
-    Flushing the buffer will send each event in the buffer in turn,
-    dispatching the events form the current process.
+The dispatching backend decides what happens when you flush the buffer:
 
 - ``celery`` dispatcher
 
@@ -129,5 +124,29 @@ The mechanism of flushing the buffer will depend on the dispatcher backend:
     in sizes defined by the :setting:`THORN_CHUNKSIZE` setting.
 
     If the chunk size is 10 (default), this means 100 events will be delivered
-    to workers in 10 messages.  The events will be ordered by hostname to take
-    advantage of keepalive-capable web servers.
+    to workers in 10 messages.
+
+- ``default`` dispatcher
+
+    Flushing the buffer will send each event in turn, blocking
+    the current process until all events have been sent.
+
+.. admonition:: Nested contexts
+
+    If you have nested ``buffer_events`` contexts, then only the outermost
+    context will be active:
+
+    .. code-block:: python
+
+        with thorn.buffer_events():
+            Article.objects.create(name='A')
+
+            with thorn.buffer_events():
+                Article.objects.create(name='B')
+            # << context exit delegates flush to outermost buffering context.
+
+            Article.objects.create(name='C')
+        # << events for A, B, C dispatched here.
+
+    Note that this does NOT apply if you call ``buffer.flush()`` manually:
+    tbat will flush events from all contexts.

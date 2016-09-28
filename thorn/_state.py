@@ -44,19 +44,22 @@ class buffer_events(object):
     def __init__(self, app=None):
         self.app = app_or_default(app)
 
+    def flush(self):
+        self._flush(None)
+
+    def _flush(self, owner):
+        self.app.flush_buffer(owner=owner)
+
+    def _enable(self):
+        self.app.enable_buffer(owner=self)
+
+    def _disable(self):
+        self.app.disable_buffer(owner=self)
+
     def __enter__(self):
-        self.enable()
+        self._enable()
         return self
 
     def __exit__(self, *exc_inf):
-        self.flush()
-        self.disable()
-
-    def enable(self):
-        self.app.enable_buffer()
-
-    def disable(self):
-        self.app.disable_buffer()
-
-    def flush(self):
-        self.app.flush_buffer()
+        self._flush(self)
+        self._disable()

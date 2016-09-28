@@ -36,7 +36,7 @@ class Thorn(object):
         if set_as_current:
             self.set_current()
 
-    def enable_buffer(self):
+    def enable_buffer(self, owner=None):
         # type: () -> None
         """Start buffering up events instead of dispatching them directly.
 
@@ -45,9 +45,9 @@ class Thorn(object):
             :meth:`flush_buffer`, say periodically or at the end of a
             web request.
         """
-        self.dispatcher.enable_buffer()
+        self.dispatcher.enable_buffer(owner=owner)
 
-    def disable_buffer(self):
+    def disable_buffer(self, owner=None):
         # type: () -> None
         """Disable buffering.
 
@@ -55,9 +55,9 @@ class Thorn(object):
             ~thorn.exceptions.BufferNotEmpty: if there are still items in the
             buffer when disabling.
         """
-        self.dispatcher.disable_buffer()
+        self.dispatcher.disable_buffer(owner=owner)
 
-    def flush_buffer(self):
+    def flush_buffer(self, owner=None):
         # type: () -> None
         """Flush events accumulated while buffering active.
 
@@ -75,7 +75,7 @@ class Thorn(object):
                 events, a worker will then pick that up and execute the
                 web requests.
         """
-        self.dispatcher.flush_buffer()
+        self.dispatcher.flush_buffer(owner=owner)
 
     def set_current(self):
         # type: () -> None

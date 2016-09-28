@@ -124,15 +124,15 @@ class test_buffering:
 
     def test_enable_buffer(self, app):
         app.dispatcher = Mock(name='dispatcher')
-        app.enable_buffer()
-        app.dispatcher.enable_buffer.assert_called_once_with()
+        app.enable_buffer(owner=id(app))
+        app.dispatcher.enable_buffer.assert_called_once_with(owner=id(app))
 
     def test_dispable_buffer(self, app):
         app.dispatcher = Mock(name='dispatcher')
-        app.disable_buffer()
-        app.dispatcher.disable_buffer.assert_called_once_with()
+        app.disable_buffer(owner=id(app))
+        app.dispatcher.disable_buffer.assert_called_once_with(owner=id(app))
 
     def test_flush_buffer(self, app):
         app.dispatcher = Mock(name='dispatcher')
-        app.flush_buffer()
-        app.dispatcher.flush_buffer.assert_called_once_with()
+        app.flush_buffer(owner=id(app))
+        app.dispatcher.flush_buffer.assert_called_once_with(owner=id(app))
