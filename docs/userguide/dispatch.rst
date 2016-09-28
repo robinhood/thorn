@@ -150,3 +150,18 @@ The dispatching backend decides what happens when you flush the buffer:
 
     Note that this does NOT apply if you call ``buffer.flush()`` manually:
     that will flush events from all contexts.
+
+Periodic flush
+--------------
+
+The context can also be used to flush the buffer periodically, using the
+``flush_freq`` and ``flush_timeout`` arguments together with the
+``maybe_flush`` method:
+
+.. code-block:: python
+
+    # Only flush every 100 calls, or if two seconds passed since last flush.
+    with thorn.buffer_events(flush_freq=100, flush_timeout=2.0) as buffer:
+        for thing in things:
+            process_thing_leading_to_webhook_being_sent(thing)
+            buffer.maybe_flush()

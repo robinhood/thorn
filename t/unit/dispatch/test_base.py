@@ -3,6 +3,8 @@ from __future__ import absolute_import, unicode_literals
 import pickle
 import pytest
 
+from weakref import ref
+
 from case import Mock, call
 
 from thorn.exceptions import BufferNotEmpty
@@ -38,6 +40,18 @@ class test_Dispatcher:
         self.dispatcher.pending_outbound.append(32)
         with pytest.raises(BufferNotEmpty):
             self.dispatcher.disable_buffer()
+
+    def test_is_buffer_owner(self):
+
+        class Bunch(object):
+            pass
+        obj = Bunch()
+
+        # no owner, anyone can flush
+        assert self.dispatcher._is_buffer_owner(obj)
+        self.dispatcher._buffer_owner = ref(obj)
+        assert self.dispatcher._is_buffer_owner(obj)
+        assert not self.dispatcher._is_buffer_owner(Bunch())
 
     def test_buffering(self):
         self.dispatcher.enable_buffer()
