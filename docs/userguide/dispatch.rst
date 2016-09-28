@@ -149,4 +149,4 @@ The dispatching backend decides what happens when you flush the buffer:
         # << events for A, B, C dispatched here.
 
     Note that this does NOT apply if you call ``buffer.flush()`` manually:
-    tbat will flush events from all contexts.
+    that will flush events from all contexts.
