@@ -32,22 +32,23 @@ def test_cases_calls_setup_teardown(request):
         # we set the .patching attribute for every test class.
         setup = getattr(request.instance, 'setup', None)
         # we also call .setup() and .teardown() after every test method.
-        teardown = getattr(request.instance, 'teardown', None)
         setup and setup()
-        teardown and request.addfinalizer(teardown)
+    yield
+    if request.instance:
+        teardown = getattr(request.instance, 'teardown', None)
+        teardown and teardown()
 
 
 @pytest.fixture()
-def app(request):
+def app():
     _tls, _state._tls = _state._tls, _state._TLS()
     app = Thorn(set_as_current=True)
     _default_app, _state.default_app = _state.default_app, app
 
-    def fin():
-        _state.default_app = _default_app
-        _state._tls = _tls
-    request.addfinalizer(fin)
-    return app
+    yield app
+
+    _state.default_app = _default_app
+    _state._tls = _tls
 
 
 @pytest.fixture(autouse=True)
@@ -94,9 +95,8 @@ def _reset_signals(wanted=None):
 @pytest.fixture()
 def reset_signals(request):
     wanted = getattr(request.module, "reset_signals", None)
-    ctx = _reset_signals(wanted)
-    ctx.__enter__()
-    request.addfinalizer(lambda: ctx.__exit__(*sys.exc_info()))
+    with _reset_signals(wanted):
+        yield
 
 
 @pytest.fixture()
