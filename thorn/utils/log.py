@@ -11,6 +11,7 @@ base_logger = _get_logger('webhooks')
 
 
 def get_logger(name, parent=base_logger):
+    """Get logger by name."""
     assert isinstance(name, string_types)
     logger = _get_logger(name)
     logger.parent = parent

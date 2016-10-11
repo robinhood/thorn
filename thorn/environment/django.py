@@ -20,6 +20,7 @@ __all__ = ['DjangoEnv']
 
 
 class DjangoEnv(object):
+    """Thorn Django environment."""
 
     settings_cls = 'django.conf:settings'
     subscriber_cls = 'thorn.django.models:Subscriber'

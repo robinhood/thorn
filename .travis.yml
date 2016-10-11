@@ -23,6 +23,7 @@ env:
         - TOXENV=flakeplus
         - TOXENV=apicheck
         - TOXENV=configcheck
+        - TOXENV=pydocstyle
 install: travis_retry pip install -U tox
 script: tox -v -- -v
 after_success:

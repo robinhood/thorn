@@ -10,17 +10,18 @@ __all__ = ['Node']
 
 
 class Node(object):
-    """A single internal node in the tree graph. A Node should be viewed as a
+    """Node in a tree.
+
+    A single internal node in the tree.  A Node should be viewed as a
     connection (the root) with the children being either leaf nodes or other
-    Node instances."""
+    Node instances.
+    """
 
     # Standard connector type. Clients usually won't use this at all and
     # subclasses will usually override the value.
     default = 'DEFAULT'
 
     def __init__(self, children=None, connector=None, negated=False):
-        """Constructs a new Node. If no connector is given,
-        the default will be used."""
         self.children = children[:] if children else []
         self.connector = connector or self.default
         self.negated = negated
@@ -29,7 +30,9 @@ class Node(object):
     # problematic, but it is a natural Node subclass in all other respects.
     @classmethod
     def _new_instance(cls, children=None, connector=None, negated=False):
-        """This is called to create a new instance of this class when we need new
+        """Alternate constructor.
+
+        This is called to create a new instance of this class when we need new
         Nodes (or subclasses) in the internal code in this class.
 
         Note:
@@ -61,11 +64,13 @@ class Node(object):
         return type(self).__bool__(self)
 
     def __contains__(self, other):
-        """Returns True is 'other' is a direct child of this instance."""
+        """Return True if 'other' is a direct child of this instance."""
         return other in self.children
 
     def add(self, data, conn_type, squash=True):
-        """Combines this tree and the data represented by data using the
+        """Combine with other tree.
+
+        Merge this tree and the data represented by data using the
         connector conn_type. The combine is done by squashing the node other
         away if possible.
 

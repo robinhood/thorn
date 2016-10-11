@@ -8,7 +8,7 @@ from .utils.compat import bytes_if_py2
 
 def webhook_model(*args, **kwargs):
     # type: (*Any, **Any) -> Any
-    """Decorates models to send webhooks based changes to that model.
+    """Decorate model to send webhooks based on changes to that model.
 
     Keyword Arguments:
         on_create (~thorn.Event): Event to dispatch whenever an instance of
@@ -127,6 +127,10 @@ def webhook_model(*args, **kwargs):
 
 
 class WebhookCapable(object):
+    """Implementation of model.webhooks.
+
+    The decorator sets model.webhooks to be an instance of this type.
+    """
 
     reverse = None          # type: model_reverser
     sender_field = None     # type: str

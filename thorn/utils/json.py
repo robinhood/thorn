@@ -35,8 +35,12 @@ json, _json_args = get_best_json()
 
 
 class JsonEncoder(get_best_json('JSONEncoder')[0]):
-    # like django.core.serializers.json.JSONEncoder but preserves
-    # datetime microsecond information.
+    """Thorn custom Json encoder.
+
+    Notes:
+        Same as django.core.serializers.json.JSONEncoder but preserves
+        datetime microsecond information.
+    """
 
     def default(self, o,
                 dates=(datetime.datetime, datetime.date),
@@ -61,4 +65,5 @@ class JsonEncoder(get_best_json('JSONEncoder')[0]):
 
 
 def dumps(obj, encode=json.dumps, cls=JsonEncoder):
+    """Serialize object as json string."""
     return encode(obj, cls=cls, **_json_args)

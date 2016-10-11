@@ -16,6 +16,8 @@ def _unpickle_appattr(reverse_name, kwargs):
 
 
 class Thorn(object):
+    """Thorn application."""
+
     event_cls = 'thorn.events:Event'
     model_event_cls = 'thorn.events:ModelEvent'
     settings_cls = 'thorn.conf:Settings'
@@ -184,8 +186,7 @@ class Thorn(object):
                            name=None, attribute='app',
                            reverse=None, keep_reduce=False, **kw):
         # type: (type, str, str, str, bool, **Any) -> type
-        """Subclass an app-compatible class by setting its app attribute
-        to this instance.
+        """Subclass an app-compatible class.
 
         App-compatible means the class has an 'app' attribute providing
         the default app, e.g.: ``class Foo(object): app = None``.

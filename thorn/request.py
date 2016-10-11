@@ -34,7 +34,7 @@ logger = get_logger(__name__)
 
 @Thenable.register
 class Request(ThenableProxy):
-    """Webhook HTTP request
+    """Webhook HTTP request.
 
     Arguments:
         event (str): Name of event.
@@ -185,9 +185,12 @@ class Request(ThenableProxy):
         self._p.throw(exc, propagate=propagate)
 
     def as_dict(self):
-        """Return a dictionary representation of this request
-        suitable for serialization."""
         # type: () -> Dict[str, Any]
+        """Return dictionary representation of this request.
+
+        Note:
+            All values must be json serializable.
+        """
         return {
             'id': self.id,
             'event': self.event,

@@ -13,6 +13,7 @@ __all__ = ['AbstractSubscriber', 'SubscriberModelMixin']
 
 @with_metaclass(ABCMeta)
 class AbstractSubscriber(object):
+    """Abstract class for Subscriber identity."""
 
     #: Unique identifier.
     uuid = abstractproperty()
@@ -53,14 +54,21 @@ class AbstractSubscriber(object):
 
     @abstractmethod
     def sign(self, message):
-        """Sign (HMAC) message using :attr:`hmac_secret` and the current
-        :attr:`hmac_digest` type."""
+        """Sign message using HMAC.
+
+        Note:
+            :attr:`hmac_secret` and the current
+            :attr:`hmac_digest` type must be set.
+        """
         pass  # pragma: no cover
 
     @abstractmethod
     def user_ident(self):
-        """Return :attr:`user` identity, must be json serializable like a
-        database primary key."""
+        """Return :attr:`user` identity.
+
+        Note:
+            Value must be json serializable like a database primary key.
+        """
         pass  # pragma: no cover
 
     @classmethod
@@ -72,6 +80,7 @@ class AbstractSubscriber(object):
 
 @AbstractSubscriber.register
 class SubscriberModelMixin(object):
+    """Mixin for subscriber models."""
 
     @classmethod
     def from_dict(cls, *args, **kwargs):

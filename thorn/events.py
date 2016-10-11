@@ -64,6 +64,7 @@ class Event(object):
         with a public IP address.  You can block those using
         :class:`~thorn.validators.block_cidr_network`.
     """
+
     app = None
     allow_keepalive = True
     recipient_validators = None
@@ -255,6 +256,7 @@ class ModelEvent(Event):
     See Also:
         In addition the same arguments as :class:`Event` is supported.
     """
+
     signal_dispatcher = None  # type: signal_dispatcher
 
     def __init__(self, name, *args, **kwargs):
@@ -300,8 +302,7 @@ class ModelEvent(Event):
 
     def _get_name(self, instance):
         # type: (Model) -> str
-        """Interpolates the event name with attributes from the
-        instance."""
+        """Interpolate event name with attributes from the instance."""
         return self.name.format(instance)
 
     def send(self, instance, data=None, sender=None, **kwargs):

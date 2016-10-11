@@ -75,6 +75,7 @@ def ensure_protocol(*allowed):
 @validator
 def ensure_port(*allowed):
     # type: (*Union[int, str]) -> Callable
+    """Validator that ensures port is member of set allowed."""
     allowed = tuple(int(p) for p in allowed)
 
     def validate_port(recipient_url):
@@ -108,7 +109,6 @@ def block_internal_ips():
         make sure the IP address is not in a reserved private block
         (e.g. 192.168.0.1/24).
     """
-
     def validate_not_internal_ip(recipient_url):
         # type: (str) -> None
         addr = _url_ip_address(recipient_url)

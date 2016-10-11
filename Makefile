@@ -7,6 +7,7 @@ NOSETESTS=nosetests
 ICONV=iconv
 FLAKE8=flake8
 FLAKEPLUS=flakeplus
+PYDOCSTYLE=pydocstyle
 SPHINX2RST=sphinx2rst
 
 SPHINX_DIR=docs/
@@ -38,6 +39,7 @@ help:
 	@echo "    flakes --------  - Check code for syntax and style errors."
 	@echo "      flakecheck     - Run flake8 on the source code."
 	@echo "      flakepluscheck - Run flakeplus on the source code."
+	@echo "      pep257check    - Run pydocstyle on the source code."
 	@echo "readme               - Regenerate README.rst file."
 	@echo "contrib              - Regenerate CONTRIBUTING.rst file"
 	@echo "clean-dist --------- - Clean all distribution build artifacts."
@@ -85,8 +87,7 @@ configcheck:
 	(cd "$(SPHINX_DIR)"; $(MAKE) configcheck)
 
 flakecheck:
-	# the only way to enable all errors, is to ignore one of them
-	$(FLAKE8) --ignore=X999 "$(PROJ)" "$(TESTPROJ)"
+	$(FLAKE8) "$(PROJ)" "$(TESTPROJ)"
 
 flakediag:
 	-$(MAKE) flakecheck
@@ -97,7 +98,10 @@ flakepluscheck:
 flakeplusdiag:
 	-$(MAKE) flakepluscheck
 
-flakes: flakediag flakeplusdiag
+pep257check:
+	$(PYDOCSTYLE) "$(PROJ)"
+
+flakes: flakediag flakeplusdiag pep257check
 
 clean-readme:
 	-rm -f $(README)

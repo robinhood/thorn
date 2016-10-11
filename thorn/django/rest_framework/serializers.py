@@ -9,6 +9,8 @@ __all__ = ['SubscriberSerializer']
 
 
 class SubscriberSerializer(serializers.HyperlinkedModelSerializer):
+    """Serializer for :class:`~thorn.django.models.Subscriber`."""
+
     subscription = serializers.HyperlinkedIdentityField(
         view_name='webhook:detail',
         lookup_url_kwarg='uuid', lookup_field='uuid',
@@ -17,6 +19,8 @@ class SubscriberSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.IntegerField(source='user.pk', default=None)
 
     class Meta:
+        """Serializer configuration."""
+
         model = Subscriber
         fields = (
             'event', 'url', 'content_type', 'user',

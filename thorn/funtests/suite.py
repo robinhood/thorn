@@ -45,6 +45,7 @@ EVENT2_URL = event_url('article.changed', ref=EVENT2_REF)
 
 
 def callback_subscribers(event, sender=None, **kwargs):
+    """Return a dummy set of callback subscribers."""
     return [
         EVENT1_URL,
         EVENT2_URL,
@@ -52,6 +53,7 @@ def callback_subscribers(event, sender=None, **kwargs):
 
 
 class Default(WebhookSuite):
+    """Thorn integration test suite."""
 
     @testcase('all', iterations=1)
     def endpoints(self):

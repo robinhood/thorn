@@ -3,7 +3,7 @@
 
 import setuptools
 
-from setuptools.command.test import test as TestCommand
+from setuptools.command.test import test as TestCommand  # noqa
 
 import os
 import re

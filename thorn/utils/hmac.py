@@ -23,11 +23,13 @@ punctuation = string.punctuation.replace('"', '').replace("'", '')
 
 
 def get_digest(d):
+    """Get digest type by name (e.g. ``"sha512"``)."""
     assert d.lower() in allowed_algorithms, d.lower()
     return getattr(hashlib, d.lower())
 
 
 def sign(digest_method, key, message):
+    """Sign HMAC digest."""
     return base64.b64encode(bytes_if_py3(hmac.new(
         want_bytes(key),
         want_bytes(message),
@@ -35,6 +37,7 @@ def sign(digest_method, key, message):
 
 
 def verify(digest, digest_method, key, message):
+    """Verify HMAC digest."""
     return hmac.compare_digest(
         want_bytes(sign(digest_method, key, message)),
         want_bytes(digest))
@@ -42,10 +45,12 @@ def verify(digest, digest_method, key, message):
 
 def random_secret(
         length, chars=string.ascii_letters + string.digits + punctuation):
+    """Generate random secret (letters, digits, punctuation)."""
     return ''.join(random.choice(chars) for _ in range(length))
 
 
 def compat_sign(digest_method, key, message):
+    """Sign message using old itsdangerous signer."""
     return itsdangerous.Signer(
         key, digest_method=get_digest(digest_method),
     ).get_signature(message)

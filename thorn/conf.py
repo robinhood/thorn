@@ -112,6 +112,7 @@ settings = Settings()
 
 
 def event_choices(app=None):
+    """Return a list of valid event choices."""
     app = app_or_default(app)
     choices = app.settings.THORN_EVENT_CHOICES
     try:

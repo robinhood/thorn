@@ -28,18 +28,23 @@ __all__ = ['WebhookSuite', 'new_ref', 'url', 'event_url', 'testcase']
 
 
 def new_ref():
+    """Create new reference ID."""
     return uuid4().hex
 
 
 def url(*s):
+    """Create URL by components in *s."""
     return '/'.join((BASE_URL,) + s)
 
 
 def event_url(event, ref=None, rest=None):
+    """Return url for event."""
     return url('r', event, '?ref={0}{1}'.format(ref, rest or ''))
 
 
 class WebhookSuite(Suite):
+    """Thorn integration test suite."""
+
     user = user2 = None
     token = None
     token_type = 'Token'

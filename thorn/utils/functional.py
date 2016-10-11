@@ -25,17 +25,26 @@ E_FILTER_FIELD_MISSING_OP = (
 
 
 def not_contains(a, b):
-    """``not_contains(a, b) -> b not in a``"""
+    """Operator for ``b not in a``.
+
+    not_contains(a, b) -> b not in a``
+    """
     return b not in a
 
 
 def startswith(a, b):
-    """``startswith(a, b) -> a.startswith(b)``"""
+    """Function calling obj.startsiwth.
+
+    ``startswith(a, b) -> a.startswith(b)``
+    """
     return a.startswith(b)
 
 
 def endswith(a, b):
-    """``endswith(a, b) -> a.endswith(b)``"""
+    """Function calling obj.endswith.
+
+    ``endswith(a, b) -> a.endswith(b)``
+    """
     return a.endswith(b)
 
 
@@ -46,19 +55,16 @@ def reverse_n(N, tup):
 
 def negate(fun):
     """Return function negating the value of a boolean function."""
-
     def negated(*args, **kwargs):
         return not fun(*args, **kwargs)
     return negated
 
 
-def reverse_arguments(N):
-    """Returns transformed function where the first N arguments are
-    reversed."""
-
+def reverse_arguments(n):
+    """Return transformed function where first N arguments are reversed."""
     def _inner(fun):
         def reversed(*args, **kwargs):
-            return fun(*reverse_n(N, args), **kwargs)
+            return fun(*reverse_n(n, args), **kwargs)
         return reversed
     return _inner
 
@@ -78,7 +84,9 @@ def traverse_subscribers(it, *args, **kwargs):
 
 
 def wrap_transition(op, did_change):
-    """Transforms operator into a transition operator, i.e. one that
+    """Transform operator into a transition operator.
+
+    That is, an operator that
     only returns true if the ``did_change`` operator also returns true.
 
     Note:
@@ -87,7 +95,6 @@ def wrap_transition(op, did_change):
         true if new_value is equal to needle, but old_value was not equal
         to needle.
     """
-
     def compare(new_value, needle, old_value):
         return did_change(old_value, needle) and op(new_value, needle)
 
@@ -216,7 +223,7 @@ class Q(_Q_):
         return [self.compile_node(field) for field in fields]
 
     def compile_node(self, field):
-        """Compiles node into a cached function that performs the match.
+        """Compile node into a cached function that performs the match.
 
         Returns:
             Callable: taking the object to match.

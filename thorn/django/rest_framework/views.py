@@ -39,8 +39,12 @@ class SubscriberList(ListCreateAPIView):
 
 
 class SubscriberDetail(RetrieveUpdateDestroyAPIView):
-    """Update, delete or get details for specific subscription owned by
-    the currently logged in user."""
+    """Update, delete or get details for specific subscription.
+
+    Note:
+        User must be logged in, and user can only see
+        subscriptions owned by them.
+    """
 
     serializer_class = SubscriberSerializer
     model = Subscriber

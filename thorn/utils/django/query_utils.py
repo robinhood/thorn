@@ -12,8 +12,11 @@ __all__ = ['Q']
 
 
 class Q(tree.Node):
-    """Encapsulates filters as objects that can then be combined
-    logically (using `&` and `|`)."""
+    """Query filter.
+
+    Encapsulates filters as objects that can then be combined
+    logically (using `&` and `|`).
+    """
 
     # Connection types
     AND = 'AND'

@@ -19,6 +19,7 @@ default_app = None
 
 
 def current_app():
+    """Return the currently active app for this thread."""
     app = _tls.current_app
     if app is None:
         if default_app is None:
@@ -29,19 +30,32 @@ def current_app():
 
 
 def set_current_app(app):
+    """Set thread-local current app instance."""
     _tls.current_app = app
 
 
 def set_default_app(app):
+    """Set default app instance."""
     global default_app
     default_app = app
 
 
 def app_or_default(app):
+    """Return app if defined, otherwise return the default app."""
     return app if app is not None else current_app()
 
 
 class buffer_events(object):
+    """Context that enables event buffering.
+
+    The buffer will be flushed at context exit, or when
+    the buffer is flushed explicitly::
+
+        with buffer_events() as buffer:
+            ...
+            buffer.flush()  # <-- flush here.
+        # <-- # implicit flush here.
+    """
 
     def __init__(self, flush_freq=None, flush_timeout=None, app=None):
         self.app = app_or_default(app)

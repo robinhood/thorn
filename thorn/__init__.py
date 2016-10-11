@@ -1,4 +1,4 @@
-"""Python Webhook and Event Framework"""
+"""Python Webhook and Event Framework."""
 from __future__ import absolute_import, unicode_literals
 
 import re

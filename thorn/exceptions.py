@@ -3,16 +3,16 @@ from __future__ import absolute_import, unicode_literals
 
 
 class ThornError(Exception):
-    pass
+    """Base class for Thorn exceptions."""
 
 
 class ImproperlyConfigured(ThornError):
-    pass
+    """Configuration invalid/missing."""
 
 
 class SecurityError(ThornError):
-    pass
+    """Security related error."""
 
 
 class BufferNotEmpty(Exception):
-    pass
+    """Trying to close buffer that is not empty."""

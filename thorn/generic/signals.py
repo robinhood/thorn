@@ -9,6 +9,7 @@ __all__ = ['signal_dispatcher']
 
 
 class signal_dispatcher(object):
+    """Signal dispatcher abstraction."""
 
     signals = None
 
