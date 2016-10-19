@@ -15,7 +15,7 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 
 from celery.result import allow_join_result, _set_task_join_will_block
-from cyanide.suite import ManagerMixin
+from cyanide.suite import DummyMeter, ManagerMixin
 from cyanide.tasks import add
 
 from thorn.django.models import Subscriber
@@ -123,6 +123,7 @@ class Manager(ManagerMixin):
 
     # we don't stop full suite when a task result is missing.
     TaskPredicate = AssertionError
+    Meter = DummyMeter
 
     user = user2 = None
     token = None
