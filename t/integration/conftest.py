@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import celery
 import json
 import os
 import pytest
@@ -77,12 +78,17 @@ def celery_worker(_celery_app):
         with _celery_app.connection() as conn:
             conn.default_channel.queue_declare
 
+        if celery.VERSION >= (4,):
+            pool_args = {'pool': 'solo'}
+        else:
+            pool_args = {'pool_cls': 'solo'}
+
         worker = _celery_app.WorkController(
             concurrency=1,
-            pool='solo',
             loglevel=WORKER_LOGLEVEL,
             logfile=None,
             ready_callback=on_worker_ready,
+            **pool_args,
         )
         t = threading.Thread(target=worker.start)
         t.start()
