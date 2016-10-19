@@ -19,6 +19,7 @@ env:
         - TOXENV=3.5-django1.10
         - TOXENV=3.5-django1.9
         - TOXENV=3.5-django1.8
+        - TOXENV=integration
         - TOXENV=flake8
         - TOXENV=flakeplus
         - TOXENV=apicheck
