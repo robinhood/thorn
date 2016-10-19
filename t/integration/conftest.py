@@ -88,8 +88,7 @@ def celery_worker(_celery_app):
             loglevel=WORKER_LOGLEVEL,
             logfile=None,
             ready_callback=on_worker_ready,
-            **pool_args,
-        )
+            **pool_args)
         t = threading.Thread(target=worker.start)
         t.start()
 
