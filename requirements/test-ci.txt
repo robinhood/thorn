@@ -1,4 +1,4 @@
 pytest-cov
 coverage>=3.0
 codecov
-cyanide
+https://github.com/celery/cyanide/zipball/master#egg=cyanide
