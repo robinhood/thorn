@@ -1,5 +1,5 @@
 language: python
-sudo: false
+sudo: required
 cache: false
 python:
     - '3.5'
@@ -29,3 +29,5 @@ script: tox -v -- -v
 after_success:
     - VERSION/bin/coverage xml
     - .tox/$TRAVIS_PYTHON_VERSION/bin/codecov -e TOXENV
+services:
+    - rabbitmq

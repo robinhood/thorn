@@ -61,5 +61,7 @@ class WorkerDispatcher(_CeleryDispatcher):
         #
         # this way requests have a good chance of reusing keepalive
         # connections as requests with the same host are grouped together.
+        print('REQUESTS: %r' %(list(self.prepare_requests(
+            event, payload, sender, timeout, context, **kwargs))))
         return self.as_request_group(self.prepare_requests(
             event, payload, sender, timeout, context, **kwargs)).delay()
