@@ -68,8 +68,15 @@ def celery_worker(_celery_app):
         def on_worker_ready(consumer):
             on_started.set()
 
+        _celery_app.set_current()
+        _celery_app.set_default()
         _celery_app.finalize()
         _celery_app.log.setup()
+
+        # Make sure we can connect to the broker
+        with _celery_app.connection() as conn:
+            conn.default_channel.queue_declare
+
         worker = _celery_app.WorkController(
             concurrency=1,
             pool='solo',
