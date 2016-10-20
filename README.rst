@@ -2,7 +2,7 @@
 
 |build-status| |coverage| |license| |wheel| |pyversion| |pyimp|
 
-:Version: 1.4.2
+:Version: 1.5.0
 :Web: http://thorn.readthedocs.io/
 :Download: http://pypi.python.org/pypi/thorn/
 :Source: http://github.com/robinhood/thorn/
@@ -81,25 +81,34 @@ Example
 
 This example adds four webhook events to the Article model of
 an imaginary blog engine:
+
 ::
 
-    from thorn import ModelEvent, model_reverser, webhook_model
+    from thorn import ModelEvent, webhook_model
 
-    @webhook_model(
-        on_create=ModelEvent('article.created')
-        on_change=ModelEvent('article.changed'),
-        on_delete=ModelEvent('article.removed'),
-        on_publish=ModelEvent(
-            'article.published',
-            state__eq='PUBLISHED').dispatches_on_change(),
-        reverse=model_reverser('article:detail', uuid='uuid'),
-    )
+    @webhook_model   # <--- activate webhooks for this model
     class Article(models.Model):
-        pass  # ...
+        uuid = models.UUIDField()
+        title = models.CharField(max_length=100)
+        body = models.TextField()
+
+        class webhooks:
+            on_create = ModelEvent('article.created')
+            on_change = ModelEvent('article.changed'),
+            on_delete = ModelEvent('article.removed'),
+            on_publish = ModelEvent(
+                'article.published',
+                state__eq='PUBLISHED',
+            ).dispatches_on_change(),
+
+        @models.permalink
+        def get_absolute_url(self):
+            return 'article:detail', None, {'uuid': self.uuid}
 
 Users can now subscribe to the four events individually, or all of them
 by subscribing to ``article.*``, and will be notified every time
 an article is created, changed, removed or published:
+
 ::
 
     $ curl -X POST                                                      \
@@ -122,6 +131,11 @@ What do I need?
     - Python (2.7, 3.4, 3.5)
     - PyPy (5.1.1)
     - Jython (2.7).
+
+    - Django (1.8, 1.9, 1.10)
+        Django 1.9 adds the ``transaction.on_commit()`` feature,
+        and Thorn takes advantage of this to send events only when
+        the transaction is committed.
 
 Thorn currently only supports `Django`_, and an API for subscribing to events
 is only provided for `Django REST Framework`_.
@@ -181,6 +195,7 @@ You can install thorn either via the Python Package Index (PyPI)
 or from source.
 
 To install using `pip`,:
+
 ::
 
     $ pip install -U thorn
@@ -194,6 +209,7 @@ Download the latest version of thorn from
 http://pypi.python.org/pypi/thorn/
 
 You can install it by doing the following,:
+
 ::
 
     $ tar xvfz thorn-0.0.0.tar.gz
@@ -214,6 +230,7 @@ With pip
 
 You can install the latest snapshot of thorn using the following
 pip command:
+
 ::
 
     $ pip install https://github.com/robinhood/thorn/zipball/master#egg=thorn
