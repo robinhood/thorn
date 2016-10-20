@@ -557,17 +557,23 @@ and must return a dictionary:
 
 .. code-block:: python
 
+    from django.conf import settings
+    from django.db import models
+
     class Article(models.Model):
         uuid = models.UUIDField()
         title = models.CharField(max_length=128)
         state = models.CharField(max_length=128, default='PENDING')
         body = models.TextField()
-        user = models.ForeignKey('auth.User')
+        user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
-        def webhook_headers(self):
-            return {
-                'Authorization': "Bearer {}".format(self.user.access_token),
-            }
+        class webhooks:
+
+            def headers(self, article):
+                return {
+                    'Authorization':
+                        'Bearer {}'.format(article.user.access_token),
+                }
 
 .. _events-model-senders:
 
