@@ -2,6 +2,114 @@
  Changelog
 ===========
 
+.. _version-1.5.0:
+
+1.5.0
+=====
+:release-date: 2016-10-20 11:08 A.M PDT
+:release-by: Ask Solem
+
+- New API for :class:`~thorn.ModelEvent`.
+
+    After having used Thorn for a while, there was a realization
+    that passing lots of arguments to a decorator looks unwieldly
+    when there are many events for a model.
+
+    We have come up with a new way to add webhooks to models,
+    that we believe is more tidy.
+
+    The new API moves declaration of webhooks related things into a
+    nested class:
+
+    .. code-block:: python
+
+    @webhook_model
+    class Article(models.Model):
+        uuid = models.UUIDField()
+        title = models.CharField(max_length=128)
+        state = models.CharField(max_length=128, default='PENDING')
+        body = models.TextField()
+        user = models.ForeignKey(settings.AUTH_USER_MODEL)
+
+        class webhooks:
+            on_create = ModelEvent('article.created')
+            on_change = ModelEvent('article.changed')
+            on_delete = ModelEvent('article.removed')
+            on_publish = ModelEvent(
+                'article.published', state__now_eq='PUBLISHED',
+            ).dispatches_on_change()
+
+            def payload(self, article):
+                return {
+                    'title': article.title,
+                }
+
+            def headers(self, article):
+                return {
+                    'Authorization':
+                        'Bearer {}'.format(article.user.access_token),
+                }
+
+    .. note::
+
+        The old API is still supported, and there's no current plans
+        of deprecating the arguments to the decorator itself.
+
+- Adds support for buffering events - moving dispatch out of signal handlers.
+
+    See :ref:`event-buffering` for more information.
+
+- Models can now define additional headers to be passed on to webhooks.
+
+    See :ref:`events-model-header`.
+
+    Contributed by **Flavio Curella**.
+
+- Django: :class:`~thorn.ModelEvent` now takes advantage of
+  ``Model.get_absolute_url()``.
+
+    Instead of defining a reverser you can now simply have your model
+    define a ``get_absolute_url`` method (which is a convention already):
+
+    .. code-block:: python
+
+        class Article(models.Model):
+
+            @models.permalink
+            def get_absolute_url(self):
+                return 'article:detail', (), {'slug': self.slug}
+
+    For more information on defining this method, refer to the
+    Django documentation:
+    https://docs.djangoproject.com/en/stable/ref/models/instances/#get-absolute-url
+
+- New :setting:`THORN_SIGNAL_HONORS_TRANSACTION` setting.
+
+    If enabled the Django model events will dispatch only after
+    the transaction is committed, and should the transaction be rolled back
+    the events are discarded.
+
+    You can also enable this setting on individual events:
+
+    .. code-block:: python
+
+        ModelEvent(..., signal_honors_transaction=True)
+
+    Disabled by default.
+
+    To be enabled by default in Thorn 2.0.
+
+- :class:`~thorn.ModelEvent` now logs errors instead of propagating them.
+
+    ``ModelEvent(propagate_errors=True)`` may be set to revert to the old
+    behavior.
+
+- URLs now ordered by scheme,host,port (was host,port,scheme).
+
+- Documentation improvements by:
+
+    - Flavio Curella
+
 .. _version-1.4.2:
 
 1.4.2
