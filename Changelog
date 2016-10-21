@@ -12,7 +12,7 @@
 - New API for :class:`~thorn.ModelEvent`.
 
     After having used Thorn for a while, there was a realization
-    that passing lots of arguments to a decorator looks unwieldly
+    that passing lots of arguments to a decorator looks very messy
     when there are many events for a model.
 
     We have come up with a new way to add webhooks to models,
@@ -23,32 +23,32 @@
 
     .. code-block:: python
 
-    @webhook_model
-    class Article(models.Model):
-        uuid = models.UUIDField()
-        title = models.CharField(max_length=128)
-        state = models.CharField(max_length=128, default='PENDING')
-        body = models.TextField()
-        user = models.ForeignKey(settings.AUTH_USER_MODEL)
+        @webhook_model
+        class Article(models.Model):
+            uuid = models.UUIDField()
+            title = models.CharField(max_length=128)
+            state = models.CharField(max_length=128, default='PENDING')
+            body = models.TextField()
+            user = models.ForeignKey(settings.AUTH_USER_MODEL)
 
-        class webhooks:
-            on_create = ModelEvent('article.created')
-            on_change = ModelEvent('article.changed')
-            on_delete = ModelEvent('article.removed')
-            on_publish = ModelEvent(
-                'article.published', state__now_eq='PUBLISHED',
-            ).dispatches_on_change()
+            class webhooks:
+                on_create = ModelEvent('article.created')
+                on_change = ModelEvent('article.changed')
+                on_delete = ModelEvent('article.removed')
+                on_publish = ModelEvent(
+                    'article.published', state__now_eq='PUBLISHED',
+                ).dispatches_on_change()
 
-            def payload(self, article):
-                return {
-                    'title': article.title,
-                }
+                def payload(self, article):
+                    return {
+                        'title': article.title,
+                    }
 
-            def headers(self, article):
-                return {
-                    'Authorization':
-                        'Bearer {}'.format(article.user.access_token),
-                }
+                def headers(self, article):
+                    return {
+                        'Authorization':
+                            'Bearer {}'.format(article.user.access_token),
+                    }
 
     .. note::
 
