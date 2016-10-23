@@ -115,14 +115,35 @@ def webhook_model(*args, **kwargs):
         model_webhooks = Webhooks(**dict(handlers, **kwargs))
         return model_webhooks.contribute_to_model(model)
 
+    # The mess below is here for ensuring that
+    # both::
+    #     @webhook_model
+    #     class x: ...
+    # and::
+    #     @webhook_model()  # <- () alone or with arguments.
+    #     class x: ...
+    # works.
+    #
+    # This may seem weird, but the Python decorator syntax is really
+    # just syntactic sugar for::
+    #     class x: ...
+    #     x = webhook_model(x)
+    #
+    # which means that the Python interpreter transforms
+    # the ``@webhook_model()`` example into::
+    #     class x: ...
+    #     x = webhook_model()(x)
     if len(args) == 1:
         if callable(args[0]):
             return _augment_model(*args)
         raise TypeError('argument 1 to @webhook_model() must be a callable')
+
+    # we take no positional arguments
     if args:
         raise TypeError(
             '@webhook_model() takes exactly 1 argument ({0} given)'.format(
                 sum([len(args), len(kwargs)])))
+
     return _augment_model
 
 
