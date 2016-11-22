@@ -88,7 +88,9 @@ class Request(ThenableProxy):
                  headers=None, user_agent=None, app=None,
                  recipient_validators=None,
                  allow_keepalive=True):
-        # type: (str, Dict, Any, Subscriber, str, Callable, Callable, float, Callable, bool, int, float, Mapping, str, App, Sequence[Callable], bool) -> None
+        # type: (str, Dict, Any, Subscriber, str, Callable,
+        #        Callable, float, Callable, bool, int,
+        #        float, Mapping, str, App, Sequence[Callable], bool) -> None
         self.app = app_or_default(app or self.app)
         self.id = id or uuid()
         self.event = event

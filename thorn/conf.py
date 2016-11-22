@@ -108,6 +108,8 @@ class Settings(object):
         # type: (str, Callable[None, Any]) -> Any
         val = getattr(self.app.config, key, None)
         return val if val is not None else default()
+
+
 settings = Settings()
 
 

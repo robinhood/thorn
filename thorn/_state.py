@@ -13,6 +13,8 @@ __all__ = [
 
 class _TLS(threading.local):
     current_app = None
+
+
 _tls = _TLS()
 
 default_app = None

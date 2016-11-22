@@ -75,7 +75,8 @@ class Event(object):
                  recipient_validators=None, subscribers=None,
                  request_data=None, allow_keepalive=None,
                  **kwargs):
-        # type: (str, float, Dispatcher, bool, int, float, App, List, Mapping, Dict, bool) -> None
+        # type: (str, float, Dispatcher, bool, int, float, App,
+        #        List, Mapping, Dict, bool) -> None
         self.name = name
         self.timeout = timeout
         self._dispatcher = dispatcher
@@ -130,7 +131,8 @@ class Event(object):
     def _send(self, name, data, headers=None, sender=None,
               on_success=None, on_error=None,
               timeout=None, on_timeout=None, context=None):
-        # type: (str, Any, Dict, Any, Callable, Callable, float, Callable, Dict) -> promise
+        # type: (str, Any, Dict, Any, Callable,
+        #        Callable, float, Callable, Dict) -> promise
         timeout = timeout if timeout is not None else self.timeout
         return self.dispatcher.send(
             name, self.prepare_payload(data), sender,
@@ -293,7 +295,8 @@ class ModelEvent(Event):
                     signal_honors_transaction=None,
                     propagate_errors=False,
                     **kwargs):
-        # type: (model_reverser, str, signal_dispatcher, bool, bool, **Any) -> None
+        # type: (model_reverser, str, signal_dispatcher,
+        #        bool, bool, **Any) -> None
         self.reverse = reverse
         self.sender_field = sender_field
         self.signal_dispatcher = signal_dispatcher

@@ -34,6 +34,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         exclude = ('user_permissions',)
 
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include(
