@@ -12,10 +12,15 @@ from thorn.request import Request
 from conftest import DEFAULT_RECIPIENT_VALIDATORS
 
 
+class PickableMock(Mock):
+    def __reduce__(self):
+        return (Mock, ())
+
+
 def mock_req(event, url, **kwargs):
-    kwargs.setdefault('on_success', Mock(name='on_success'))
-    kwargs.setdefault('on_timeout', Mock(name='on_timeout'))
-    kwargs.setdefault('on_error', Mock(name='on_error'))
+    kwargs.setdefault('on_success', PickableMock(name='on_success'))
+    kwargs.setdefault('on_timeout', PickableMock(name='on_timeout'))
+    kwargs.setdefault('on_error', PickableMock(name='on_error'))
     subscriber = Mock(name='subscriber')
     subscriber.url = url
     subscriber.content_type = MIME_JSON
@@ -176,6 +181,9 @@ class test_Request:
             'retry_max': self.req.retry_max,
             'recipient_validators': DEFAULT_RECIPIENT_VALIDATORS,
             'allow_keepalive': self.req.allow_keepalive,
+            'on_success': self.req.on_success,
+            'on_error': self.req.on_error,
+            'on_timeout': self.req.on_timeout,
         }
 
     def test_urlident(self):
@@ -199,7 +207,7 @@ class test_Request:
                 return {'value': 808}
         self.req._dispatcher = ''
         self.req.subscriber = Subscriber()
-        r2 = pickle.loads(pickle.dumps(self.req))
+        r2 = pickle.loads(pickle.dumps(self.req, -1))
         assert r2.app is self.app
 
     def test_repr(self):

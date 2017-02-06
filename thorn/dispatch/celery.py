@@ -40,7 +40,7 @@ class Dispatcher(_CeleryDispatcher):
              timeout=None, context=None, **kwargs):
         return send_event.s(
             event, payload,
-            sender.pk if sender else sender, timeout, context,
+            sender.pk if sender else sender, timeout, context, **kwargs
         ).apply_async()
 
     def flush_buffer(self):
