@@ -1,12 +1,10 @@
 """Webhooks-related configuration settings."""
 from __future__ import absolute_import, unicode_literals
-
-from celery.utils import cached_property
-
+from kombu.utils import json
+from kombu.utils.objects import cached_property
 from . import validators
 from ._state import app_or_default
 from .exceptions import ImproperlyConfigured
-from .utils import json
 
 __all__ = ['settings', 'event_choices']
 

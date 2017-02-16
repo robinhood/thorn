@@ -1,17 +1,13 @@
 from __future__ import absolute_import, unicode_literals
-
 import pytest
 import pytz
-
 from decimal import Decimal
 from datetime import datetime
 from json import loads
 from six import text_type
 from uuid import uuid4
-
 from case import Mock, mock, patch
-
-from thorn.utils.json import dumps, get_best_json
+from kombu.utils.json import dumps
 
 
 def test_encode_datetime():
@@ -70,16 +66,3 @@ def test_B_simplejson():
             assert json.dumps(obj, encode=encode) is encode.return_value
             encode.assert_called_with(
                 obj, cls=json.JsonEncoder, use_decimal=False)
-
-
-class test_get_best_json:
-
-    @patch('thorn.utils.json.symbol_by_name')
-    def test_no_alternatives(self, symbol_by_name):
-        from thorn.utils import json
-        symbol_by_name.side_effect = ImportError()
-        with pytest.raises(ImportError):
-            json.get_best_json()
-
-    def test_no_choices(self):
-        get_best_json(choices=[])

@@ -1,16 +1,13 @@
 """Functional-style utilities."""
 from __future__ import absolute_import, unicode_literals
-
 import operator
-
 from collections import Callable, deque
 from functools import partial
 from itertools import islice
 from six import string_types
-
-from celery.utils import cached_property
-from celery.utils.functional import is_list, maybe_list
-from celery.utils.imports import symbol_by_name
+from kombu.utils.objects import cached_property
+from kombu.utils.functional import is_list, maybe_list
+from kombu.utils.imports import symbol_by_name
 
 try:
     from django.db.models.query import Q as _Q_

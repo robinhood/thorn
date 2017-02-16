@@ -1,6 +1,5 @@
-celery
+celery>=4.0,<5.0
 six
 requests
-vine>=1.1.0
 
 itsdangerous # XXX remove for Thorn2

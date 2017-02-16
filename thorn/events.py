@@ -5,7 +5,7 @@ from operator import attrgetter
 from six import iteritems as items, iterkeys as keys
 from weakref import WeakSet
 
-from celery.utils import cached_property
+from kombu.utils.objects import cached_property
 
 from ._state import app_or_default
 from .utils.compat import bytes_if_py2, restore_from_keys

@@ -1,9 +1,7 @@
 """Dispatching by signal."""
 from __future__ import absolute_import, unicode_literals
-
 from six import iteritems as items
-
-from celery.utils.imports import symbol_by_name
+from kombu.utils.imports import symbol_by_name
 
 __all__ = ['signal_dispatcher']
 
