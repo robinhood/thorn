@@ -18,7 +18,7 @@ Subscribers are stored in the database.
 
 The subscription can match an event by simple pattern matching,
 and also filter by events related to a specific user (requires
-the event to be sent with a ``sender`` argument``).
+the event to be sent with a ``sender`` argument).
 
 A simple subscriber can be created from the repl,
 like in this example where all ``article.`` related events
@@ -32,3 +32,9 @@ and the payload is requested to be in *json* format:
             url='http://example.com/receive/article',
             content_type='application/json',
     ... )
+
+Sending events to only a subset of subscribers
+----------------------------------------------
+Thorn can send an event either to all subscribers or to the single subscriber
+whose :attr:`~thorn.generic.models.AbstractSubscriber.user` attribute matches
+the ``sender`` keyword argument passed to :meth:`~thorn.events.Event.send`.
