@@ -1,6 +1,7 @@
 language: python
 sudo: false
 cache: false
+group: edge
 python:
     - '3.6'
 env:
