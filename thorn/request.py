@@ -3,20 +3,23 @@ from __future__ import absolute_import, unicode_literals
 
 import thorn
 import requests
+import socket
 
 from contextlib import contextmanager
 
 from celery import uuid
 from celery.utils import cached_property
 from requests.exceptions import ConnectionError, Timeout
-from requests.packages.urllib3.util.url import parse_url
+from requests.packages.urllib3.util.url import Url, parse_url
 from vine import maybe_promise, promise
 from vine.abstract import Thenable, ThenableProxy
 
 from ._state import app_or_default
 from .utils.compat import bytes_if_py2, restore_from_keys
 from .utils.log import get_logger
-from .validators import deserialize_validator, serialize_validator
+from .validators import (
+    block_internal_ips, deserialize_validator, serialize_validator,
+)
 
 __all__ = ['Request']
 
@@ -164,17 +167,37 @@ class Request(ThenableProxy):
             if close_session and session is not None:
                 session.close()
 
+    def to_safeurl(self, url):
+        # type: (str) -> Tuple[str, str]
+        parts = parse_url(url)
+        host = parts.host
+        addr = socket.gethostbyname(host)
+        safeurl = Url(
+            scheme=parts.scheme,
+            auth=parts.auth,
+            host=addr,
+            port=parts.port,
+            path=parts.path,
+            query=parts.query,
+            fragment=parts.fragment,
+        )
+        block_internal_ips()(addr)
+        return host, safeurl.url
+
     def post(self, session=None):
         # type: (requests.Session) -> requests.Response
+        host, url = self.to_safeurl(self.subscriber.url)
+
         with self.session_or_acquire(session) as session:
             return session.post(
-                url=self.subscriber.url,
+                url=url,
                 data=self.data,
-                allow_redirects=self.app.settings.THORN_ALLOW_REDIRECTS,
+                allow_redirects=self.allow_redirects,
                 timeout=self.timeout,
                 headers=self.annotate_headers({
                     'Hook-HMAC': self.sign_request(self.subscriber, self.data),
                     'Hook-Subscription': str(self.subscriber.uuid),
+                    'Host': host,
                 }),
             )
 

@@ -7,7 +7,7 @@ from case import Mock, skip
 
 from thorn.conf import MIME_JSON
 from thorn.exceptions import SecurityError
-from thorn.request import Request
+from thorn.request import Request, parse_url
 
 from conftest import DEFAULT_RECIPIENT_VALIDATORS
 
@@ -56,21 +56,24 @@ class test_Request:
         assert x.user_agent == 'MyAgent'
         assert x.headers['User-Agent'] == 'MyAgent'
 
-    def expected_headers(self, req):
+    def expected_headers(self, req, host=None):
         return req.annotate_headers({
             'Hook-HMAC': req.sign_request(req.subscriber, req.data),
             'Hook-Subscription': str(req.subscriber.uuid),
+            'Host': host,
         })
 
     def test_dispatch(self):
         session = Mock(name='session')
-        expected_headers = self.expected_headers(self.req)
+        host, url = self.req.to_safeurl(self.req.subscriber.url)
+        expected_headers = self.expected_headers(self.req, host=host)
         self.req.dispatch(session=session)
         session.post.assert_called_with(
-            url=self.req.subscriber.url,
+            url=url,
             data=self.req.data,
             headers=expected_headers,
             timeout=self.req.timeout,
+            allow_redirects=False,
         )
         self.req.on_success.assert_called_with(self.req)
         self.req.on_success = None
@@ -89,15 +92,17 @@ class test_Request:
         self.req.allow_keepalive = False
         session = Mock(name='session')
         self.req.Session = Mock(name='req.Session')
-        expected_headers = self.expected_headers(self.req)
+        host, url = self.req.to_safeurl(self.req.subscriber.url)
+        expected_headers = self.expected_headers(self.req, host=host)
         self.req.dispatch(session=session)
         session.post.assert_not_called()
         self.req.Session.assert_called_once_with()
         self.req.Session().post.assert_called_with(
-            url=self.req.subscriber.url,
+            url=url,
             data=self.req.data,
             headers=expected_headers,
             timeout=self.req.timeout,
+            allow_redirects=False,
         )
         self.req.Session().close.assert_called_once_with()
 
