@@ -7,7 +7,7 @@ import requests
 from contextlib import contextmanager
 
 from celery import uuid
-from kombu.utils.objects import cached_property
+from celery.utils import cached_property
 from requests.exceptions import ConnectionError, Timeout
 from requests.packages.urllib3.util.url import parse_url
 from vine import maybe_promise, promise

@@ -6,8 +6,8 @@ import os
 
 from functools import partial
 
-from kombu.utils.imports import symbol_by_name
-from kombu.utils.objects import cached_property
+from celery.utils import cached_property
+from celery.utils.imports import symbol_by_name
 
 try:
     from django.db.transaction import TransactionManagementError, on_commit

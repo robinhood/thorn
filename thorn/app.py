@@ -3,9 +3,9 @@ from __future__ import absolute_import, unicode_literals
 
 from operator import attrgetter, methodcaller
 
+from celery.utils import cached_property
+from celery.utils.imports import symbol_by_name
 from celery.utils.functional import first
-from kombu.utils.objects import cached_property
-from kombu.utils.imports import symbol_by_name
 
 from . import _state
 from .utils.compat import bytes_if_py2

@@ -6,7 +6,7 @@ from functools import partial
 from itertools import chain
 from weakref import ref
 
-from kombu.utils.functional import maybe_list
+from celery.utils.functional import maybe_list
 from vine import barrier
 
 from thorn._state import app_or_default

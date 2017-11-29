@@ -1,7 +1,9 @@
 """Tasks used by the Celery dispatcher."""
 from __future__ import absolute_import, unicode_literals
+
 from celery import shared_task
-from kombu.utils.functional import memoize
+from celery.utils.functional import memoize
+
 from ._state import app_or_default
 
 __all__ = ['send_event', 'dispatch_requests', 'dispatch_request']
