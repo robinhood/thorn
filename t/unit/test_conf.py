@@ -22,6 +22,7 @@ def app():
     ('THORN_EVENT_TIMEOUT', 'default_timeout'),
     ('THORN_HMAC_SIGNER', 'default_hmac_signer'),
     ('THORN_SIGNAL_HONORS_TRANSACTION', 'default_signal_honors_transaction'),
+    ('THORN_ALLOW_REDIRECTS', 'default_allow_redirects'),
 ])
 def test_settings(setting, default_attr, app):
     s1 = Settings(app=app)

@@ -87,10 +87,12 @@ class Request(ThenableProxy):
                  retry=None, retry_max=None, retry_delay=None,
                  headers=None, user_agent=None, app=None,
                  recipient_validators=None,
-                 allow_keepalive=True):
+                 allow_keepalive=True,
+                 allow_redirects=None):
         # type: (str, Dict, Any, Subscriber, str, Callable,
         #        Callable, float, Callable, bool, int,
-        #        float, Mapping, str, App, Sequence[Callable], bool) -> None
+        #        float, Mapping, str, App, Sequence[Callable],
+        #        bool, bool) -> None
         self.app = app_or_default(app or self.app)
         self.id = id or uuid()
         self.event = event
@@ -111,6 +113,9 @@ class Request(ThenableProxy):
         if recipient_validators is None:
             recipient_validators = self.app.settings.THORN_RECIPIENT_VALIDATORS
         self.allow_keepalive = allow_keepalive
+        if allow_redirects is None:
+            allow_redirects = self.app.settings.THORN_ALLOW_REDIRECTS
+        self.allow_redirects = allow_redirects
         self._recipient_validators = recipient_validators
         self.response = None
         self._headers = headers
@@ -165,6 +170,7 @@ class Request(ThenableProxy):
             return session.post(
                 url=self.subscriber.url,
                 data=self.data,
+                allow_redirects=self.app.settings.THORN_ALLOW_REDIRECTS,
                 timeout=self.timeout,
                 headers=self.annotate_headers({
                     'Hook-HMAC': self.sign_request(self.subscriber, self.data),

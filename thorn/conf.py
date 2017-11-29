@@ -32,6 +32,7 @@ class Settings(object):
     ]
     default_signal_honors_transaction = False
     default_hmac_signer = 'thorn.utils.hmac:compat_sign'
+    default_allow_redirects = False
 
     def __init__(self, app=None):
         self.app = app_or_default(app or self.app)
@@ -97,6 +98,12 @@ class Settings(object):
         return self._get(
             'THORN_SIGNAL_HONORS_TRANSACTION',
             self.default_signal_honors_transaction)
+
+    @cached_property
+    def THORN_ALLOW_REDIRECTS(self):
+        # type: () -> bool
+        return self._get(
+            'THORN_ALLOW_REDIRECTS', self.default_allow_redirects)
 
     def _get(self, key, default=None):
         # type: (str, Any) -> Any
