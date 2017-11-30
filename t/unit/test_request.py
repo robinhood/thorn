@@ -74,6 +74,7 @@ class test_Request:
             headers=expected_headers,
             timeout=self.req.timeout,
             allow_redirects=False,
+            verify=False,
         )
         self.req.on_success.assert_called_with(self.req)
         self.req.on_success = None
@@ -103,6 +104,7 @@ class test_Request:
             headers=expected_headers,
             timeout=self.req.timeout,
             allow_redirects=False,
+            verify=False,
         )
         self.req.Session().close.assert_called_once_with()
 

@@ -199,6 +199,7 @@ class Request(ThenableProxy):
                     'Hook-Subscription': str(self.subscriber.uuid),
                     'Host': host,
                 }),
+                verify=False,
             )
 
     def handle_timeout_error(self, exc, propagate=False):
