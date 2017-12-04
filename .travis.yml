@@ -7,8 +7,6 @@ env:
     global:
         PYTHONUNBUFFERED=yes
     matrix:
-        - TOXENV=2.7-django2.0-unit
-        - TOXENV=2.7-django2.0-integration
         - TOXENV=2.7-django1.10-unit
         - TOXENV=2.7-django1.10-integration
         - TOXENV=2.7-django1.9-unit
