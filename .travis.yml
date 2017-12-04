@@ -7,24 +7,32 @@ env:
     global:
         PYTHONUNBUFFERED=yes
     matrix:
+        - TOXENV=2.7-django2.0-unit
+        - TOXENV=2.7-django2.0-integration
         - TOXENV=2.7-django1.10-unit
         - TOXENV=2.7-django1.10-integration
         - TOXENV=2.7-django1.9-unit
         - TOXENV=2.7-django1.9-integration
         - TOXENV=2.7-django1.8-unit
         - TOXENV=2.7-django1.8-integration
+        - TOXENV=pypy-django2.0-unit
+        - TOXENV=pypy-django2.0-integration
         - TOXENV=pypy-django1.10-unit
         - TOXENV=pypy-django1.10-integration
         - TOXENV=pypy-django1.9-unit
         - TOXENV=pypy-django1.9-integration
         - TOXENV=pypy-django1.8-unit
         - TOXENV=pypy-django1.8-integration
+        - TOXENV=3.4-django2.0-unit
+        - TOXENV=3.4-django2.0-integration
         - TOXENV=3.4-django1.10-unit
         - TOXENV=3.4-django1.10-integration
         - TOXENV=3.4-django1.9-unit
         - TOXENV=3.4-django1.9-integration
         - TOXENV=3.4-django1.8-unit
         - TOXENV=3.4-django1.8-integration
+        - TOXENV=3.5-django2.0-unit
+        - TOXENV=3.5-django2.0-integration
         - TOXENV=3.5-django1.10-unit
         - TOXENV=3.5-django1.10-integration
         - TOXENV=3.5-django1.9-unit
