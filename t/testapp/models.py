@@ -16,7 +16,8 @@ class Foo(models.Model):
 
 
 class Bar(models.Model):
-    foo = models.ForeignKey(Foo, related_name='bars')
+    foo = models.ForeignKey(
+        Foo, related_name='bars', on_delete=models.CASCADE)
 
 
 class Tag(models.Model):
@@ -29,6 +30,7 @@ class Article(models.Model):
     state = models.CharField(max_length=64, default='PENDING')
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         related_name='%(app_label)s_%(class)s',
     )
     tags = models.ManyToManyField(Tag)
