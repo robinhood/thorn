@@ -30,6 +30,7 @@ class test_SubscriberManager:
             self.rsimple('*.created', 'E'),
             self.rsimple('bar.updated', 'F'),
             self.rsimple('baz.*', 'G', user=self.user2),
+            self.rsimple('*', 'H'),
         ]
 
     def rsimple(self, event, url, user=None):
@@ -38,13 +39,13 @@ class test_SubscriberManager:
         )
 
     @pytest.mark.parametrize('event,expected,username', [
-        ('foo.created', ['A', 'B', 'C', 'E'], None),
-        ('foo.updated', ['A'], None),
-        ('foo.deleted', ['A', 'D'], None),
-        ('baz.created', ['E', 'G'], None),
-        ('bar.updated', ['F'], None),
-        ('bar.deleted', [], None),
-        ('baz.moo', [], 'user'),
+        ('foo.created', ['A', 'B', 'C', 'E', 'H'], None),
+        ('foo.updated', ['A', 'H'], None),
+        ('foo.deleted', ['A', 'D', 'H'], None),
+        ('baz.created', ['E', 'G', 'H'], None),
+        ('bar.updated', ['F', 'H'], None),
+        ('bar.deleted', ['H'], None),
+        ('baz.moo', ['H'], 'user'),
         ('baz.moo', ['G'], 'user2')
     ])
     def test_matching(self, event, expected, username):
