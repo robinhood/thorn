@@ -1,5 +1,9 @@
 .. image:: http://thorn.readthedocs.io/en/latest/_images/thorn_banner.png
 
+==========================
+ Python Stream Processing
+==========================
+
 |build-status| |coverage| |license| |wheel| |pyversion| |pyimp|
 
 .. include:: ../includes/introduction.txt
