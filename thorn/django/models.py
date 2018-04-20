@@ -87,7 +87,7 @@ class Subscriber(models.Model, SubscriberModelMixin):
     content_type = models.CharField(
         _('content type'),
         max_length=CHAR_MAX_LENGTH,
-        choices=zip(CONTENT_TYPES, CONTENT_TYPES),
+        choices=[(c, c) for c in sorted(CONTENT_TYPES)],
         default=MIME_JSON,
         help_text='Desired content type for requests to this callback.'
     )
