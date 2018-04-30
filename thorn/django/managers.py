@@ -18,6 +18,7 @@ class SubscriberQuerySet(models.QuerySet):
         # order.*
         # *.completed
         return self.filter(
+            Q(event__exact='*') |
             Q(event__exact=event) |
             Q(event__exact='{0}.*'.format(topic)) |
             Q(event__exact='*.{0}'.format(rest))

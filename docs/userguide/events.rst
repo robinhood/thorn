@@ -64,7 +64,7 @@ a single dot:
 A subscription to ``"user.*"`` will match events ``"user.created"``,
 ``"user.changed"``, and ``"user.removed"``; while a subscription to
 ``"*.created"`` will match ``"user.created"``, ``"article.created"``, and so
-on.
+on. A subscription to ``"*"`` will match *all* events.
 
 ``ModelEvent`` names may include model instance's field values. For example, you
 could define ``"user.{.username}"``, and events will be fired as
