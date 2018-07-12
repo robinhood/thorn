@@ -279,7 +279,7 @@ class ModelEvent(Event):
         # handles this, but we want to avoid the extra database hit
         # when they are not in use.
         self.use_transitions = any(
-            '__now_' in k for k in keys(self.filter_fields),
+            ('__now_' in k for k in keys(self.filter_fields)),
         )
         # _filterargs is set by __reduce__ to restore *args
         restored_args = kwargs.get('_filterargs') or ()
