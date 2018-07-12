@@ -1,9 +1,7 @@
 language: python
 sudo: false
-cache: false
+cache: pip
 group: edge
-python:
-    - '3.5'
 env:
     global:
         PYTHONUNBUFFERED=yes
