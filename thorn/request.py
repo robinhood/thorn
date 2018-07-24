@@ -169,6 +169,15 @@ class Request(ThenableProxy):
 
     def to_safeurl(self, url):
         # type: (str) -> Tuple[str, str]
+        # Try and see if there is any sort of redirection in the recipient URL
+        # if yes, get the final URL to be passed into the validator
+        if self.allow_redirects:
+            try:
+                _dummy_resp = requests.head(url, allow_redirects=True)
+                url = _dummy_resp.url
+            except ConnectionError:
+                logger.warning("Recipient URL not reachable")
+
         parts = parse_url(url)
         host = parts.host
         addr = socket.gethostbyname(host)
