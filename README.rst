@@ -88,7 +88,7 @@ an imaginary blog engine:
 
 ::
 
-    from django.core.urlresolvers import reverse
+    from django.urls import reverse
     from thorn import ModelEvent, webhook_model
 
     @webhook_model   # <--- activate webhooks for this model

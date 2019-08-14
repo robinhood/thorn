@@ -40,7 +40,7 @@ def webhook_model(*args, **kwargs):
 
         .. code-block:: python
 
-            from django.core.urlresolvers import reverse
+            from django.urls import reverse
 
             @webhook_model
             class Article(models.Model):
@@ -68,7 +68,7 @@ def webhook_model(*args, **kwargs):
 
         .. code-block:: python
 
-            from django.core.urlresolvers import reverse
+            from django.urls import reverse
 
             @webhook_model
             class Article(model.Model):

@@ -234,8 +234,8 @@ Here's an example decorating a Django ORM model:
 
 .. code-block:: python
 
-    from django.core.urlresolvers import reverse
     from django.db import models
+    from django.urls import reverse
 
     from thorn import ModelEvent, webhook_model
 
@@ -343,7 +343,7 @@ So let's discuss the decorator arguments one by one:
 
     .. code-block:: pycon
 
-        >>> from django.core.urlresolvers import reverse
+        >>> from django.urls import reverse
         >>> reverse('blog:article_detail', kwargs={'uuid': article.uuid})
         http://example.com/blog/article/3d90c42c-d61e-4579-ab8f-733d955529ad/
 
@@ -610,7 +610,7 @@ URL references
 --------------
 
 To be able to provide a URL reference back to your model object
-the event needs to know how to call :func:`django.core.urlresolvers.reverse`
+the event needs to know how to call :func:`django.urls.reverse`
 (or equivalent in your web framework) and what arguments to use.
 
 A best practice when writing Django apps is to always add a
@@ -618,7 +618,7 @@ A best practice when writing Django apps is to always add a
 
 .. code-block:: python
 
-    from django.core.urlresolvers import reverse
+    from django.urls import reverse
 
     class Article(models.Model):
 
@@ -663,7 +663,7 @@ We can see that to get the URL of a specific article we need
 
 .. code-block:: python
 
-    >>> from django.core.urlresolvers import reverse
+    >>> from django.urls import reverse
     >>> article = Article.objects.get(uuid='f3f2b22b-8630-412a-a320-5b2644ed723a')
     >>> reverse('article:detail', kwargs={'uuid': article.uuid})
     http://example.com/article/f3f2b22b-8630-412a-a320-5b2644ed723a/
