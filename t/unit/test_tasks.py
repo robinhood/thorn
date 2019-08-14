@@ -98,7 +98,8 @@ class test_dispatch_request:
             id=self.req.id, timeout=self.req.timeout, retry=self.req.retry,
             retry_max=self.req.retry_max, retry_delay=self.req.retry_delay,
             recipient_validators=DEFAULT_RECIPIENT_VALIDATORS,
-            allow_keepalive=True,
+            allow_keepalive=True, on_error=None, on_success=None,
+            on_timeout=None
         )
         _Request().dispatch.assert_called_once_with(
             session=self.session, propagate=_Request().retry)
@@ -116,7 +117,8 @@ class test_dispatch_request:
             id=self.req.id, timeout=self.req.timeout, retry=self.req.retry,
             retry_max=self.req.retry_max, retry_delay=self.req.retry_delay,
             recipient_validators=DEFAULT_RECIPIENT_VALIDATORS,
-            allow_keepalive=False,
+            allow_keepalive=False, on_error=None, on_success=None,
+            on_timeout=None
         )
         _Request().dispatch.assert_called_once_with(
             session=self.session, propagate=_Request().retry)
@@ -133,7 +135,8 @@ class test_dispatch_request:
             id=self.req2.id, timeout=self.req2.timeout, retry=self.req2.retry,
             retry_max=self.req2.retry_max, retry_delay=self.req2.retry_delay,
             recipient_validators=DEFAULT_RECIPIENT_VALIDATORS,
-            allow_keepalive=True,
+            allow_keepalive=True, on_error=None, on_success=None,
+            on_timeout=None
         )
         _Request().dispatch.assert_called_once_with(
             session=self.session, propagate=_Request().retry)

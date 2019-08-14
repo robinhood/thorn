@@ -246,6 +246,9 @@ class Request(ThenableProxy):
                 self._recipient_validators,
             ),
             'allow_keepalive': self.allow_keepalive,
+            'on_success': self.on_success,
+            'on_error': self.on_error,
+            'on_timeout': self.on_timeout,
         }
 
     def annotate_headers(self, extra_headers):
