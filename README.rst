@@ -73,7 +73,7 @@ Notable examples of webhooks in use are:
 +------------+---------------------------------------------------------------+
 |   Stripe   | https://stripe.com/docs/webhooks                              |
 +------------+---------------------------------------------------------------+
-|   PayPal   | http://bit.ly/1TbDtvj                                         |
+|   PayPal   | https://developer.paypal.com/docs/integration/direct/webhooks/|
 +------------+---------------------------------------------------------------+
 
 Example
