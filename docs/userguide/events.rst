@@ -234,6 +234,7 @@ Here's an example decorating a Django ORM model:
 
 .. code-block:: python
 
+    from django.core.urlresolvers import reverse
     from django.db import models
 
     from thorn import ModelEvent, webhook_model
@@ -259,9 +260,8 @@ Here's an example decorating a Django ORM model:
                     'title': article.title,
                 }
 
-        @models.permalink
         def get_absolute_url(self):
-            return ('blog:article-detail', None, {'uuid': self.uuid})
+            return reverse('blog:article-detail', kwargs={'uuid': self.uuid})
 
 
 .. sidebar:: Why is this example using Django?
@@ -332,7 +332,7 @@ So let's discuss the decorator arguments one by one:
     This method defines what to include in the ``data`` section of the
     webhooks sent for this model.
 
-#. ``@models.permalink``
+#. ``def get_absolute_url``
 
     This tells Thorn how to get the canonical URL of an object of
     this model type, which is used as the ``ref`` field in the webhook
@@ -618,11 +618,12 @@ A best practice when writing Django apps is to always add a
 
 .. code-block:: python
 
+    from django.core.urlresolvers import reverse
+
     class Article(models.Model):
 
-        @models.permalink
         def get_absolute_url(self):
-            return ('article:detail', None, {'uuid': self.uuid})
+            return reverse('article:detail', kwargs={'uuid': self.uuid})
 
 If you define this method, then Thorn will happily use it, but some times
 you may also want to define alternate reversing strategies for specific events

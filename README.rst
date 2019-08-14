@@ -1,5 +1,9 @@
 .. image:: http://thorn.readthedocs.io/en/latest/_images/thorn_banner.png
 
+==========================
+ Python Stream Processing
+==========================
+
 |build-status| |coverage| |license| |wheel| |pyversion| |pyimp|
 
 :Version: 1.5.2
@@ -73,7 +77,7 @@ Notable examples of webhooks in use are:
 +------------+---------------------------------------------------------------+
 |   Stripe   | https://stripe.com/docs/webhooks                              |
 +------------+---------------------------------------------------------------+
-|   PayPal   | https://developer.paypal.com/docs/integration/direct/webhooks/|
+|   PayPal   | http://bit.ly/1TbDtvj                                         |
 +------------+---------------------------------------------------------------+
 
 Example
@@ -84,6 +88,7 @@ an imaginary blog engine:
 
 ::
 
+    from django.core.urlresolvers import reverse
     from thorn import ModelEvent, webhook_model
 
     @webhook_model   # <--- activate webhooks for this model
@@ -101,9 +106,8 @@ an imaginary blog engine:
                 state__eq='PUBLISHED',
             ).dispatches_on_change(),
 
-        @models.permalink
         def get_absolute_url(self):
-            return 'article:detail', None, {'uuid': self.uuid}
+            return reverse('article:detail', kwargs={'uuid': self.uuid})
 
 Users can now subscribe to the four events individually, or all of them
 by subscribing to ``article.*``, and will be notified every time
