@@ -142,7 +142,7 @@ class Request(ThenableProxy):
             self.validate_recipient(self.subscriber.url)
             with self._finalize_unless_request_error(propagate):
                 self.response = self.post(session=session)
-                return self
+            return self
 
     @contextmanager
     def _finalize_unless_request_error(self, propagate=False):
