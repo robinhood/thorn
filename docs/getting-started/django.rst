@@ -68,7 +68,8 @@ To enable them add the following URL configuration to your
 .. code-block:: python
 
     url(r"^hooks/",
-        include("thorn.django.rest_framework.urls", namespace="webhook"))
+        include(("thorn.django.rest_framework.urls", "thorn"),
+                namespace="webhook"))
 
 .. _django-rest-framework-operations:
 

@@ -646,7 +646,7 @@ So if we imagine that the REST API view of our article app is included
 like this::
 
    url(r'^article/', include(
-       'apps.article.urls', namespace='article'))
+       ('apps.article.urls', 'article'), namespace='article'))
 
 and the URL routing table of the Article app looks like this::
 

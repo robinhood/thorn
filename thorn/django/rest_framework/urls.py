@@ -12,7 +12,8 @@ To include the rest-framework API views in your project use the
 
     urlpatterns = [
         url(r'^hooks/',
-            include('thorn.django.rest_framework.urls', namespace='webhook')),
+            include(('thorn.django.rest_framework.urls', 'thorn'),
+                    namespace='webhook')),
     ]
 
 Endpoints
