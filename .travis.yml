@@ -10,12 +10,6 @@ env:
     matrix:
         - TOXENV=2.7-django1.11-unit
         - TOXENV=2.7-django1.11-integration
-        - TOXENV=pypy-django2.1-unit
-        - TOXENV=pypy-django2.1-integration
-        - TOXENV=pypy-django2.0-unit
-        - TOXENV=pypy-django2.0-integration
-        - TOXENV=pypy-django1.11-unit
-        - TOXENV=pypy-django1.11-integration
         - TOXENV=3.5-django2.1-unit
         - TOXENV=3.5-django2.1-integration
         - TOXENV=3.5-django2.0-unit
