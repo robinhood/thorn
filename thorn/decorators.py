@@ -40,6 +40,8 @@ def webhook_model(*args, **kwargs):
 
         .. code-block:: python
 
+            from django.urls import reverse
+
             @webhook_model
             class Article(models.Model):
                 uuid = models.UUIDField()
@@ -52,9 +54,8 @@ def webhook_model(*args, **kwargs):
                         'article.deactivate', deactivated__eq=True,
                     )
 
-                @models.permalink
                 def get_absolute_url(self):
-                    return ('blog:article-detail', None, {'uuid': self.uuid})
+                    return reverse('blog:article-detail', kwargs={'uuid': self.uuid})
 
         The URL may not actually exist after deletion, so maybe we want
         to point the reference to something else in that special case,
@@ -66,6 +67,8 @@ def webhook_model(*args, **kwargs):
         only:
 
         .. code-block:: python
+
+            from django.urls import reverse
 
             @webhook_model
             class Article(model.Model):
@@ -84,9 +87,8 @@ def webhook_model(*args, **kwargs):
                         'article.internal_delete', priority__gte=30.0,
                     ).dispatches_on_delete()
 
-                @models.permalink
                 def get_absolute_url(self):
-                    return ('blog:article-detail', None, {'uuid': self.uuid})
+                    return reverse('blog:article-detail', kwargs={'uuid': self.uuid})
     """
     def _augment_model(model):
         # type: (type) -> type

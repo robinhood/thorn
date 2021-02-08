@@ -80,6 +80,7 @@ an imaginary blog engine:
 
 .. code-block:: python
 
+    from django.urls import reverse
     from thorn import ModelEvent, webhook_model
 
     @webhook_model   # <--- activate webhooks for this model
@@ -97,9 +98,8 @@ an imaginary blog engine:
                 state__eq='PUBLISHED',
             ).dispatches_on_change(),
 
-        @models.permalink
         def get_absolute_url(self):
-            return 'article:detail', None, {'uuid': self.uuid}
+            return reverse('article:detail', kwargs={'uuid': self.uuid})
 
 Users can now subscribe to the four events individually, or all of them
 by subscribing to ``article.*``, and will be notified every time

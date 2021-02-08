@@ -38,13 +38,13 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api-auth/', include(
-        'rest_framework.urls', namespace='rest_framework')),
+        ('rest_framework.urls', 'rest_framework'), namespace='rest_framework')),
     url(r'^api-token-auth/', obtain_auth_token),
     url(r'^hooks/', include(
-        'thorn.django.rest_framework.urls', namespace='webhook')),
+        ('thorn.django.rest_framework.urls', 'thorn'), namespace='webhook')),
     url(r'^user/', user_detail, name='user-detail'),
     url(r'^article/', include(
-        'testapp.urls', namespace='article',
+        ('testapp.urls', 'testapp'), namespace='article',
     )),
     url(r'^r/(?P<event>.+?)/', log_event, name='event-log'),
 ]

@@ -73,11 +73,12 @@
 
     .. code-block:: python
 
+        from django.urls import reverse
+
         class Article(models.Model):
 
-            @models.permalink
             def get_absolute_url(self):
-                return 'article:detail', (), {'slug': self.slug}
+                return reverse('article:detail', kwargs={'slug': self.slug})
 
     For more information on defining this method, refer to the
     Django documentation:

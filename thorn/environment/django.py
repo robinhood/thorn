@@ -25,7 +25,7 @@ class DjangoEnv(object):
     settings_cls = 'django.conf:settings'
     subscriber_cls = 'thorn.django.models:Subscriber'
     signals_cls = 'thorn.django.signals'
-    reverse_cls = 'django.core.urlresolvers:reverse'
+    reverse_cls = 'django.urls:reverse'
 
     def on_commit(self, fun, *args, **kwargs):
         if args or kwargs:

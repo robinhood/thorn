@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.conf import settings
 from django.db import models
+from django.urls import reverse
 
 from thorn import ModelEvent, webhook_model
 
@@ -58,9 +59,8 @@ class Article(models.Model):
                 ]),
             }
 
-    @models.permalink
     def get_absolute_url(self):
-        return 'article:detail', None, {'id': self.pk}
+        return reverse('article:detail', kwargs={'id': self.pk})
 
 
 class SubscriberLog(models.Model):

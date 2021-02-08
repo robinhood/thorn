@@ -17,7 +17,7 @@ class test_Dispatcher:
         res = Dispatcher().send(
             event, payload, user, timeout=3.03, kw=9, context=context)
         send_event.s.assert_called_once_with(
-            event, payload, user.pk, 3.03, context,
+            event, payload, user.pk, 3.03, context, kw=9
         )
         send_event.s().apply_async.assert_called_once_with()
         assert res is send_event.s().apply_async()

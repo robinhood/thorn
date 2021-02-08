@@ -142,7 +142,7 @@ class Request(ThenableProxy):
             self.validate_recipient(self.subscriber.url)
             with self._finalize_unless_request_error(propagate):
                 self.response = self.post(session=session)
-                return self
+            return self
 
     @contextmanager
     def _finalize_unless_request_error(self, propagate=False):
@@ -246,6 +246,9 @@ class Request(ThenableProxy):
                 self._recipient_validators,
             ),
             'allow_keepalive': self.allow_keepalive,
+            'on_success': self.on_success,
+            'on_error': self.on_error,
+            'on_timeout': self.on_timeout,
         }
 
     def annotate_headers(self, extra_headers):
