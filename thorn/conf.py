@@ -35,6 +35,7 @@ class Settings(object):
     default_signal_honors_transaction = False
     default_hmac_signer = 'thorn.utils.hmac:compat_sign'
     default_allow_redirects = False
+    default_raise_http_error = False
 
     def __init__(self, app=None):
         self.app = app_or_default(app or self.app)
@@ -106,6 +107,12 @@ class Settings(object):
         # type: () -> bool
         return self._get(
             'THORN_ALLOW_REDIRECTS', self.default_allow_redirects)
+
+    @cached_property
+    def THORN_RAISE_HTTP_ERROR(self):
+        # type: () -> bool
+        return self._get(
+            'THORN_RAISE_HTTP_ERROR', self.default_raise_http_error)
 
     def _get(self, key, default=None):
         # type: (str, Any) -> Any

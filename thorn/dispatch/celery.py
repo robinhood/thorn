@@ -10,7 +10,6 @@ from . import base
 
 __all__ = ['Dispatcher', 'WorkerDispatcher']
 
-
 class _CeleryDispatcher(base.Dispatcher):
 
     def as_request_group(self, requests):
