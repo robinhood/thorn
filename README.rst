@@ -86,7 +86,7 @@ Example
 This example adds four webhook events to the Article model of
 an imaginary blog engine:
 
-::
+.. sourcecode:: python
 
     from django.urls import reverse
     from thorn import ModelEvent, webhook_model
