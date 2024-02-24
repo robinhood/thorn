@@ -203,18 +203,35 @@ class Request(ThenableProxy):
         host, url = self.to_safeurl(self.subscriber.url)
 
         with self.session_or_acquire(session) as session:
-            return session.post(
-                url=url,
-                data=self.data,
-                allow_redirects=self.allow_redirects,
-                timeout=self.timeout,
-                headers=self.annotate_headers({
-                    'Hook-HMAC': self.sign_request(self.subscriber, self.data),
-                    'Hook-Subscription': str(self.subscriber.uuid),
-                    'Host': host,
-                }),
-                verify=False,
-            )
+            try:
+                return session.post(
+                    url=url,
+                    data=self.data,
+                    allow_redirects=self.allow_redirects,
+                    timeout=self.timeout,
+                    headers=self.annotate_headers({
+                        'Hook-HMAC': self.sign_request(self.subscriber, self.data),
+                        'Hook-Subscription': str(self.subscriber.uuid),
+                        'Host': host,
+                    }),
+                    verify=False,
+                )
+            except requests.exceptions.SSLError as e:
+                addr = socket.gethostbyname(host)
+                url = url.replace(addr, host)
+
+                return session.post(
+                    url=url,
+                    data=self.data,
+                    allow_redirects=self.allow_redirects,
+                    timeout=self.timeout,
+                    headers=self.annotate_headers({
+                        'Hook-HMAC': self.sign_request(self.subscriber, self.data),
+                        'Hook-Subscription': str(self.subscriber.uuid),
+                        'Host': host,
+                    }),
+                    verify=False,
+                )
 
     def handle_timeout_error(self, exc, propagate=False):
         # type: (Exception, bool) -> Any
