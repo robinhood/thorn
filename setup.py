@@ -84,7 +84,7 @@ if not PY3:
 
 # -*- Tests Requires -*-
 
-tests_require = reqs('test.txt') + reqs('test_django.txt')
+tests_require = ""#reqs('test.txt') + reqs('test_django.txt')
 
 # -*- Long Description -*-
 

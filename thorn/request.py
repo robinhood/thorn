@@ -9,7 +9,7 @@ from contextlib import contextmanager
 
 from celery import uuid
 from celery.utils import cached_property
-from requests.exceptions import ConnectionError, Timeout
+from requests.exceptions import ConnectionError, HTTPError, Timeout
 from requests.packages.urllib3.util.url import Url, parse_url
 from vine import maybe_promise, promise
 from vine.abstract import Thenable, ThenableProxy
@@ -127,6 +127,9 @@ class Request(ThenableProxy):
         ))
         if user_agent:
             self.user_agent = user_agent
+        self.raise_http_error = self.app.settings.THORN_RAISE_HTTP_ERROR
+        if self.raise_http_error:
+            self.connection_errors = (ConnectionError, HTTPError)
 
     def validate_recipient(self, url):
         # type: (str) -> None
@@ -142,6 +145,8 @@ class Request(ThenableProxy):
             self.validate_recipient(self.subscriber.url)
             with self._finalize_unless_request_error(propagate):
                 self.response = self.post(session=session)
+                if self.raise_http_error:
+                    self.response.raise_for_status()
             return self
 
     @contextmanager
@@ -198,18 +203,35 @@ class Request(ThenableProxy):
         host, url = self.to_safeurl(self.subscriber.url)
 
         with self.session_or_acquire(session) as session:
-            return session.post(
-                url=url,
-                data=self.data,
-                allow_redirects=self.allow_redirects,
-                timeout=self.timeout,
-                headers=self.annotate_headers({
-                    'Hook-HMAC': self.sign_request(self.subscriber, self.data),
-                    'Hook-Subscription': str(self.subscriber.uuid),
-                    'Host': host,
-                }),
-                verify=False,
-            )
+            try:
+                return session.post(
+                    url=url,
+                    data=self.data,
+                    allow_redirects=self.allow_redirects,
+                    timeout=self.timeout,
+                    headers=self.annotate_headers({
+                        'Hook-HMAC': self.sign_request(self.subscriber, self.data),
+                        'Hook-Subscription': str(self.subscriber.uuid),
+                        'Host': host,
+                    }),
+                    verify=False,
+                )
+            except requests.exceptions.SSLError as e:
+                addr = socket.gethostbyname(host)
+                url = url.replace(addr, host)
+
+                return session.post(
+                    url=url,
+                    data=self.data,
+                    allow_redirects=self.allow_redirects,
+                    timeout=self.timeout,
+                    headers=self.annotate_headers({
+                        'Hook-HMAC': self.sign_request(self.subscriber, self.data),
+                        'Hook-Subscription': str(self.subscriber.uuid),
+                        'Host': host,
+                    }),
+                    verify=False,
+                )
 
     def handle_timeout_error(self, exc, propagate=False):
         # type: (Exception, bool) -> Any
