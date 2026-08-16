@@ -16,7 +16,8 @@ class SubscriberSerializer(serializers.HyperlinkedModelSerializer):
         lookup_url_kwarg='uuid', lookup_field='uuid',
     )
     id = serializers.UUIDField(source='uuid', read_only=True)
-    user = serializers.IntegerField(source='user.pk', default=None)
+    user = serializers.IntegerField(source='user.pk', read_only=True)
+    hmac_secret = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         """Serializer configuration."""
@@ -27,4 +28,4 @@ class SubscriberSerializer(serializers.HyperlinkedModelSerializer):
             'id', 'created_at', 'updated_at', 'subscription',
             'hmac_secret', 'hmac_digest',
         )
-        read_only_fields = ('id', 'created_at', 'updated_at', 'subscription')
+        read_only_fields = ('user', 'id', 'created_at', 'updated_at', 'subscription')

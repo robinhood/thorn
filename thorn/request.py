@@ -15,6 +15,7 @@ from vine import maybe_promise, promise
 from vine.abstract import Thenable, ThenableProxy
 
 from ._state import app_or_default
+from .exceptions import SecurityError
 from .utils.compat import bytes_if_py2, restore_from_keys
 from .utils.log import get_logger
 from .validators import (
@@ -172,11 +173,9 @@ class Request(ThenableProxy):
         # Try and see if there is any sort of redirection in the recipient URL
         # if yes, get the final URL to be passed into the validator
         if self.allow_redirects:
-            try:
-                _dummy_resp = requests.head(url, allow_redirects=True)
-                url = _dummy_resp.url
-            except ConnectionError:
-                logger.warning("Recipient URL not reachable")
+            raise SecurityError(
+                "Redirects are disabled for secure webhook delivery"
+            )
 
         parts = parse_url(url)
         host = parts.host
@@ -201,28 +200,32 @@ class Request(ThenableProxy):
             return session.post(
                 url=url,
                 data=self.data,
-                allow_redirects=self.allow_redirects,
+                allow_redirects=False,
                 timeout=self.timeout,
                 headers=self.annotate_headers({
                     'Hook-HMAC': self.sign_request(self.subscriber, self.data),
                     'Hook-Subscription': str(self.subscriber.uuid),
                     'Host': host,
                 }),
-                verify=False,
+                verify=True,
             )
 
     def handle_timeout_error(self, exc, propagate=False):
         # type: (Exception, bool) -> Any
-        logger.info('Timed out while dispatching webhook request: %r',
-                    exc, exc_info=1, extra={'data': self.as_dict()})
+        logger.info(
+            'Timed out while dispatching webhook request: %r',
+            exc, exc_info=1, extra={'data': self.as_log_dict()},
+        )
         if self.on_timeout:
             return self.on_timeout(self, exc)
         return self._p.throw(exc, propagate=propagate)
 
     def handle_connection_error(self, exc, propagate=False):
         # type: (Exception, bool) -> None
-        logger.error('Error dispatching webhook request: %r',
-                     exc, exc_info=1, extra={'data': self.as_dict()})
+        logger.error(
+            'Error dispatching webhook request: %r',
+            exc, exc_info=1, extra={'data': self.as_log_dict()},
+        )
         self._p.throw(exc, propagate=propagate)
 
     def as_dict(self):
@@ -249,6 +252,21 @@ class Request(ThenableProxy):
             'on_success': self.on_success,
             'on_error': self.on_error,
             'on_timeout': self.on_timeout,
+        }
+
+    def as_log_dict(self):
+        # Keep secrets and webhook payloads out of operational logs.
+        subscriber = self.subscriber.as_dict()
+        subscriber.pop('hmac_secret', None)
+        return {
+            'id': self.id,
+            'event': self.event,
+            'sender': self.sender,
+            'subscriber': subscriber,
+            'timeout': self.timeout,
+            'retry': self.retry,
+            'retry_max': self.retry_max,
+            'retry_delay': self.retry_delay,
         }
 
     def annotate_headers(self, extra_headers):
